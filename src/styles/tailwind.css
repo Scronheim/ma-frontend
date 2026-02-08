@@ -1,0 +1,22 @@
+@import "tailwindcss";
+@layer components {
+  .btn-primary {
+    @apply px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors duration-200 font-medium;
+  }
+  
+  .btn-secondary {
+    @apply px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg transition-colors duration-200 font-medium border border-gray-700;
+  }
+  
+  .card {
+    @apply bg-gray-800 rounded-lg border border-gray-700 p-6;
+  }
+  
+  .table-header {
+    @apply text-left py-3 px-4 font-semibold text-gray-300 uppercase tracking-wider text-sm;
+  }
+  
+  .table-cell {
+    @apply py-3 px-4 border-b border-gray-700;
+  }
+}

@@ -1,0 +1,11 @@
+@forward 'element-plus/theme-chalk/src/common/var.scss' with (
+  $main: (
+    'padding': 10px
+  ),
+  $card: (
+    'padding': 15px,
+  ),
+);
+
+@use 'element-plus/theme-chalk/dark/css-vars.css';
+@use 'element-plus/theme-chalk/src/index.scss' as *;
