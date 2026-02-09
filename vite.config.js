@@ -35,11 +35,11 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'https://ma.dark-corner.ru/',
+        target: 'https://metal-archives.ru',
         changeOrigin: true
       },
       '/images': {
-        target: 'https://ma.dark-corner.ru/',
+        target: 'https://metal-archives.ru',
         changeOrigin: true
       }
     }

@@ -73,7 +73,7 @@
                 <p>{{ band.label }}</p>
               </div>
             </div>
-            <el-divider v-if="band.description" />
+            <el-divider v-if="band.description" style="margin-bottom: 8px" />
             <collapsible-text :content="band.description" :collapsed-height="200" />
           </div>
         </div>
@@ -92,9 +92,10 @@
               </thead>
               <tbody>
                 <tr
-                  v-for="album in sortedDiscography"
+                  v-for="(album, index) in sortedDiscography"
                   :key="album.id"
-                  class="border-b border-gray-700 hover:bg-gray-750 transition-colors duration-150 cursor-pointer"
+                  :class="{ 'border-b': index !== sortedDiscography.length - 1 }"
+                  class="border-gray-700 hover:bg-gray-800 transition-colors duration-150 cursor-pointer"
                   @click="$router.push(`/album/${bandName}/${album.id}`)"
                 >
                   <td class="py-3">{{ album.release_date }}</td>

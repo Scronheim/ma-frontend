@@ -334,7 +334,6 @@ const getFlagEmoji = (country: string) => {
 const goToBand = async (band: Band) => {
   try {
     searchIsLoading.value = true
-    await store.getBandById(band.id)
     router.push(`/band/${band.name}/${band.id}`)
   } finally {
     searchIsLoading.value = false
