@@ -61,10 +61,7 @@
         <!-- Мобильная версия (карточки) -->
         <div class="md:hidden">
           <div v-for="result in paginatedResults" :key="result.id" class="border-b border-gray-700 last:border-0">
-            <div
-              class="p-4 hover:bg-gray-750 transition-colors duration-150 cursor-pointer"
-              @click="goToBand(result.id)"
-            >
+            <div class="p-4 hover:bg-gray-750 transition-colors duration-150 cursor-pointer" @click="goToBand(result)">
               <div class="flex items-center justify-between">
                 <div>
                   <div class="font-bold text-lg mb-1">{{ result.name }}</div>
@@ -149,10 +146,7 @@
         <!-- Мобильная версия (карточки) -->
         <div class="md:hidden">
           <div v-for="result in paginatedResults" :key="result.id" class="border-b border-gray-700 last:border-0">
-            <div
-              class="p-4 hover:bg-gray-750 transition-colors duration-150 cursor-pointer"
-              @click="goToAlbum(result.id)"
-            >
+            <div class="p-4 hover:bg-gray-750 transition-colors duration-150 cursor-pointer" @click="goToAlbum(result)">
               <div class="flex items-center justify-between">
                 <div>
                   <div class="font-bold text-lg mb-1">{{ result.band_name }}</div>
