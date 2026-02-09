@@ -1,5 +1,11 @@
 <template>
-  <div class="space-y-6" v-if="band">
+  <div v-if="store.bandIsLoading" class="flex items-center justify-center min-h-[60vh]">
+    <div class="text-center">
+      <div class="w-16 h-16 border-4 border-red-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+      <p>Идёт загрузка информации...</p>
+    </div>
+  </div>
+  <div class="space-y-6" v-else>
     <!-- Заголовок группы -->
     <div class="flex flex-col md:flex-row items-start md:items-center justify-between">
       <div class="flex items-center space-x-4">
@@ -168,12 +174,6 @@
       </div>
     </div>
   </div>
-  <div v-else class="flex items-center justify-center min-h-[60vh]">
-    <div class="text-center">
-      <div class="w-16 h-16 border-4 border-red-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-      <p>Идёт загрузка информации...</p>
-    </div>
-  </div>
 </template>
 
 <script setup lang="ts">
@@ -194,6 +194,7 @@ const urlList = ref<string[]>([])
 const band = computed(() => store.currentBand)
 const bandName = computed(() => route.params.bandName)
 const bandId = computed(() => route.params.id)
+const fromRandom = computed(() => route.query.fromRandom)
 const sortedDiscography = computed(() => {
   return [...band.value.discography].sort(sortByDate)
 })
@@ -202,14 +203,15 @@ const openImagePreview = (imgList: string[]) => {
   urlList.value = imgList
   showPreview.value = true
 }
-watch(
-  bandId,
-  async () => {
-    if (!store.currentBand.id) await store.getBandById(bandId.value)
-  },
-  { deep: true }
-)
+
+const getBandById = async () => {
+  if (fromRandom.value) location.replace(`/#/band/${bandName.value}/${bandId.value}`)
+  else await store.getBandById(bandId.value)
+}
+watch(bandId, async () => {
+  await getBandById()
+})
 onMounted(async () => {
-  if (!store.currentBand.id) await store.getBandById(bandId.value)
+  await getBandById()
 })
 </script>

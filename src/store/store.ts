@@ -30,7 +30,7 @@ export const useStore = defineStore('store', () => {
       bandIsLoading.value = true
       const { data } = await axios.get('/api/band/random')
       currentBand.value = data.data
-      router.push({ path: `/band/${data.data.name}/${data.data.id}` })
+      router.push({ path: `/band/${data.data.name}/${data.data.id}`, query: { fromRandom: 'true' } })
     } finally {
       bandIsLoading.value = false
     }
