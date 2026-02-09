@@ -35,7 +35,7 @@
             <span class="px-3 py-1 bg-gray-800 rounded-full text-sm">{{ band.status }}</span>
             <span class="px-3 py-1 bg-gray-800 rounded-full text-sm">Образована в {{ band.formed_in }}</span>
           </div>
-          <h3 class="text-gray-400 text-sm">Данные на {{ formatDate(band.updated_at) }}</h3>
+          <h3 class="text-gray-400 text-sm">Данные на {{ dateNormalizer.normalizeDate(band.updated_at) }}</h3>
         </div>
       </div>
     </div>
@@ -73,6 +73,8 @@
                 <p>{{ band.label }}</p>
               </div>
             </div>
+            <el-divider v-if="band.description" />
+            <collapsible-text :content="band.description" :collapsed-height="200" />
           </div>
         </div>
 
@@ -166,7 +168,14 @@
         <div v-if="band.links.length" class="bg-gray-800 rounded-lg border border-gray-700 py-3 px-3">
           <h2 class="text-xl font-bold mb-4 text-red-400">Ссылки</h2>
           <div class="grid grid-cols-2 bg-gray-750 rounded-lg overflow-hidden">
-            <el-link v-for="link in band.links" :key="link.url" type="primary" target="_blank" :href="link.url">
+            <el-link
+              v-for="link in band.links"
+              :key="link.url"
+              type="primary"
+              :underline="false"
+              target="_blank"
+              :href="link.url"
+            >
               {{ link.social }}
             </el-link>
           </div>
@@ -182,7 +191,10 @@ import { useRoute } from 'vue-router'
 
 import { useStore } from '@/store/store'
 
-import { formatDate, sortByDate } from '@/utils'
+import dateNormalizer from '@/utils/dateNormalizer'
+import { sortByDate } from '@/utils'
+
+import CollapsibleText from '@/components/CollapsibleText.vue'
 
 const route = useRoute()
 const store = useStore()

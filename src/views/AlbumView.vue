@@ -56,7 +56,7 @@
             <span class="px-3 py-1 bg-gray-800 rounded-full">{{ album.label }}</span>
           </div>
         </div>
-        <h3 class="text-gray-400 text-sm">Данные на {{ formatDate(album.updated_at) }}</h3>
+        <h3 class="text-gray-400 text-sm">Данные на {{ DateNormalizer.normalizeDate(album.updated_at) }}</h3>
       </div>
     </div>
 
@@ -159,7 +159,7 @@ import durationPlugin from 'dayjs/plugin/duration'
 
 import { useStore } from '@/store/store'
 
-import { formatDate } from '@/utils'
+import DateNormalizer from '@/utils/dateNormalizer'
 
 dayjs.extend(durationPlugin)
 

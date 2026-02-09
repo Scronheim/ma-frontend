@@ -1,6 +1,7 @@
 export interface Band {
   id: number
   name: string
+  description: string
   country: string
   city: string
   status: 'Active' | 'Split-up' | 'On hold' | 'Changed name' | 'Disputed'

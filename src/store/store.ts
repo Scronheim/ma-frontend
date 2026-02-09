@@ -2,13 +2,16 @@ import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { defineStore } from 'pinia'
 import axios from 'axios'
+import { breakpointsTailwind, useBreakpoints } from '@vueuse/core'
 
 import type { Band, Album, Track, SSEResponse, AllStatInfo } from '@/types'
 
 export const useStore = defineStore('store', () => {
   const router = useRouter()
+  const breakpoints = useBreakpoints(breakpointsTailwind)
 
   const currentBand = ref<Band>({
+    description: '',
     discography: [],
     current_lineup: [],
     links: []
@@ -24,6 +27,7 @@ export const useStore = defineStore('store', () => {
   const sseEvents = ref<EventSource>()
 
   const albumsExceptCurrent = computed(() => currentBand.value.discography.filter(a => a.id !== currentAlbum.value.id))
+  const isMobile = breakpoints.smaller('md')
 
   const getRandomBand = async () => {
     try {
@@ -83,6 +87,7 @@ export const useStore = defineStore('store', () => {
     switch (data.type) {
       case 'new_album':
         const album = currentBand.value.discography.find(a => a.id === parseInt(data.data.id))
+        album.release_date = data.data.release_date
         album.cover_url = data.data.cover_url
         album.cover_loading = false
         break
@@ -110,6 +115,7 @@ export const useStore = defineStore('store', () => {
     statsIsLoading,
     albumsExceptCurrent,
     sseEvents,
+    isMobile,
     getRandomBand,
     getBandById,
     getAlbumById,
