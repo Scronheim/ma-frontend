@@ -29,11 +29,11 @@ onMounted(async () => {
       , на паузе -
       <span class="on_hold">{{ store.stats.ma.bands.on_hold }}</span>
       , распались -
-      <span class="on_hold">{{ store.stats.ma.bands.split_up }}</span>
+      <span class="split_up">{{ store.stats.ma.bands.split_up }}</span>
       , сменили название -
-      <span class="on_hold">{{ store.stats.ma.bands.changed_name }}</span>
+      <span class="changed_name">{{ store.stats.ma.bands.changed_name }}</span>
       , неизвестно -
-      <span class="on_hold">{{ store.stats.ma.bands.unknown }}</span>
+      <span class="unknown">{{ store.stats.ma.bands.unknown }}</span>
       , альбмов -
       <b>{{ store.stats.ma.albums }}</b>
       , треков -
@@ -48,11 +48,11 @@ onMounted(async () => {
       , на паузе -
       <span class="on_hold">{{ store.stats.local.bands.on_hold }}</span>
       , распались -
-      <span class="on_hold">{{ store.stats.local.bands.split_up }}</span>
+      <span class="split_up">{{ store.stats.local.bands.split_up }}</span>
       , сменили название -
-      <span class="on_hold">{{ store.stats.local.bands.changed_name }}</span>
+      <span class="changed_name">{{ store.stats.local.bands.changed_name }}</span>
       , неизвестно -
-      <span class="on_hold">{{ store.stats.local.bands.unknown }}</span>
+      <span class="unknown">{{ store.stats.local.bands.unknown }}</span>
       , альбмов -
       <b>{{ store.stats.local.albums }}</b>
       , треков -
