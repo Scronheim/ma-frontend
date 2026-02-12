@@ -96,12 +96,12 @@
                   :key="album.id"
                   :class="{ 'border-b': index !== sortedDiscography.length - 1 }"
                   class="border-gray-700 hover:bg-gray-800 transition-colors duration-150 cursor-pointer"
-                  @click="$router.push(`/album/${bandName}/${album.id}`)"
+                  @click="$router.push(`/albums/${bandName}/${album.title_slug}/${album.id}`)"
                 >
                   <td class="py-3">{{ album.release_date }}</td>
                   <td class="py-3 px-3 font-medium">
                     <div class="flex items-center space-x-3">
-                      <div class="w-10 h-10 bg-gray-700 rounded flex-shrink-0 flex items-center justify-center">
+                      <div class="w-10 h-10 bg-gray-700 rounded shrink-0 flex items-center justify-center">
                         <div
                           v-if="album.cover_loading"
                           class="w-8 h-8 border-4 border-red-600 border-t-transparent rounded-full animate-spin mx-auto"
@@ -173,7 +173,7 @@
               v-for="link in band.links"
               :key="link.url"
               type="primary"
-              :underline="false"
+              underline="never"
               target="_blank"
               :href="link.url"
             >
@@ -218,7 +218,7 @@ const openImagePreview = (imgList: string[]) => {
 }
 
 const getBandById = async () => {
-  if (fromRandom.value) location.replace(`/#/band/${bandName.value}/${bandId.value}`)
+  if (fromRandom.value) location.replace(`/#/bands/${bandName.value}/${bandId.value}`)
   else await store.getBandById(bandId.value)
 }
 watch(bandId, async () => {

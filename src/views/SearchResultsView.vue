@@ -334,13 +334,13 @@ const getFlagEmoji = (country: string) => {
 const goToBand = async (band: Band) => {
   try {
     searchIsLoading.value = true
-    router.push(`/band/${band.name}/${band.id}`)
+    router.push(`/bands/${band.name_slug}/${band.id}`)
   } finally {
     searchIsLoading.value = false
   }
 }
 const goToAlbum = (album: SearchAlbumResult) => {
-  router.push(`/album/${album.band_name}/${album.id}`)
+  router.push(`/albums/${album.band_name_slug}/${album.title_slug}/${album.id}`)
 }
 
 const previousPage = () => {

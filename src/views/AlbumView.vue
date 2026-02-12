@@ -31,7 +31,7 @@
             <div class="mt-2">
               <template v-for="(b, i) in album.band_names" :key="b">
                 <router-link
-                  :to="`/band/${album.band_names[i]}/${album.band_ids[i]}`"
+                  :to="`/bands/${album.band_names_slug[i]}/${album.band_ids[i]}`"
                   class="text-xl text-red-400 hover:text-red-300 transition-colors duration-150"
                 >
                   {{ album.band_names[i] }}

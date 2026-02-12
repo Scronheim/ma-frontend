@@ -14,14 +14,14 @@ const router = createRouter({
       component: HomeView
     },
     {
-      path: '/band/:bandName/:id',
-      name: 'band',
+      path: '/bands/:bandName/:id',
+      name: 'bands',
       component: BandView,
       props: true
     },
     {
-      path: '/album/:bandName/:id',
-      name: 'album',
+      path: '/albums/:bandName/:albumName/:id',
+      name: 'albums',
       component: AlbumView,
       props: true
     },

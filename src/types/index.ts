@@ -1,6 +1,7 @@
 export interface Band {
   id: number
   name: string
+  name_slug: string
   description: string
   country: string
   city: string
@@ -24,9 +25,11 @@ export interface Band {
 
 export interface Album {
   id: number
+  title: string
+  title_slug: string
   band_ids: number[]
   band_names: string[]
-  title: string
+  band_names_slug: string[]
   type: 'Full-length' | 'EP' | 'Single' | 'Demo' | 'Split'
   release_date: string
   label: string
@@ -57,15 +60,18 @@ export interface BandMember {
 export interface SearchBandResult {
   id: number
   name: string
+  name_slug: string
   genre: string
   country: string
 }
 
 export interface SearchAlbumResult {
   id: number
-  band_name: string
-  release_date: string
   title: string
+  title_slug: string
+  band_name: string
+  band_name_slug: string
+  release_date: string
   type: string
 }
 
