@@ -4,7 +4,7 @@
     <div class="flex flex-col md:flex-row items-start md:items-center space-y-4 md:space-y-0">
       <div class="flex-0">
         <div
-          class="w-40 h-40 md:w-60 md:h-60 bg-linear-to-br from-gray-800 to-gray-900 rounded-lg border border-gray-700 flex items-center justify-center overflow-hidden"
+          class="w-40 h-40 md:w-60 md:h-60 bg-linear-to-br from-gray-800 to-gray-900 rounded-lg border border-gray-700 flex items-center justify-center overflow-hidden cursor-pointer"
         >
           <template v-if="album.cover_url">
             <img

@@ -10,7 +10,7 @@
     <div class="flex flex-col md:flex-row items-start md:items-center justify-between">
       <div class="flex items-center space-x-4">
         <div
-          class="w-20 h-20 md:w-24 md:h-24 bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg border border-gray-700 flex items-center justify-center overflow-hidden"
+          class="w-20 h-20 md:w-24 md:h-24 bg-linear-to-br from-gray-800 to-gray-900 rounded-lg border border-gray-700 flex items-center justify-center overflow-hidden cursor-pointer"
         >
           <template v-if="band.logo_url">
             <img
@@ -128,7 +128,9 @@
         <div class="bg-gray-800 rounded-lg border border-gray-700 py-3 px-3">
           <h2 class="text-xl font-bold mb-4 text-red-400">Фото группы</h2>
           <div class="bg-gray-750 rounded-lg overflow-hidden">
-            <div class="bg-gradient-to-br from-gray-700 to-gray-900 flex flex-col items-center justify-center">
+            <div
+              class="bg-linear-to-br from-gray-700 to-gray-900 flex flex-col items-center justify-center cursor-pointer"
+            >
               <template v-if="band.logo_url || band.photo_url">
                 <img
                   v-if="band.logo_url"
