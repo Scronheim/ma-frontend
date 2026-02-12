@@ -2,9 +2,9 @@
   <div class="space-y-6" v-if="album">
     <!-- Заголовок альбома -->
     <div class="flex flex-col md:flex-row items-start md:items-center space-y-4 md:space-y-0">
-      <div class="flex-shrink-0">
+      <div class="flex-0">
         <div
-          class="w-40 h-40 md:w-60 md:h-60 bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg border border-gray-700 flex items-center justify-center overflow-hidden"
+          class="w-40 h-40 md:w-60 md:h-60 bg-linear-to-br from-gray-800 to-gray-900 rounded-lg border border-gray-700 flex items-center justify-center overflow-hidden"
         >
           <template v-if="album.cover_url">
             <img
@@ -121,9 +121,9 @@
               v-for="otherAlbum in store.albumsExceptCurrent"
               :key="otherAlbum.id"
               class="flex items-center p-3 bg-gray-750 rounded hover:bg-gray-700 transition-colors duration-150 cursor-pointer"
-              @click="$router.push(`/album/${route.params.bandName}/${otherAlbum.id}`)"
+              @click="$router.push(`/albums/${route.params.bandName}/${otherAlbum.title_slug}/${otherAlbum.id}`)"
             >
-              <div class="w-12 h-12 bg-gray-700 rounded flex-shrink-0 flex items-center justify-center mr-3">
+              <div class="w-12 h-12 bg-gray-700 rounded flex shrink-0 items-center justify-center mr-3">
                 <img
                   v-if="otherAlbum.cover_url"
                   :src="otherAlbum.cover_url"
