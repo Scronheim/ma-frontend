@@ -49,7 +49,6 @@
                 </td>
                 <td class="py-4 px-6">
                   <div class="flex items-center">
-                    <span class="mr-2">{{ getFlagEmoji(result.country) }}</span>
                     <span>{{ result.country }}</span>
                   </div>
                 </td>
@@ -66,7 +65,6 @@
                 <div>
                   <div class="font-bold text-lg mb-1">{{ result.name }}</div>
                   <div class="flex items-center mb-2">
-                    <span class="mr-2">{{ getFlagEmoji(result.country) }}</span>
                     <span class="text-gray-400">{{ result.country }}</span>
                   </div>
                   <div class="flex flex-wrap gap-1 mb-3">
@@ -313,22 +311,6 @@ const search = async () => {
   } finally {
     searchIsLoading.value = false
   }
-}
-const getFlagEmoji = (country: string) => {
-  // Простая маппинг стран в эмодзи флагов
-  const flagMap: Record<string, string> = {
-    'United States': '🇺🇸',
-    'United Kingdom': '🇬🇧',
-    Sweden: '🇸🇪',
-    Germany: '🇩🇪',
-    Norway: '🇳🇴',
-    Finland: '🇫🇮',
-    France: '🇫🇷',
-    Poland: '🇵🇱',
-    Brazil: '🇧🇷'
-  }
-
-  return flagMap[country] || '🏴'
 }
 
 const goToBand = async (band: Band) => {

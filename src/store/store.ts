@@ -24,6 +24,7 @@ export const useStore = defineStore('store', () => {
   const albumIsLoading = ref<boolean>(false)
   const lyricsIsLoading = ref<boolean>(false)
   const statsIsLoading = ref<boolean>(false)
+  const fromRandom = ref<boolean>(false)
   const sseEvents = ref<EventSource>()
 
   const albumsExceptCurrent = computed(() => currentBand.value.discography.filter(a => a.id !== currentAlbum.value.id))
@@ -34,7 +35,8 @@ export const useStore = defineStore('store', () => {
       bandIsLoading.value = true
       const { data } = await axios.get('/api/band/random')
       currentBand.value = data.data
-      router.push({ path: `/bands/${data.data.name_slug}/${data.data.id}`, query: { fromRandom: 'true' } })
+      router.push({ path: `/bands/${data.data.name_slug}/${data.data.id}` })
+      fromRandom.value = true
     } finally {
       bandIsLoading.value = false
     }
@@ -115,6 +117,7 @@ export const useStore = defineStore('store', () => {
     statsIsLoading,
     albumsExceptCurrent,
     sseEvents,
+    fromRandom,
     isMobile,
     getRandomBand,
     getBandById,

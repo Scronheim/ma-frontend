@@ -209,7 +209,6 @@ const urlList = ref<string[]>([])
 const band = computed(() => store.currentBand)
 const bandName = computed(() => route.params.bandName)
 const bandId = computed(() => route.params.id)
-const fromRandom = computed(() => route.query.fromRandom)
 const sortedDiscography = computed(() => {
   return [...band.value.discography].sort(sortByDate)
 })
@@ -220,8 +219,7 @@ const openImagePreview = (imgList: string[]) => {
 }
 
 const getBandById = async () => {
-  if (fromRandom.value) location.replace(`/#/bands/${bandName.value}/${bandId.value}`)
-  else await store.getBandById(bandId.value)
+  if (!store.fromRandom) await store.getBandById(bandId.value)
 }
 watch(bandId, async () => {
   await getBandById()

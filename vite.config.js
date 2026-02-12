@@ -35,11 +35,11 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'https://metal-archives.ru',
+        target: 'https://www.metal-archives.ru',
         changeOrigin: true
       },
       '/images': {
-        target: 'https://metal-archives.ru',
+        target: 'https://www.metal-archives.ru',
         changeOrigin: true
       }
     }
