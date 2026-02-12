@@ -15,7 +15,9 @@
       </template>
     </el-input>
     <div>
-      <el-button @click="performSearch" type="primary">Искать в Metal Archives</el-button>
+      <el-button @click="performSearch" :loading="store.bandIsLoading" type="primary">
+        Искать в Metal Archives
+      </el-button>
       <el-button @click="store.getRandomBand" :loading="store.bandIsLoading" type="info">Мне повезёт</el-button>
     </div>
   </div>
