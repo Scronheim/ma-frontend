@@ -38,20 +38,20 @@ class DateNormalizer {
    * @param outputFormat - желаемый выходной формат (по умолчанию 'YYYY-MM-DD')
    * @returns нормализованную дату в указанном формате или null, если парсинг невозможен
    */
-  public static normalizeDate(dateString: string, outputFormat: string = 'YYYY-MM-DD'): string | null {
+  public static normalizeDate(dateString: string, outputFormat: string = 'YYYY-MM-DD'): string {
     try {
       const parsedDate = this.parseDate(dateString)
 
-      if (!parsedDate) return null
+      if (!parsedDate) return ''
 
       const normalizedDayjs = this.createDayjsFromParsedDate(parsedDate)
 
-      if (!normalizedDayjs || !normalizedDayjs.isValid()) return null
+      if (!normalizedDayjs || !normalizedDayjs.isValid()) return ''
 
       return normalizedDayjs.format(outputFormat)
     } catch (error) {
       console.error(`Error normalizing date: ${dateString}`, error)
-      return null
+      return ''
     }
   }
 

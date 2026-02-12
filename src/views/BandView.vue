@@ -1,10 +1,5 @@
 <template>
-  <div v-if="store.bandIsLoading" class="flex items-center justify-center min-h-[60vh]">
-    <div class="text-center">
-      <div class="w-16 h-16 border-4 border-red-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-      <p>Идёт загрузка информации...</p>
-    </div>
-  </div>
+  <LoadingSpinner v-if="store.bandIsLoading" :visible="store.bandIsLoading" />
   <div class="space-y-6" v-else>
     <!-- Заголовок группы -->
     <div class="flex flex-col md:flex-row items-start md:items-center justify-between">
@@ -198,6 +193,7 @@ import dateNormalizer from '@/utils/dateNormalizer'
 import { sortByDate } from '@/utils'
 
 import CollapsibleText from '@/components/CollapsibleText.vue'
+import LoadingSpinner from '@/components/LoadingSpinner.vue'
 
 const route = useRoute()
 const store = useStore()

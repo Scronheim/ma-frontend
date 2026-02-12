@@ -1,5 +1,6 @@
 <template>
-  <div class="space-y-6" v-if="album">
+  <LoadingSpinner v-if="store.albumIsLoading" :visible="store.albumIsLoading" />
+  <div class="space-y-6" v-else>
     <!-- Заголовок альбома -->
     <div class="flex flex-col md:flex-row items-start md:items-center space-y-4 md:space-y-0">
       <div class="flex-0">
@@ -143,12 +144,6 @@
       </div>
     </div>
   </div>
-  <div v-else class="flex items-center justify-center min-h-[60vh]">
-    <div class="text-center">
-      <div class="w-16 h-16 border-4 border-red-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-      <p>Информация об альбоме загружается...</p>
-    </div>
-  </div>
 </template>
 
 <script setup lang="ts">
@@ -158,6 +153,8 @@ import dayjs from 'dayjs'
 import durationPlugin from 'dayjs/plugin/duration'
 
 import { useStore } from '@/store/store'
+
+import LoadingSpinner from '@/components/LoadingSpinner.vue'
 
 import DateNormalizer from '@/utils/dateNormalizer'
 
@@ -181,7 +178,7 @@ const albumTotalDuration = computed((): string => {
 })
 
 const getBandById = async () => {
-  const bandIndex = store.currentAlbum.band_names.findIndex(name => name === route.params.bandName)
+  const bandIndex = store.currentAlbum.band_names_slug.findIndex(name => name === route.params.bandName)
   const bandId = store.currentAlbum.band_ids[bandIndex]
   await store.getBandById(bandId)
 }

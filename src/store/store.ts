@@ -113,6 +113,7 @@ export const useStore = defineStore('store', () => {
     currentAlbum,
     stats,
     bandIsLoading,
+    albumIsLoading,
     lyricsIsLoading,
     statsIsLoading,
     albumsExceptCurrent,
