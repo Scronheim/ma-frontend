@@ -160,7 +160,7 @@ onMounted(async () => {
                 </table>
               </el-tab-pane>
               <el-tab-pane v-if="band.current_lineup.length || band.past_lineup.length" label="Состав" name="members">
-                <el-tabs tab-position="left" v-model="activeMembersTab">
+                <el-tabs tab-position="top" v-model="activeMembersTab">
                   <el-tab-pane v-if="band.current_lineup.length" label="Текущий состав" name="active">
                     <div class="grid grid-cols-1 md:grid-cols-1 gap-4">
                       <BandMember v-for="member in band.current_lineup" :key="member.fullname" :member="member" />
