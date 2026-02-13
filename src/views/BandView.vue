@@ -33,7 +33,8 @@ const openImagePreview = (imgList: string[]) => {
 }
 
 const getBandById = async () => {
-  if (!store.fromRandom) await store.getBandById(bandId.value)
+  if (store.fromRandom) store.fromRandom = false
+  else await store.getBandById(bandId.value)
 }
 watch(bandId, async () => {
   await getBandById()
