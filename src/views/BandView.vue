@@ -38,9 +38,13 @@ const getBandById = async () => {
 }
 watch(bandId, async () => {
   await getBandById()
+  activeTab.value = 'discography'
+  activeMembersTab.value = 'active'
 })
 onMounted(async () => {
   await getBandById()
+  activeTab.value = 'discography'
+  activeMembersTab.value = 'active'
 })
 </script>
 
