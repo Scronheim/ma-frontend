@@ -1,3 +1,48 @@
+<script setup lang="ts">
+import { ref, computed, onMounted, watch } from 'vue'
+import { useRoute } from 'vue-router'
+
+import { useStore } from '@/store/store'
+
+import dateNormalizer from '@/utils/dateNormalizer'
+import { sortByDate } from '@/utils'
+
+import CollapsibleText from '@/components/CollapsibleText.vue'
+import LoadingSpinner from '@/components/LoadingSpinner.vue'
+import BandMember from '@/components/BandMember.vue'
+
+const route = useRoute()
+const store = useStore()
+
+const showPreview = ref(false)
+const showLogoPreview = ref(false)
+const urlList = ref<string[]>([])
+const activeTab = ref<string>('discography')
+const activeMembersTab = ref<string>('active')
+
+const band = computed(() => store.currentBand)
+const bandName = computed(() => route.params.bandName)
+const bandId = computed(() => route.params.id)
+const sortedDiscography = computed(() => {
+  return [...band.value.discography].sort(sortByDate)
+})
+
+const openImagePreview = (imgList: string[]) => {
+  urlList.value = imgList
+  showPreview.value = true
+}
+
+const getBandById = async () => {
+  if (!store.fromRandom) await store.getBandById(bandId.value)
+}
+watch(bandId, async () => {
+  await getBandById()
+})
+onMounted(async () => {
+  await getBandById()
+})
+</script>
+
 <template>
   <LoadingSpinner v-if="store.bandIsLoading" :visible="store.bandIsLoading" />
   <div class="space-y-6" v-else>
@@ -73,46 +118,76 @@
           </div>
         </div>
 
-        <!-- Альбомы -->
         <div class="bg-gray-800 rounded-lg border border-gray-700 py-2 px-4">
-          <h2 class="text-2xl font-bold mb-4 text-red-400">Дискография</h2>
           <div class="overflow-x-auto">
-            <table class="w-full">
-              <thead>
-                <tr class="border-b border-gray-700">
-                  <th class="text-left py-3">Дата релиза</th>
-                  <th class="text-left py-3 px-3">Название</th>
-                  <th class="text-left py-3 px-3">Тип</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr
-                  v-for="(album, index) in sortedDiscography"
-                  :key="album.id"
-                  :class="{ 'border-b': index !== sortedDiscography.length - 1 }"
-                  class="border-gray-700 hover:bg-gray-800 transition-colors duration-150 cursor-pointer"
-                  @click="$router.push(`/albums/${bandName}/${album.title_slug}/${album.id}`)"
-                >
-                  <td class="py-3">{{ album.release_date }}</td>
-                  <td class="py-3 px-3 font-medium">
-                    <div class="flex items-center space-x-3">
-                      <div class="w-10 h-10 bg-gray-700 rounded shrink-0 flex items-center justify-center">
-                        <div
-                          v-if="album.cover_loading"
-                          class="w-8 h-8 border-4 border-red-600 border-t-transparent rounded-full animate-spin mx-auto"
-                        />
-                        <img v-else-if="album.cover_url && !album.cover_loading" :src="album.cover_url" />
-                        <span v-else>💿</span>
-                      </div>
-                      <span>{{ album.title }}</span>
+            <el-tabs v-model="activeTab">
+              <el-tab-pane label="Дискография" name="discography">
+                <table class="w-full">
+                  <thead>
+                    <tr class="border-b border-gray-700">
+                      <th class="text-left py-3">Дата релиза</th>
+                      <th class="text-left py-3 px-3">Название</th>
+                      <th class="text-left py-3 px-3">Тип</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr
+                      v-for="(album, index) in sortedDiscography"
+                      :key="album.id"
+                      :class="{ 'border-b': index !== sortedDiscography.length - 1 }"
+                      class="border-gray-700 hover:bg-gray-800 transition-colors duration-150 cursor-pointer"
+                      @click="$router.push(`/albums/${bandName}/${album.title_slug}/${album.id}`)"
+                    >
+                      <td class="py-3">{{ album.release_date }}</td>
+                      <td class="py-3 px-3 font-medium">
+                        <div class="flex items-center space-x-3">
+                          <div class="w-10 h-10 bg-gray-700 rounded shrink-0 flex items-center justify-center">
+                            <div
+                              v-if="album.cover_loading"
+                              class="w-8 h-8 border-4 border-red-600 border-t-transparent rounded-full animate-spin mx-auto"
+                            />
+                            <img v-else-if="album.cover_url && !album.cover_loading" :src="album.cover_url" />
+                            <span v-else>💿</span>
+                          </div>
+                          <span>{{ album.title }}</span>
+                        </div>
+                      </td>
+                      <td class="py-3 px-3">
+                        <span class="px-2 py-1 bg-gray-700 rounded text-xs">{{ album.type }}</span>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </el-tab-pane>
+              <el-tab-pane v-if="band.current_lineup.length || band.past_lineup.length" label="Состав" name="members">
+                <el-tabs tab-position="left" v-model="activeMembersTab">
+                  <el-tab-pane v-if="band.current_lineup.length" label="Текущий состав" name="active">
+                    <div class="grid grid-cols-1 md:grid-cols-1 gap-4">
+                      <BandMember v-for="member in band.current_lineup" :key="member.fullname" :member="member" />
                     </div>
-                  </td>
-                  <td class="py-3 px-3">
-                    <span class="px-2 py-1 bg-gray-700 rounded text-xs">{{ album.type }}</span>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+                  </el-tab-pane>
+                  <el-tab-pane v-if="band.past_lineup.length" label="Прошлые составы" name="past">
+                    <div class="grid grid-cols-1 md:grid-cols-1 gap-4">
+                      <BandMember v-for="member in band.past_lineup" :key="member.fullname" :member="member" />
+                    </div>
+                  </el-tab-pane>
+                </el-tabs>
+              </el-tab-pane>
+              <el-tab-pane v-if="band.links.length" label="Ссылки" name="links">
+                <div class="flex flex-col items-start">
+                  <el-link
+                    v-for="link in band.links"
+                    :key="link.url"
+                    :href="link.url"
+                    type="primary"
+                    underline="never"
+                    target="_blank"
+                  >
+                    {{ link.social }}
+                  </el-link>
+                </div>
+              </el-tab-pane>
+            </el-tabs>
           </div>
         </div>
       </div>
@@ -152,75 +227,8 @@
             </div>
           </div>
         </div>
-        <!-- Состав группы -->
-        <div v-if="band.current_lineup.length" class="min-w-80 bg-gray-800 rounded-lg border border-gray-700 py-3 px-3">
-          <h2 class="text-2xl font-bold mb-4 text-red-400">Состав</h2>
-          <div class="grid grid-cols-2 md:grid-cols-2 gap-4">
-            <div v-for="member in band.current_lineup" :key="member.url">
-              <h3>{{ member.name }}</h3>
-              <p class="text-gray-400 text-sm tracking-wider">{{ member.role }}</p>
-            </div>
-          </div>
-        </div>
         <!-- Ссылки группы -->
-        <div v-if="band.links.length" class="bg-gray-800 rounded-lg border border-gray-700 py-3 px-3">
-          <h2 class="text-xl font-bold mb-4 text-red-400">Ссылки</h2>
-          <div class="grid grid-cols-2 bg-gray-750 rounded-lg overflow-hidden">
-            <el-link
-              v-for="link in band.links"
-              :key="link.url"
-              type="primary"
-              underline="never"
-              target="_blank"
-              :href="link.url"
-            >
-              {{ link.social }}
-            </el-link>
-          </div>
-        </div>
       </div>
     </div>
   </div>
 </template>
-
-<script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
-import { useRoute } from 'vue-router'
-
-import { useStore } from '@/store/store'
-
-import dateNormalizer from '@/utils/dateNormalizer'
-import { sortByDate } from '@/utils'
-
-import CollapsibleText from '@/components/CollapsibleText.vue'
-import LoadingSpinner from '@/components/LoadingSpinner.vue'
-
-const route = useRoute()
-const store = useStore()
-
-const showPreview = ref(false)
-const showLogoPreview = ref(false)
-const urlList = ref<string[]>([])
-
-const band = computed(() => store.currentBand)
-const bandName = computed(() => route.params.bandName)
-const bandId = computed(() => route.params.id)
-const sortedDiscography = computed(() => {
-  return [...band.value.discography].sort(sortByDate)
-})
-
-const openImagePreview = (imgList: string[]) => {
-  urlList.value = imgList
-  showPreview.value = true
-}
-
-const getBandById = async () => {
-  if (!store.fromRandom) await store.getBandById(bandId.value)
-}
-watch(bandId, async () => {
-  await getBandById()
-})
-onMounted(async () => {
-  await getBandById()
-})
-</script>

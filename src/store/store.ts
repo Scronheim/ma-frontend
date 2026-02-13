@@ -4,7 +4,7 @@ import { defineStore } from 'pinia'
 import axios from 'axios'
 import { breakpointsTailwind, useBreakpoints } from '@vueuse/core'
 
-import type { Band, Album, Track, SSEResponse, AllStatInfo } from '@/types'
+import type { Band, Album, Track, SSEResponse, AllStatInfo, Member } from '@/types'
 
 export const useStore = defineStore('store', () => {
   const router = useRouter()
@@ -14,16 +14,26 @@ export const useStore = defineStore('store', () => {
     description: '',
     discography: [],
     current_lineup: [],
+    past_lineup: [],
     links: []
   })
   const currentAlbum = ref<Album>({
     tracklist: []
+  })
+  const currentMember = ref<Member>({
+    active_bands: [],
+    past_bands: [],
+    guest_session: [],
+    live: [],
+    misc_staff: [],
+    links: []
   })
   const stats = ref<AllStatInfo>()
   const bandIsLoading = ref<boolean>(false)
   const albumIsLoading = ref<boolean>(false)
   const lyricsIsLoading = ref<boolean>(false)
   const statsIsLoading = ref<boolean>(false)
+  const memberIsLoading = ref<boolean>(false)
   const fromRandom = ref<boolean>(false)
   const sseEvents = ref<EventSource>()
 
@@ -73,6 +83,16 @@ export const useStore = defineStore('store', () => {
     }
   }
 
+  const getMemberById = async (artistId: string | number) => {
+    try {
+      memberIsLoading.value = true
+      const { data } = await axios.get(`/api/artist/${artistId}`)
+      currentMember.value = data.data
+    } finally {
+      memberIsLoading.value = false
+    }
+  }
+
   const getStats = async () => {
     try {
       statsIsLoading.value = true
@@ -84,6 +104,7 @@ export const useStore = defineStore('store', () => {
   }
 
   const onEventsMessage = (event: MessageEvent) => {
+    if (!currentBand.value.discography.length) return
     const data: SSEResponse = JSON.parse(event.data)
 
     switch (data.type) {
@@ -111,11 +132,13 @@ export const useStore = defineStore('store', () => {
   return {
     currentBand,
     currentAlbum,
+    currentMember,
     stats,
     bandIsLoading,
     albumIsLoading,
     lyricsIsLoading,
     statsIsLoading,
+    memberIsLoading,
     albumsExceptCurrent,
     sseEvents,
     fromRandom,
@@ -124,6 +147,7 @@ export const useStore = defineStore('store', () => {
     getBandById,
     getAlbumById,
     getLyricsById,
+    getMemberById,
     getStats,
     connectToEvents
   }

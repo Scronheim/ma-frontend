@@ -4,6 +4,7 @@ import BandView from '../views/BandView.vue'
 import AlbumView from '../views/AlbumView.vue'
 import SearchResultsView from '../views/SearchResultsView.vue'
 import StatsView from '../views/StatsView.vue'
+import MemberView from '../views/MemberView.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -16,20 +17,22 @@ const router = createRouter({
     {
       path: '/band/view/id/:id',
       name: 'bands view',
-      component: BandView,
-      props: true
+      component: BandView
     },
     {
       path: '/bands/:bandName/:id',
       name: 'bands',
-      component: BandView,
-      props: true
+      component: BandView
     },
     {
       path: '/albums/:bandName/:albumName/:id',
       name: 'albums',
-      component: AlbumView,
-      props: true
+      component: AlbumView
+    },
+    {
+      path: '/artists/:artistName/:id',
+      name: 'artist',
+      component: MemberView
     },
     {
       path: '/search',

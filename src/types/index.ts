@@ -11,15 +11,12 @@ export interface Band {
   genres: string
   themes: string
   label: string
-  links: BandLink[]
+  links: SocialLink[]
   logo_url: string
   photo_url: string
   discography: Album[]
-  current_lineup: {
-    name: string
-    role: string
-    url: string
-  }[]
+  current_lineup: MemberLineUp[]
+  past_lineup: MemberLineUp[]
   updated_at: string
 }
 
@@ -36,7 +33,7 @@ export interface Album {
   cover_url: string
   cover_loading: boolean
   tracklist: Track[]
-  current_lineup: BandMember[]
+  current_lineup: MemberLineUp[]
   updated_at: string
 }
 
@@ -51,9 +48,49 @@ export interface Track {
   show_lyrics: boolean | null
 }
 
-export interface BandMember {
+export interface Member {
+  id: number | null
+  fullname: string | null
+  fullname_slug: string | null
+  age: string | null
+  place_of_birth: string | null
+  gender: string | null
+  photo_url: string
+  biography: string
+  active_bands: MemberBand[]
+  past_bands: MemberBand[]
+  guest_session: MemberBand[]
+  live: MemberBand[]
+  misc_staff: MemberBand[]
+  links: SocialLink[]
+}
+
+export interface MemberBand {
+  id: number | null
   name: string
+  name_slug: string
+  albums: MemberAlbum[]
   role: string
+}
+
+export interface MemberAlbum {
+  id: number | null
+  title: string
+  title_slug: string
+  release_date: string
+  role: string
+}
+
+export interface MemberLineUp {
+  id: number
+  fullname: string
+  fullname_slug: string
+  role: string
+  other_bands: {
+    id: number
+    name: string
+    name_slug: string
+  }[]
   url: string
 }
 
@@ -108,7 +145,7 @@ export interface AllStatInfo {
   ma: StatInfo
 }
 
-export interface BandLink {
+export interface SocialLink {
   social: string
   url: string
 }
