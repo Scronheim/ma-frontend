@@ -4,7 +4,8 @@ import { defineStore } from 'pinia'
 import axios from 'axios'
 import { breakpointsTailwind, useBreakpoints } from '@vueuse/core'
 
-import type { Band, Album, Track, SSEResponse, AllStatInfo, Member } from '@/types'
+import type { Band, Album, Track, SSEResponse, AllStatInfo, Member, User } from '@/types'
+import { ElNotification } from 'element-plus'
 
 export const useStore = defineStore('store', () => {
   const router = useRouter()
@@ -21,23 +22,43 @@ export const useStore = defineStore('store', () => {
     tracklist: []
   })
   const currentMember = ref<Member>({
+    id: null,
+    fullname: null,
+    fullname_slug: null,
+    age: null,
+    biography: '',
+    gender: null,
+    place_of_birth: null,
     active_bands: [],
     past_bands: [],
     guest_session: [],
     live: [],
     misc_staff: [],
-    links: []
+    links: [],
+    photo_url: null
   })
+  const user = ref<User>({
+    username: '',
+    real_name: null,
+    country: null,
+    gender: null,
+    favorite_bands: [],
+    favorite_albums: [],
+    role: 'user'
+  })
+  const token = ref('')
   const stats = ref<AllStatInfo>()
   const bandIsLoading = ref<boolean>(false)
   const albumIsLoading = ref<boolean>(false)
   const lyricsIsLoading = ref<boolean>(false)
   const statsIsLoading = ref<boolean>(false)
   const memberIsLoading = ref<boolean>(false)
+  const userIsLoading = ref<boolean>(false)
   const fromRandom = ref<boolean>(false)
   const sseEvents = ref<EventSource>()
 
   const albumsExceptCurrent = computed(() => currentBand.value.discography.filter(a => a.id !== currentAlbum.value.id))
+  const userIsAuth = computed(() => token.value)
   const isMobile = breakpoints.smaller('md')
 
   const getRandomBand = async () => {
@@ -106,13 +127,15 @@ export const useStore = defineStore('store', () => {
   const onEventsMessage = (event: MessageEvent) => {
     if (!currentBand.value.discography.length) return
     const data: SSEResponse = JSON.parse(event.data)
-
+    let album: Album | undefined
     switch (data.type) {
       case 'new_album':
-        const album = currentBand.value.discography.find(a => a.id === parseInt(data.data.id))
-        album.release_date = data.data.release_date
-        album.cover_url = data.data.cover_url
-        album.cover_loading = false
+        album = currentBand.value.discography.find(a => a.id === parseInt(data.data.id))
+        if (album) {
+          album.release_date = data.data.release_date
+          album.cover_url = data.data.cover_url
+          album.cover_loading = false
+        }
         break
 
       default:
@@ -129,26 +152,131 @@ export const useStore = defineStore('store', () => {
     }
   }
 
+  const logout = () => {
+    router.push('/')
+    token.value = ''
+    user.value = {
+      username: '',
+      real_name: null,
+      country: null,
+      gender: null,
+      favorite_bands: [],
+      favorite_albums: [],
+      role: 'user'
+    }
+    localStorage.removeItem('token')
+  }
+
+  const login = async (username: string, password: string): Promise<void> => {
+    try {
+      const { data } = await axios.post('/api/auth/login', { username, password })
+      user.value = data.user
+      token.value = data.token
+      localStorage.setItem('token', data.token)
+      axios.defaults.headers['Authorization'] = data.token
+      ElNotification({
+        type: 'success',
+        message: 'Вы успешно авторизовались'
+      })
+      router.push('/')
+    } catch (e) {
+      console.log(e)
+    }
+  }
+
+  const register = async (username: string, password: string): Promise<void> => {
+    try {
+      const { data } = await axios.post('/api/auth/register', { username, password })
+      user.value = data.user
+      token.value = data.token
+      localStorage.setItem('token', data.token)
+      axios.defaults.headers['Authorization'] = data.token
+      ElNotification({
+        type: 'success',
+        message: 'Вы успешно зарегистрировались'
+      })
+      router.push('/')
+    } catch (e) {
+      console.log(e)
+    }
+  }
+
+  const me = async (): Promise<void> => {
+    try {
+      const { data } = await axios.get('/api/auth/me')
+      user.value = data
+    } catch (e) {
+      console.log(e)
+    }
+  }
+
+  const updateMe = async (): Promise<void> => {
+    try {
+      const localUser = {
+        ...user.value,
+        favorite_bands: user.value.favorite_bands.flatMap(b => b.id),
+        favorite_albums: user.value.favorite_albums.flatMap(a => a.id)
+      }
+      const { data } = await axios.patch('/api/auth/me/update', localUser)
+      user.value = data
+    } catch (e) {
+      console.log(e)
+    }
+  }
+
+  const getProfileByUsername = async (username: string): Promise<User | null> => {
+    try {
+      userIsLoading.value = true
+      const { data } = await axios.get(`/api/auth/profile/${username}`)
+      return data
+    } catch (e) {
+      console.log(e)
+      return null
+    } finally {
+      userIsLoading.value = false
+    }
+  }
+
+  const checkToken = async (): Promise<string | null> => {
+    const tokenFromLocalStorage = localStorage.getItem('token')
+    if (tokenFromLocalStorage) {
+      axios.defaults.headers['Authorization'] = tokenFromLocalStorage
+      token.value = tokenFromLocalStorage
+      await me()
+    }
+    return null
+  }
+
   return {
     currentBand,
     currentAlbum,
     currentMember,
+    user,
     stats,
     bandIsLoading,
     albumIsLoading,
     lyricsIsLoading,
     statsIsLoading,
     memberIsLoading,
+    userIsLoading,
     albumsExceptCurrent,
     sseEvents,
     fromRandom,
     isMobile,
+    userIsAuth,
     getRandomBand,
     getBandById,
     getAlbumById,
     getLyricsById,
     getMemberById,
     getStats,
-    connectToEvents
+    connectToEvents,
+    login,
+    logout,
+    register,
+    me,
+    updateMe,
+    getProfileByUsername,
+    checkToken
   }
 })

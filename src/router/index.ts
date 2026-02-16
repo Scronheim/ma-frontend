@@ -5,6 +5,8 @@ import AlbumView from '../views/AlbumView.vue'
 import SearchResultsView from '../views/SearchResultsView.vue'
 import StatsView from '../views/StatsView.vue'
 import MemberView from '../views/MemberView.vue'
+import AuthView from '../views/AuthView.vue'
+import ProfileView from '../views/ProfileView.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -44,6 +46,16 @@ const router = createRouter({
       path: '/stats',
       name: 'stats',
       component: StatsView
+    },
+    {
+      path: '/auth',
+      name: 'Auth',
+      component: AuthView
+    },
+    {
+      path: '/profile/:username?',
+      name: 'Profile',
+      component: ProfileView
     }
   ],
   scrollBehavior() {

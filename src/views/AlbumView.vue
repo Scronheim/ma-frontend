@@ -1,3 +1,64 @@
+<script setup lang="ts">
+import { ref, computed, onMounted, watch } from 'vue'
+import { useRoute } from 'vue-router'
+import dayjs from 'dayjs'
+import durationPlugin from 'dayjs/plugin/duration'
+import { Star, StarFilled } from '@element-plus/icons-vue'
+
+import { useStore } from '@/store/store'
+
+import LoadingSpinner from '@/components/LoadingSpinner.vue'
+
+import DateNormalizer from '@/utils/dateNormalizer'
+
+dayjs.extend(durationPlugin)
+
+const route = useRoute()
+const store = useStore()
+
+const showPreview = ref(false)
+
+const album = computed(() => store.currentAlbum)
+const albumId = computed(() => route.params.id)
+const albumTotalDuration = computed((): string => {
+  const totalSeconds = album.value?.tracklist.reduce((total, track) => {
+    const [minutes, seconds] = track.duration.split(':').map(i => parseInt(i))
+    return total + dayjs.duration({ minutes, seconds }).asSeconds()
+  }, 0)
+
+  return dayjs.duration(totalSeconds, 'seconds').format('HH:mm:ss')
+})
+const albumUserFavoriteIndex = computed((): number =>
+  store.user.favorite_albums.findIndex(b => b.id === parseInt(albumId.value))
+)
+
+const toggleFavoriteAlbum = async () => {
+  if (albumUserFavoriteIndex.value > -1) store.user.favorite_albums.splice(albumUserFavoriteIndex.value, 1)
+  else store.user.favorite_albums.push(store.currentAlbum)
+  await store.updateMe()
+}
+
+const getBandById = async () => {
+  const bandIndex = store.currentAlbum.band_names_slug.findIndex(name => name === route.params.bandName)
+  const bandId = store.currentAlbum.band_ids[bandIndex]
+  await store.getBandById(bandId)
+}
+
+watch(
+  albumId,
+  async () => {
+    await store.getAlbumById(route.params.id)
+    if (!store.currentBand.id) await getBandById()
+  },
+  { deep: true }
+)
+
+onMounted(async () => {
+  await store.getAlbumById(route.params.id)
+  if (!store.currentBand.id) await getBandById()
+})
+</script>
+
 <template>
   <LoadingSpinner v-if="store.albumIsLoading" :visible="store.albumIsLoading" />
   <div class="space-y-6" v-else>
@@ -28,7 +89,21 @@
       <div class="md:ml-6 flex-1">
         <div class="flex flex-col md:flex-row md:items-center justify-between">
           <div>
-            <h1 class="text-3xl md:text-4xl font-bold">{{ album.title }}</h1>
+            <h1 class="text-3xl md:text-4xl font-bold">
+              {{ album.title }}
+              <el-tooltip
+                v-if="store.userIsAuth"
+                :content="albumUserFavoriteIndex > -1 ? 'Убрать из любимых' : 'Добавить в любимые'"
+                placement="top"
+              >
+                <el-button
+                  :icon="albumUserFavoriteIndex > -1 ? StarFilled : Star"
+                  circle
+                  text
+                  @click="toggleFavoriteAlbum"
+                />
+              </el-tooltip>
+            </h1>
             <div class="mt-2">
               <template v-for="(b, i) in album.band_names" :key="b">
                 <router-link
@@ -145,58 +220,3 @@
     </div>
   </div>
 </template>
-
-<script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
-import { useRoute } from 'vue-router'
-import dayjs from 'dayjs'
-import durationPlugin from 'dayjs/plugin/duration'
-
-import { useStore } from '@/store/store'
-
-import LoadingSpinner from '@/components/LoadingSpinner.vue'
-
-import DateNormalizer from '@/utils/dateNormalizer'
-
-dayjs.extend(durationPlugin)
-
-const route = useRoute()
-const store = useStore()
-
-const showPreview = ref(false)
-
-const album = computed(() => store.currentAlbum)
-const albumId = computed(() => route.params.id)
-
-const albumTotalDuration = computed((): string => {
-  const totalSeconds = album.value?.tracklist.reduce((total, track) => {
-    const [minutes, seconds] = track.duration.split(':').map(i => parseInt(i))
-    return total + dayjs.duration({ minutes, seconds }).asSeconds()
-  }, 0)
-
-  return dayjs.duration(totalSeconds, 'seconds').format('HH:mm:ss')
-})
-
-const getBandById = async () => {
-  const bandIndex = store.currentAlbum.band_names_slug.findIndex(name => name === route.params.bandName)
-  const bandId = store.currentAlbum.band_ids[bandIndex]
-  await store.getBandById(bandId)
-}
-
-watch(
-  albumId,
-  async () => {
-    await store.getAlbumById(route.params.id)
-    if (!store.currentBand.id) await getBandById()
-  },
-  { deep: true }
-)
-
-onMounted(async () => {
-  await store.getAlbumById(route.params.id)
-  if (!store.currentBand.id) await getBandById()
-})
-// onUnmounted(() => {
-//   store.currentAlbum.id = null
-// })
-</script>

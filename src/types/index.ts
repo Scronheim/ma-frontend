@@ -1,5 +1,5 @@
 export interface Band {
-  id: number
+  id: number | null
   name: string
   name_slug: string
   description: string
@@ -21,7 +21,7 @@ export interface Band {
 }
 
 export interface Album {
-  id: number
+  id: number | null
   title: string
   title_slug: string
   band_ids: number[]
@@ -55,7 +55,7 @@ export interface Member {
   age: string | null
   place_of_birth: string | null
   gender: string | null
-  photo_url: string
+  photo_url: string | null
   biography: string
   active_bands: MemberBand[]
   past_bands: MemberBand[]
@@ -148,4 +148,40 @@ export interface AllStatInfo {
 export interface SocialLink {
   social: string
   url: string
+}
+
+export interface AuthData {
+  username: string
+  password: string
+}
+
+export interface ShortBand {
+  id: number
+  name: string
+  name_slug: string
+  genres: string
+  country: string
+  photo_url: string | null
+  logo_url: string | null
+}
+
+export interface ShortAlbum {
+  id: number
+  title: string
+  title_slug: string
+  band_names: string[]
+  band_names_slug: string[]
+  type: string
+  cover_url: string | null
+}
+
+export interface User {
+  username: string
+  real_name: string | null
+  gender: string | null
+  country: string | null
+  favorite_bands: ShortBand[]
+  favorite_albums: ShortAlbum[]
+  role: 'admin' | 'moderator' | 'user'
+  created_at?: string
 }

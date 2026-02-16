@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
+import { Star, StarFilled } from '@element-plus/icons-vue'
 
 import { useStore } from '@/store/store'
 
@@ -26,6 +27,15 @@ const bandId = computed(() => route.params.id)
 const sortedDiscography = computed(() => {
   return [...band.value.discography].sort(sortByDate)
 })
+const bandUserFavoriteIndex = computed((): number =>
+  store.user.favorite_bands.findIndex(b => b.id === parseInt(bandId.value))
+)
+
+const toggleFavoriteBand = async () => {
+  if (bandUserFavoriteIndex.value > -1) store.user.favorite_bands.splice(bandUserFavoriteIndex.value, 1)
+  else store.user.favorite_bands.push(store.currentBand)
+  await store.updateMe()
+}
 
 const openImagePreview = (imgList: string[]) => {
   urlList.value = imgList
@@ -91,7 +101,21 @@ onMounted(async () => {
         <!-- Детали группы -->
         <div class="flex flex-col gap-6">
           <div class="w-full bg-gray-800 rounded-lg border border-gray-700 py-3 px-3">
-            <h2 class="text-2xl font-bold mb-4 text-red-400">Информация о группе</h2>
+            <div class="flex justify-between">
+              <h2 class="text-2xl font-bold mb-4 text-red-400">Информация о группе</h2>
+              <el-tooltip
+                v-if="store.userIsAuth"
+                :content="bandUserFavoriteIndex > -1 ? 'Убрать из любимых' : 'Добавить в любимые'"
+                placement="top"
+              >
+                <el-button
+                  :icon="bandUserFavoriteIndex > -1 ? StarFilled : Star"
+                  circle
+                  text
+                  @click="toggleFavoriteBand"
+                />
+              </el-tooltip>
+            </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <h3 class="text-gray-400 text-sm uppercase tracking-wider">Жанр</h3>
