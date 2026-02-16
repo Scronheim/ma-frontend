@@ -24,10 +24,13 @@ const otherUser = ref<User>({
   real_name: null,
   country: null,
   gender: null,
+  avatar_color: 'red',
+  favorite_genre: null,
   favorite_bands: [],
   favorite_albums: [],
   role: 'user'
 })
+const predefineColors = ref(['#FF4D4D', '#FFB84D', '#FFE64D', '#4DFF4D', '#4DFFE6', '#4D4DFF', '#B84DFF'])
 
 const user = computed(() => (route.params.username ? otherUser.value : store.user))
 const tabs = computed(() => [
@@ -80,9 +83,10 @@ onMounted(async () => {
       <div class="flex flex-col md:flex-row items-start md:items-center space-y-4 md:space-y-0">
         <div class="flex-shrink-0">
           <div
-            class="w-24 h-24 md:w-32 md:h-32 bg-gradient-to-br from-gray-700 to-gray-900 rounded-full border-4 border-gray-700 overflow-hidden flex items-center justify-center"
+            class="w-24 h-24 md:w-32 md:h-32 rounded-full border-4 border-gray-700 overflow-hidden flex items-center justify-center"
+            :style="{ backgroundColor: user.avatar_color }"
           >
-            <span class="text-4xl">{{ store.user.username.slice(0, 2).toUpperCase() }}</span>
+            <span class="text-4xl">{{ user.username.slice(0, 2).toUpperCase() }}</span>
           </div>
         </div>
 
@@ -90,9 +94,11 @@ onMounted(async () => {
           <div class="flex flex-col md:flex-row md:items-center justify-between">
             <div>
               <h1 class="text-3xl md:text-4xl font-bold">{{ user.username }}</h1>
-              <div class="flex items-center mt-2 text-gray-400">
-                <span>Участник с {{ formatDate(user.created_at) }}</span>
-                <span v-if="user.country" class="mx-2">• {{ user.country }}</span>
+              <span class="mb-2">Участник с {{ formatDate(user.created_at) }}</span>
+              <div class="flex flex-col text-gray-400">
+                <span v-if="user.gender">Пол: {{ user.gender }}</span>
+                <span v-if="user.country">Страна: {{ user.country }}</span>
+                <span v-if="user.favorite_genre">Любимый жанр: {{ user.favorite_genre }}</span>
               </div>
             </div>
 
@@ -189,6 +195,12 @@ onMounted(async () => {
           <el-option label="Мужской" value="Мужской" />
           <el-option label="Женский" value="Женский" />
         </el-select>
+      </el-form-item>
+      <el-form-item label="Любимый жанр" prop="favorite_genre">
+        <el-input v-model="user.favorite_genre" placeholder="Введите любимый жанр" />
+      </el-form-item>
+      <el-form-item label="Цвет аватара" prop="avatar_color">
+        <el-color-picker :predefine="predefineColors" v-model="user.avatar_color" />
       </el-form-item>
     </el-form>
     <template #footer>

@@ -1,16 +1,30 @@
+<script setup lang="ts">
+import { Close } from '@element-plus/icons-vue'
+
+import type { ShortAlbum } from '../types'
+
+const props = defineProps<{
+  album: ShortAlbum
+}>()
+
+defineEmits<{
+  (e: 'click', album: ShortAlbum): void
+  (e: 'remove', album: ShortAlbum): void
+}>()
+</script>
+
 <template>
   <div
-    class="bg-gray-800 rounded-lg border border-gray-700 p-4 hover:bg-gray-750 transition-colors duration-150 cursor-pointer relative group"
+    class="bg-gray-800 rounded-lg border border-gray-700 p-4 hover:bg-gray-750 transition-colors duration-150 cursor-pointer relative"
     @click="$emit('click', album)"
   >
     <button
       @click.stop="$emit('remove', album)"
-      class="absolute top-2 right-2 w-8 h-8 bg-gray-700 hover:bg-red-600 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10"
-      :aria-label="`Remove ${album.title} from favorites`"
+      class="absolute top-2 right-2 w-8 h-8 bg-gray-700 hover:bg-red-600 rounded-full flex items-center justify-center cursor-pointer"
     >
-      <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-      </svg>
+      <el-icon>
+        <Close />
+      </el-icon>
     </button>
     <div class="flex items-start space-x-3">
       <!-- Обложка альбома -->
@@ -29,16 +43,3 @@
     </div>
   </div>
 </template>
-
-<script setup lang="ts">
-import type { ShortAlbum } from '../types'
-
-const props = defineProps<{
-  album: ShortAlbum
-}>()
-
-defineEmits<{
-  (e: 'click', album: ShortAlbum): void
-  (e: 'remove', album: ShortAlbum): void
-}>()
-</script>

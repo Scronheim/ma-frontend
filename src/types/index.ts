@@ -180,8 +180,10 @@ export interface User {
   real_name: string | null
   gender: string | null
   country: string | null
+  favorite_genre: string | null
   favorite_bands: ShortBand[]
   favorite_albums: ShortAlbum[]
   role: 'admin' | 'moderator' | 'user'
+  avatar_color: string
   created_at?: string
 }

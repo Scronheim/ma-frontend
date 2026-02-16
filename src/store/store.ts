@@ -44,6 +44,8 @@ export const useStore = defineStore('store', () => {
     real_name: null,
     country: null,
     gender: null,
+    avatar_color: 'red',
+    favorite_genre: null,
     favorite_bands: [],
     favorite_albums: [],
     role: 'user'

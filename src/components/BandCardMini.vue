@@ -33,6 +33,12 @@ const route = useRoute()
     <div class="flex items-start space-x-3">
       <div class="w-14 h-14 bg-gray-700 rounded shrink-0 flex items-center justify-center overflow-hidden">
         <img v-if="band.logo_url" :src="band.logo_url" :alt="band.name" class="w-full h-full object-cover" />
+        <img
+          v-else-if="!band.logo_url && band.photo_url"
+          :src="band.photo_url"
+          :alt="band.name"
+          class="w-full h-full object-cover"
+        />
         <span v-else class="text-xl">🎸</span>
       </div>
 
