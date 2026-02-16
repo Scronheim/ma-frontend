@@ -177,7 +177,7 @@ onMounted(async () => {
                 </div>
               </div>
               <div v-show="track.show_lyrics">
-                <pre class="overflow-auto">{{ track.lyrics }}</pre>
+                <span class="overflow-auto" v-html="track.lyrics" />
               </div>
             </div>
           </div>
