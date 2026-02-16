@@ -8,11 +8,9 @@
       leave-from-class="opacity-100"
       leave-to-class="opacity-0"
     >
-      <div v-if="modelValue" class="fixed inset-0 z-50 overflow-y-auto" @click="handleOverlayClick">
-        <!-- Затемнение фона -->
-        <div class="fixed inset-0 bg-black bg-opacity-50 transition-opacity"></div>
+      <div v-if="modelValue" class="fixed inset-0 z-50 overflow-y-auto">
+        <div class="fixed inset-0 bg-black opacity-50 transition-opacity" @click="handleOverlayClick"></div>
 
-        <!-- Контейнер для центрирования модалки -->
         <div class="flex min-h-full items-center justify-center p-4">
           <Transition
             enter-active-class="transition duration-200 ease-out"
@@ -30,13 +28,11 @@
               aria-modal="true"
               :aria-labelledby="titleId"
             >
-              <!-- Заголовок модального окна -->
-              <div v-if="title || $slots.title" class="flex items-center justify-between p-6 border-b border-gray-700">
+              <div v-if="title || $slots.title" class="flex items-center justify-between p-3 border-b border-gray-700">
                 <div :id="titleId" class="text-xl font-bold text-white">
                   <slot name="title">{{ title }}</slot>
                 </div>
 
-                <!-- Кнопка закрытия -->
                 <button
                   @click="closeModal"
                   class="text-gray-400 hover:text-white transition-colors duration-200 rounded-lg p-1 hover:bg-gray-700"
@@ -48,13 +44,11 @@
                 </button>
               </div>
 
-              <!-- Контент -->
-              <div class="p-6" :class="{ 'max-h-[70vh] overflow-y-auto': scrollable }">
+              <div class="p-3" :class="{ 'max-h-[70vh] overflow-y-auto': scrollable }">
                 <slot></slot>
               </div>
 
-              <!-- Футер с действиями -->
-              <div v-if="showFooter || $slots.footer" class="flex justify-end space-x-3 p-6 border-t border-gray-700">
+              <div v-if="showFooter || $slots.footer" class="flex justify-end space-x-3 p-3 border-t border-gray-700">
                 <slot name="footer">
                   <button
                     v-if="showCancelButton"
@@ -126,10 +120,8 @@ const emit = defineEmits<{
   (e: 'open'): void
 }>()
 
-// Генерация уникального ID для accessibility
 const titleId = `modal-title-${Math.random().toString(36).substring(2, 9)}`
 
-// Классы для размера модального окна
 const modalSizeClasses = computed(() => {
   switch (props.size) {
     case 'sm':
@@ -147,7 +139,6 @@ const modalSizeClasses = computed(() => {
   }
 })
 
-// Методы управления модальным окном
 const closeModal = () => {
   emit('update:modelValue', false)
   emit('close')
@@ -165,19 +156,13 @@ const handleConfirm = () => {
 }
 
 const handleOverlayClick = (event: MouseEvent) => {
-  if (props.closeOnClickOverlay && event.target === event.currentTarget) {
-    closeModal()
-  }
+  if (props.closeOnClickOverlay && event.target === event.currentTarget) closeModal()
 }
 
-// Обработка нажатия ESC
 const handleKeyDown = (event: KeyboardEvent) => {
-  if (props.closeOnEsc && event.key === 'Escape' && props.modelValue) {
-    closeModal()
-  }
+  if (props.closeOnEsc && event.key === 'Escape' && props.modelValue) closeModal()
 }
 
-// Блокировка скролла body при открытой модалке
 watch(
   () => props.modelValue,
   newValue => {
@@ -190,12 +175,10 @@ watch(
   }
 )
 
-// Очистка при размонтировании
 onUnmounted(() => {
   document.body.style.overflow = ''
 })
 
-// Добавление/удаление обработчика клавиш
 onMounted(() => {
   window.addEventListener('keydown', handleKeyDown)
 })

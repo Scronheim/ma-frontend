@@ -19,7 +19,7 @@ const showPreview = ref(false)
 const showLogoPreview = ref(false)
 const urlList = ref<string[]>([])
 const activeTab = ref<string>('discography')
-const activeMembersTab = ref<string>('active')
+const activeMembersTab = ref<string>('current')
 
 const band = computed(() => store.currentBand)
 const bandName = computed(() => route.params.bandName)
@@ -30,6 +30,15 @@ const sortedDiscography = computed(() => {
 const bandUserFavoriteIndex = computed((): number =>
   store.user.favorite_bands.findIndex(b => b.id === parseInt(bandId.value))
 )
+const tabs = computed(() => [
+  { id: 'discography', label: 'Дискография', count: band.value.discography.length },
+  { id: 'members', label: 'Состав', count: band.value.current_lineup.length + band.value.past_lineup.length },
+  { id: 'links', label: 'Ссылки', count: band.value.links.length }
+])
+const membersTabs = computed(() => [
+  { id: 'current', label: 'Текущий', count: band.value.current_lineup.length },
+  { id: 'past', label: 'Прошлые', count: band.value.past_lineup.length }
+])
 
 const toggleFavoriteBand = async () => {
   if (bandUserFavoriteIndex.value > -1) store.user.favorite_bands.splice(bandUserFavoriteIndex.value, 1)
@@ -49,12 +58,12 @@ const getBandById = async () => {
 watch(bandId, async () => {
   await getBandById()
   activeTab.value = 'discography'
-  activeMembersTab.value = 'active'
+  activeMembersTab.value = 'current'
 })
 onMounted(async () => {
   await getBandById()
   activeTab.value = 'discography'
-  activeMembersTab.value = 'active'
+  activeMembersTab.value = 'current'
 })
 </script>
 
@@ -105,13 +114,14 @@ onMounted(async () => {
               <h2 class="text-2xl font-bold mb-4 text-red-400">Информация о группе</h2>
               <el-tooltip
                 v-if="store.userIsAuth"
-                :content="bandUserFavoriteIndex > -1 ? 'Убрать из любимых' : 'Добавить в любимые'"
+                :content="bandUserFavoriteIndex > -1 ? 'Убрать из избранных' : 'Добавить в избранные'"
                 placement="top"
               >
                 <el-button
                   :icon="bandUserFavoriteIndex > -1 ? StarFilled : Star"
                   circle
-                  text
+                  plain
+                  :type="bandUserFavoriteIndex > -1 ? 'warning' : 'info'"
                   @click="toggleFavoriteBand"
                 />
               </el-tooltip>
@@ -149,8 +159,24 @@ onMounted(async () => {
 
         <div class="bg-gray-800 rounded-lg border border-gray-700 py-2 px-4">
           <div class="overflow-x-auto">
-            <el-tabs v-model="activeTab">
-              <el-tab-pane label="Дискография" name="discography">
+            <div class="flex border-b border-gray-700">
+              <button
+                v-for="tab in tabs"
+                :key="tab.id"
+                @click="activeTab = tab.id"
+                class="flex-1 py-2 px-2 text-center font-medium transition-colors duration-200 cursor-pointer"
+                :class="
+                  activeTab === tab.id ? 'text-red-400 border-b-2 border-red-400' : 'text-gray-400 hover:text-gray-200'
+                "
+              >
+                {{ tab.label }}
+                <span class="ml-2 text-sm bg-gray-700 rounded-full px-2 py-0.5">{{ tab.count }}</span>
+              </button>
+            </div>
+
+            <div>
+              <div v-if="activeTab === 'discography'" class="space-y-4">
+                <div v-if="band.discography.length === 0" class="text-center py-8 text-gray-400">Нет альбомов</div>
                 <table class="w-full">
                   <thead>
                     <tr class="border-b border-gray-700">
@@ -187,23 +213,45 @@ onMounted(async () => {
                     </tr>
                   </tbody>
                 </table>
-              </el-tab-pane>
-              <el-tab-pane v-if="band.current_lineup.length || band.past_lineup.length" label="Состав" name="members">
-                <el-tabs tab-position="top" v-model="activeMembersTab">
-                  <el-tab-pane v-if="band.current_lineup.length" label="Текущий состав" name="active">
-                    <div class="grid grid-cols-1 md:grid-cols-1 gap-4">
-                      <BandMember v-for="member in band.current_lineup" :key="member.fullname" :member="member" />
-                    </div>
-                  </el-tab-pane>
-                  <el-tab-pane v-if="band.past_lineup.length" label="Прошлые составы" name="past">
-                    <div class="grid grid-cols-1 md:grid-cols-1 gap-4">
-                      <BandMember v-for="member in band.past_lineup" :key="member.fullname" :member="member" />
-                    </div>
-                  </el-tab-pane>
-                </el-tabs>
-              </el-tab-pane>
-              <el-tab-pane v-if="band.links.length" label="Ссылки" name="links">
-                <div class="flex flex-col items-start">
+              </div>
+
+              <div v-if="activeTab === 'members'" class="space-y-4">
+                <div
+                  v-if="band.current_lineup.length === 0 && band.past_lineup.length === 0"
+                  class="text-center py-8 text-gray-400"
+                >
+                  Нет добавленных составов
+                </div>
+                <div class="flex border-b border-gray-700">
+                  <button
+                    v-for="tab in membersTabs"
+                    :key="tab.id"
+                    @click="activeMembersTab = tab.id"
+                    class="flex-1 py-2 px-2 text-center font-medium transition-colors duration-200 cursor-pointer"
+                    :class="
+                      activeMembersTab === tab.id
+                        ? 'text-red-400 border-b-2 border-red-400'
+                        : 'text-gray-400 hover:text-gray-200'
+                    "
+                  >
+                    {{ tab.label }}
+                    <span class="ml-2 text-sm bg-gray-700 rounded-full px-2 py-0.5">{{ tab.count }}</span>
+                  </button>
+                </div>
+
+                <div v-if="activeMembersTab === 'current'" class="space-y-4">
+                  <div class="grid grid-cols-1 md:grid-cols-1 gap-2">
+                    <BandMember v-for="member in band.current_lineup" :key="member.fullname" :member="member" />
+                  </div>
+                </div>
+                <div v-if="activeMembersTab === 'past'">
+                  <div class="grid grid-cols-1 md:grid-cols-1 gap-2">
+                    <BandMember v-for="member in band.past_lineup" :key="member.fullname" :member="member" />
+                  </div>
+                </div>
+              </div>
+              <div v-if="activeTab === 'links'" class="space-y-4">
+                <div class="grid grid-cols-3">
                   <el-link
                     v-for="link in band.links"
                     :key="link.url"
@@ -215,8 +263,8 @@ onMounted(async () => {
                     {{ link.social }}
                   </el-link>
                 </div>
-              </el-tab-pane>
-            </el-tabs>
+              </div>
+            </div>
           </div>
         </div>
       </div>

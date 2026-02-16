@@ -16,6 +16,14 @@ const activeTab = ref<string>('active_bands')
 
 const member = computed(() => store.currentMember)
 
+const tabs = computed(() => [
+  { id: 'active_bands', label: 'Активные', count: member.value.active_bands.length },
+  { id: 'past_bands', label: 'Прошлые', count: member.value.past_bands.length },
+  { id: 'guest_session', label: 'Как гость', count: member.value.guest_session.length },
+  { id: 'live', label: 'Live', count: member.value.live.length },
+  { id: 'misc_staff', label: 'Прочее', count: member.value.misc_staff.length }
+])
+
 const openImagePreview = (imgList: string[]) => {
   urlList.value = imgList
   showPreview.value = true
@@ -29,7 +37,6 @@ onMounted(async () => {
 <template>
   <loading-spinner v-if="store.memberIsLoading" :visible="store.memberIsLoading" />
   <div class="space-y-6" v-else>
-    <!-- Заголовок группы -->
     <div class="flex flex-col md:flex-row items-start md:items-center justify-between">
       <div class="flex items-center space-x-4">
         <div>
@@ -38,10 +45,8 @@ onMounted(async () => {
       </div>
     </div>
 
-    <!-- Основная информация -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <div class="lg:col-span-2 space-y-6">
-        <!-- Детали группы -->
         <div class="flex flex-col gap-6">
           <div class="w-full bg-gray-800 rounded-lg border border-gray-700 py-3 px-3">
             <h2 class="text-2xl font-bold mb-4 text-red-400">Информация о музыканте</h2>
@@ -66,34 +71,46 @@ onMounted(async () => {
           </div>
         </div>
 
-        <!-- Альбомы -->
         <div class="bg-gray-800 rounded-lg border border-gray-700 py-2 px-4">
           <h2 class="text-2xl font-bold mb-4 text-red-400">Группы</h2>
           <div class="overflow-x-auto">
-            <el-tabs v-model="activeTab">
-              <el-tab-pane v-if="member.active_bands.length" label="Активные" name="active_bands">
-                <member-bands :bands="member.active_bands" />
-              </el-tab-pane>
-              <el-tab-pane v-if="member.past_bands.length" label="Прошлые" name="past_bands">
-                <member-bands :bands="member.past_bands" />
-              </el-tab-pane>
-              <el-tab-pane v-if="member.live.length" label="Live" name="live">
-                <member-bands :bands="member.live" />
-              </el-tab-pane>
-              <el-tab-pane v-if="member.guest_session.length" label="Как гость" name="guest_session">
-                <member-bands :bands="member.guest_session" />
-              </el-tab-pane>
-              <el-tab-pane v-if="member.misc_staff.length" label="Другое" name="misc_staff">
-                <member-bands :bands="member.misc_staff" />
-              </el-tab-pane>
-            </el-tabs>
+            <div class="flex border-b border-gray-700">
+              <template v-for="tab in tabs" :key="tab.id">
+                <button
+                  v-if="tab.count"
+                  @click="activeTab = tab.id"
+                  class="flex-1 py-2 px-2 text-center font-medium transition-colors duration-200 cursor-pointer"
+                  :class="
+                    activeTab === tab.id
+                      ? 'text-red-400 border-b-2 border-red-400'
+                      : 'text-gray-400 hover:text-gray-200'
+                  "
+                >
+                  {{ tab.label }}
+                  <span class="ml-2 text-sm bg-gray-700 rounded-full px-2 py-0.5">{{ tab.count }}</span>
+                </button>
+              </template>
+            </div>
+            <div v-if="activeTab === 'active_bands'" class="space-y-4">
+              <member-bands :bands="member.active_bands" />
+            </div>
+            <div v-if="activeTab === 'past_bands'" class="space-y-4">
+              <member-bands :bands="member.past_bands" />
+            </div>
+            <div v-if="activeTab === 'live'" class="space-y-4">
+              <member-bands :bands="member.live" />
+            </div>
+            <div v-if="activeTab === 'guest_session'" class="space-y-4">
+              <member-bands :bands="member.guest_session" />
+            </div>
+            <div v-if="activeTab === 'misc_staff'" class="space-y-4">
+              <member-bands :bands="member.misc_staff" />
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- Боковая панель -->
       <div class="space-y-6">
-        <!-- Фото группы -->
         <div class="bg-gray-800 rounded-lg border border-gray-700 py-3 px-3">
           <h2 class="text-xl font-bold mb-4 text-red-400">Фото</h2>
           <div class="bg-gray-750 rounded-lg overflow-hidden">
@@ -119,7 +136,6 @@ onMounted(async () => {
             </div>
           </div>
         </div>
-        <!-- Ссылки группы -->
         <div v-if="member.links.length" class="bg-gray-800 rounded-lg border border-gray-700 py-3 px-3">
           <h2 class="text-xl font-bold mb-4 text-red-400">Ссылки</h2>
           <div class="grid grid-cols-2 bg-gray-750 rounded-lg overflow-hidden">

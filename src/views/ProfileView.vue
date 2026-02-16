@@ -7,9 +7,10 @@ import { useStore } from '@/store/store'
 
 import BandCardMini from '../components/BandCardMini.vue'
 import AlbumCardMini from '../components/AlbumCardMini.vue'
-import ConfirmModal from '../components/Modal.vue'
+import Modal from '../components/Modal.vue'
 
 import type { ShortBand, ShortAlbum, User } from '../types'
+import { ElNotification } from 'element-plus'
 
 const route = useRoute()
 const router = useRouter()
@@ -30,8 +31,8 @@ const otherUser = ref<User>({
 
 const user = computed(() => (route.params.username ? otherUser.value : store.user))
 const tabs = computed(() => [
-  { id: 'bands', label: 'Любимые группы', count: user.value.favorite_bands.length },
-  { id: 'albums', label: 'Любимые альбомы', count: user.value.favorite_albums.length }
+  { id: 'bands', label: 'Избранные группы', count: user.value.favorite_bands.length },
+  { id: 'albums', label: 'Избранные альбомы', count: user.value.favorite_albums.length }
 ])
 
 const formatDate = (dateString: string) => {
@@ -45,6 +46,25 @@ const goToBand = (band: ShortBand) => {
 
 const goToAlbum = (album: ShortAlbum) => {
   router.push(`/albums/${album.band_names_slug[0]}/${album.title_slug}/${album.id}`)
+}
+
+const saveUser = async () => {
+  await store.updateMe()
+  userEditDialog.value = false
+  ElNotification({
+    type: 'success',
+    message: 'Пользователь сохранён'
+  })
+}
+
+const removeBandFromFavorite = async (index: number): Promise<void> => {
+  store.user.favorite_bands.splice(index, 1)
+  await store.updateMe()
+}
+
+const removeAlbumFromFavorite = async (index: number): Promise<void> => {
+  store.user.favorite_albums.splice(index, 1)
+  await store.updateMe()
 }
 
 onMounted(async () => {
@@ -76,18 +96,16 @@ onMounted(async () => {
               </div>
             </div>
 
-            <div class="mt-4 md:mt-0 flex space-x-2">
-              <button
-                v-if="!route.params.username"
-                class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors duration-200 flex items-center space-x-2"
-                @click="userEditDialog = true"
-              >
-                <el-icon>
-                  <EditPen />
-                </el-icon>
-                <span>Редактировать</span>
-              </button>
-            </div>
+            <button
+              v-if="store.userIsAuth && !route.params.username"
+              class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2 cursor-pointer"
+              @click="userEditDialog = true"
+            >
+              <el-icon>
+                <EditPen />
+              </el-icon>
+              <span>Редактировать</span>
+            </button>
           </div>
         </div>
       </div>
@@ -99,7 +117,7 @@ onMounted(async () => {
           v-for="tab in tabs"
           :key="tab.id"
           @click="activeTab = tab.id"
-          class="flex-1 py-4 px-4 text-center font-medium transition-colors duration-200 cursor-pointer"
+          class="flex-1 py-2 px-2 text-center font-medium transition-colors duration-200 cursor-pointer"
           :class="activeTab === tab.id ? 'text-red-400 border-b-2 border-red-400' : 'text-gray-400 hover:text-gray-200'"
         >
           {{ tab.label }}
@@ -110,23 +128,30 @@ onMounted(async () => {
       <div class="p-6">
         <div v-if="activeTab === 'bands'" class="space-y-4">
           <div v-if="user.favorite_bands.length === 0" class="text-center py-8 text-gray-400">
-            Нет добавленых любимых групп
+            Нет добавленых избранных групп
           </div>
           <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <BandCardMini v-for="band in user.favorite_bands" :key="band.id" :band="band" @click="goToBand(band)" />
+            <BandCardMini
+              v-for="(band, index) in user.favorite_bands"
+              :key="band.id"
+              :band="band"
+              @click="goToBand(band)"
+              @remove="removeBandFromFavorite(index)"
+            />
           </div>
         </div>
 
         <div v-if="activeTab === 'albums'" class="space-y-4">
           <div v-if="user.favorite_albums.length === 0" class="text-center py-8 text-gray-400">
-            Нет добавленых любимых альбомов
+            Нет добавленых избранных альбомов
           </div>
           <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
             <AlbumCardMini
-              v-for="album in user.favorite_albums"
+              v-for="(album, index) in user.favorite_albums"
               :key="album.id"
               :album="album"
               @click="goToAlbum(album)"
+              @remove="removeAlbumFromFavorite(index)"
             />
           </div>
         </div>
@@ -146,13 +171,29 @@ onMounted(async () => {
     </div>
   </div>
 
-  <confirm-modal :model-value="userEditDialog" title="123123" @close="userEditDialog = false" />
-
-  <!-- <el-dialog v-model="userEditDialog" title="Редактирование" width="500">
-    <span>This is a message</span>
+  <modal :model-value="userEditDialog" title="Редактирование пользователя" @close="userEditDialog = false">
+    <el-form ref="formRef" :model="user" label-width="auto">
+      <el-form-item label="Имя пользователя" prop="username">
+        <el-input v-model="user.username" readonly />
+      </el-form-item>
+      <el-form-item label="Реальное имя" prop="real_name">
+        <el-input v-model="user.real_name" placeholder="Введите настоящее имя" />
+      </el-form-item>
+      <el-form-item label="Страна" prop="country">
+        <el-select v-model="user.country" placeholder="Выберите страну">
+          <el-option v-for="country in store.countryList" :label="country" :value="country" />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="Пол" prop="gender">
+        <el-select v-model="user.gender" placeholder="Выберите пол">
+          <el-option label="Мужской" value="Мужской" />
+          <el-option label="Женский" value="Женский" />
+        </el-select>
+      </el-form-item>
+    </el-form>
     <template #footer>
-      <el-button type="danger" @click="userEditDialog = false">Отменить</el-button>
-      <el-button type="success" @click="userEditDialog = false">Сохранить</el-button>
+      <el-button type="danger" @click="userEditDialog = false">Закрыть</el-button>
+      <el-button type="success" @click="saveUser">Сохранить</el-button>
     </template>
-  </el-dialog> -->
+  </modal>
 </template>

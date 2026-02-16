@@ -3,9 +3,11 @@ import { useRouter } from 'vue-router'
 import { defineStore } from 'pinia'
 import axios from 'axios'
 import { breakpointsTailwind, useBreakpoints } from '@vueuse/core'
+import { ElNotification } from 'element-plus'
+
+import countries from '@/utils/countries'
 
 import type { Band, Album, Track, SSEResponse, AllStatInfo, Member, User } from '@/types'
-import { ElNotification } from 'element-plus'
 
 export const useStore = defineStore('store', () => {
   const router = useRouter()
@@ -46,6 +48,7 @@ export const useStore = defineStore('store', () => {
     favorite_albums: [],
     role: 'user'
   })
+  const countryList = ref(countries)
   const token = ref('')
   const stats = ref<AllStatInfo>()
   const bandIsLoading = ref<boolean>(false)
@@ -253,6 +256,7 @@ export const useStore = defineStore('store', () => {
     currentMember,
     user,
     stats,
+    countryList,
     bandIsLoading,
     albumIsLoading,
     lyricsIsLoading,
