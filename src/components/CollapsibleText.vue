@@ -27,12 +27,13 @@
         </el-icon>
       </el-button>
     </div>
-    <el-dialog v-model="showMoreDialog" title="Дополнительные заметки" :width="dialogWidth">
+
+    <modal :model-value="showMoreDialog" title="Дополнительные заметки" @close="showMoreDialog = false" size="full">
       <span v-html="content" class="desciption-link" />
       <template #footer>
         <el-button @click="showMoreDialog = false">Закрыть</el-button>
       </template>
-    </el-dialog>
+    </modal>
   </div>
 </template>
 
@@ -41,6 +42,8 @@ import { ref, computed, onMounted } from 'vue'
 import { ArrowRight } from '@element-plus/icons-vue'
 
 import { useStore } from '@/store/store'
+
+import Modal from '../components/Modal.vue'
 
 interface Props {
   content?: string
