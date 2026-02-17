@@ -18,7 +18,7 @@
       <el-button @click="performSearch" :loading="store.bandIsLoading" type="primary">
         Искать в Metal Archives
       </el-button>
-      <el-button @click="store.getRandomBand" :loading="store.bandIsLoading" type="info">Мне повезёт</el-button>
+      <el-button @click="getRandomBand" :loading="store.bandIsLoading" type="info">Мне повезёт</el-button>
     </div>
   </div>
 </template>
@@ -30,13 +30,21 @@ import { Search } from '@element-plus/icons-vue'
 
 import { useStore } from '@/store/store'
 
+const emits = defineEmits(['closeMenu'])
+
 const router = useRouter()
 const store = useStore()
 const searchQuery = ref('')
 const selectedSearchField = ref('band')
 
+const getRandomBand = async () => {
+  await store.getRandomBand()
+  emits('closeMenu')
+}
+
 const performSearch = () => {
   if (searchQuery.value.trim()) {
+    emits('closeMenu')
     router.push({ path: '/search', query: { type: selectedSearchField.value, q: searchQuery.value } })
   }
 }

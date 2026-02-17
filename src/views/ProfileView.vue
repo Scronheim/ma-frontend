@@ -136,7 +136,7 @@ onMounted(async () => {
           <div v-if="user.favorite_bands.length === 0" class="text-center py-8 text-gray-400">
             Нет добавленых избранных групп
           </div>
-          <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-4 h-82 overflow-y-auto">
             <BandCardMini
               v-for="(band, index) in user.favorite_bands"
               :key="band.id"
@@ -151,7 +151,7 @@ onMounted(async () => {
           <div v-if="user.favorite_albums.length === 0" class="text-center py-8 text-gray-400">
             Нет добавленых избранных альбомов
           </div>
-          <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-4 h-82 overflow-y-auto">
             <AlbumCardMini
               v-for="(album, index) in user.favorite_albums"
               :key="album.id"

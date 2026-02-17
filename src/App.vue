@@ -63,7 +63,7 @@
         <!-- Мобильное меню (раскрывающееся) -->
         <div v-if="!isMainPage && mobileMenuOpen" class="md:hidden bg-gray-800 px-4 py-3 border-t border-gray-700">
           <div class="mb-4">
-            <SearchBar />
+            <SearchBar @close-menu="mobileMenuOpen = false" />
           </div>
         </div>
       </header>

@@ -87,34 +87,32 @@ onMounted(async () => {
       </div>
 
       <div class="md:ml-6 flex-1">
-        <div class="flex flex-col md:flex-row md:items-center justify-between">
-          <div>
-            <h1 class="text-3xl md:text-4xl font-bold">
-              {{ album.title }}
-              <el-tooltip
-                v-if="store.userIsAuth"
-                :content="albumUserFavoriteIndex > -1 ? 'Убрать из любимых' : 'Добавить в любимые'"
-                placement="top"
+        <div>
+          <h1 class="text-3xl md:text-4xl font-bold">
+            {{ album.title }}
+            <el-tooltip
+              v-if="store.userIsAuth"
+              :content="albumUserFavoriteIndex > -1 ? 'Убрать из любимых' : 'Добавить в любимые'"
+              placement="top"
+            >
+              <el-button
+                :icon="albumUserFavoriteIndex > -1 ? StarFilled : Star"
+                circle
+                text
+                @click="toggleFavoriteAlbum"
+              />
+            </el-tooltip>
+          </h1>
+          <div class="mt-2 break-all">
+            <template v-for="(b, i) in album.band_names" :key="b">
+              <router-link
+                :to="`/bands/${album.band_names_slug[i]}/${album.band_ids[i]}`"
+                class="text-xl text-red-400 hover:text-red-300 transition-colors duration-150"
               >
-                <el-button
-                  :icon="albumUserFavoriteIndex > -1 ? StarFilled : Star"
-                  circle
-                  text
-                  @click="toggleFavoriteAlbum"
-                />
-              </el-tooltip>
-            </h1>
-            <div class="mt-2">
-              <template v-for="(b, i) in album.band_names" :key="b">
-                <router-link
-                  :to="`/bands/${album.band_names_slug[i]}/${album.band_ids[i]}`"
-                  class="text-xl text-red-400 hover:text-red-300 transition-colors duration-150"
-                >
-                  {{ album.band_names[i] }}
-                </router-link>
-                <span v-if="album.band_names.length && i < album.band_names.length - 1" class="mx-2">/</span>
-              </template>
-            </div>
+                {{ album.band_names[i] }}
+              </router-link>
+              <span v-if="album.band_names.length && i < album.band_names.length - 1" class="mx-2">/</span>
+            </template>
           </div>
         </div>
 
