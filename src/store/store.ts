@@ -5,6 +5,7 @@ import axios from 'axios'
 import { breakpointsTailwind, useBreakpoints } from '@vueuse/core'
 import { ElNotification } from 'element-plus'
 
+import { DEFAULT_BAND, DEFAULT_ALBUM, DEFAULT_BAND_MEMBER, DEFAULT_USER } from '@/utils/consts'
 import countries from '@/utils/countries'
 
 import type { Band, Album, Track, SSEResponse, AllStatInfo, Member, User } from '@/types'
@@ -13,43 +14,10 @@ export const useStore = defineStore('store', () => {
   const router = useRouter()
   const breakpoints = useBreakpoints(breakpointsTailwind)
 
-  const currentBand = ref<Band>({
-    description: '',
-    discography: [],
-    current_lineup: [],
-    past_lineup: [],
-    links: []
-  })
-  const currentAlbum = ref<Album>({
-    tracklist: []
-  })
-  const currentMember = ref<Member>({
-    id: null,
-    fullname: null,
-    fullname_slug: null,
-    age: null,
-    biography: '',
-    gender: null,
-    place_of_birth: null,
-    active_bands: [],
-    past_bands: [],
-    guest_session: [],
-    live: [],
-    misc_staff: [],
-    links: [],
-    photo_url: null
-  })
-  const user = ref<User>({
-    username: '',
-    real_name: null,
-    country: null,
-    gender: null,
-    avatar_color: 'red',
-    favorite_genre: null,
-    favorite_bands: [],
-    favorite_albums: [],
-    role: 'user'
-  })
+  const currentBand = ref<Band>(DEFAULT_BAND)
+  const currentAlbum = ref<Album>(DEFAULT_ALBUM)
+  const currentMember = ref<Member>(DEFAULT_BAND_MEMBER)
+  const user = ref<User>(DEFAULT_USER)
   const countryList = ref(countries)
   const token = ref('')
   const stats = ref<AllStatInfo>()
@@ -160,15 +128,7 @@ export const useStore = defineStore('store', () => {
   const logout = () => {
     router.push('/')
     token.value = ''
-    user.value = {
-      username: '',
-      real_name: null,
-      country: null,
-      gender: null,
-      favorite_bands: [],
-      favorite_albums: [],
-      role: 'user'
-    }
+    user.value = DEFAULT_USER
     localStorage.removeItem('token')
   }
 
@@ -211,7 +171,10 @@ export const useStore = defineStore('store', () => {
       const { data } = await axios.get('/api/auth/me')
       user.value = data
     } catch (e) {
-      console.log(e)
+      if (e.response.status === 404) {
+        localStorage.removeItem('token')
+        token.value = ''
+      }
     }
   }
 

@@ -12,6 +12,8 @@ import CollapsibleText from '@/components/CollapsibleText.vue'
 import LoadingSpinner from '@/components/LoadingSpinner.vue'
 import BandMember from '@/components/BandMember.vue'
 
+import type { Rating } from '@/types'
+
 const route = useRoute()
 const store = useStore()
 
@@ -23,13 +25,17 @@ const activeMembersTab = ref<string>('current')
 
 const band = computed(() => store.currentBand)
 const bandName = computed(() => route.params.bandName)
-const bandId = computed(() => route.params.id)
+const bandId = computed((): number => parseInt(route.params.id as string))
 const sortedDiscography = computed(() => {
   return [...band.value.discography].sort(sortByDate)
 })
-const bandUserFavoriteIndex = computed((): number =>
-  store.user.favorite_bands.findIndex(b => b.id === parseInt(bandId.value))
-)
+const bandUserFavoriteIndex = computed((): number => store.user.favorite_bands.findIndex(b => b.id === bandId.value))
+const bandUserRatingIndex = computed((): number => store.user.bands_ratings.findIndex(b => b.id === bandId.value))
+const bandUserRating = computed((): Rating => {
+  const rating = store.user.bands_ratings.find(b => b.id === bandId.value)
+  if (rating) return rating
+  return { id: bandId.value, rating: 0 }
+})
 const tabs = computed(() => [
   { id: 'discography', label: 'Дискография', count: band.value.discography.length },
   { id: 'members', label: 'Состав', count: band.value.current_lineup.length + band.value.past_lineup.length },
@@ -45,16 +51,21 @@ const toggleFavoriteBand = async () => {
   else store.user.favorite_bands.push(store.currentBand)
   await store.updateMe()
 }
-
 const openImagePreview = (imgList: string[]) => {
   urlList.value = imgList
   showPreview.value = true
 }
-
 const getBandById = async () => {
   if (store.fromRandom) store.fromRandom = false
   else await store.getBandById(bandId.value)
 }
+const changeBandRating = async (rating: number): Promise<void> => {
+  if (bandUserRatingIndex.value > -1) store.user.bands_ratings[bandUserRatingIndex.value].rating = rating
+  else if (rating === 0) store.user.bands_ratings.splice(bandUserRatingIndex.value, 1)
+  else store.user.bands_ratings.push({ id: bandId.value, rating })
+  await store.updateMe()
+}
+
 watch(bandId, async () => {
   await getBandById()
   activeTab.value = 'discography'
@@ -93,7 +104,22 @@ onMounted(async () => {
           <span v-else class="text-3xl">🎸</span>
         </div>
         <div>
-          <h1 class="text-3xl md:text-4xl font-bold">{{ band.name }}</h1>
+          <div class="flex gap-2">
+            <h1 class="text-3xl md:text-4xl font-bold">{{ band.name }}</h1>
+            <el-tooltip
+              v-if="store.userIsAuth"
+              :content="bandUserFavoriteIndex > -1 ? 'Убрать из избранных' : 'Добавить в избранные'"
+              placement="top"
+            >
+              <el-button
+                :icon="bandUserFavoriteIndex > -1 ? StarFilled : Star"
+                circle
+                plain
+                :type="bandUserFavoriteIndex > -1 ? 'warning' : 'info'"
+                @click="toggleFavoriteBand"
+              />
+            </el-tooltip>
+          </div>
           <div class="flex flex-wrap items-center gap-2 mt-2">
             <span class="px-3 py-1 bg-gray-800 rounded-full text-sm">{{ band.country }}</span>
             <span class="px-3 py-1 bg-gray-800 rounded-full text-sm">{{ band.status }}</span>
@@ -112,19 +138,9 @@ onMounted(async () => {
           <div class="w-full bg-gray-800 rounded-lg border border-gray-700 py-3 px-3">
             <div class="flex justify-between">
               <h2 class="text-2xl font-bold mb-4 text-red-400">Информация о группе</h2>
-              <el-tooltip
-                v-if="store.userIsAuth"
-                :content="bandUserFavoriteIndex > -1 ? 'Убрать из избранных' : 'Добавить в избранные'"
-                placement="top"
-              >
-                <el-button
-                  :icon="bandUserFavoriteIndex > -1 ? StarFilled : Star"
-                  circle
-                  plain
-                  :type="bandUserFavoriteIndex > -1 ? 'warning' : 'info'"
-                  @click="toggleFavoriteBand"
-                />
-              </el-tooltip>
+              <div v-if="store.userIsAuth" class="flex items-start">
+                <el-rate clearable allow-half v-model.number="bandUserRating.rating" @change="changeBandRating" />
+              </div>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
@@ -177,7 +193,7 @@ onMounted(async () => {
             <div>
               <div v-if="activeTab === 'discography'" class="space-y-4">
                 <div v-if="band.discography.length === 0" class="text-center py-8 text-gray-400">Нет альбомов</div>
-                <table class="w-full">
+                <table v-if="band.discography.length" class="w-full">
                   <thead>
                     <tr class="border-b border-gray-700">
                       <th class="text-left py-3">Дата релиза</th>

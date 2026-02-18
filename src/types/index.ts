@@ -6,14 +6,14 @@ export interface Band {
   country: string
   city: string
   status: 'Active' | 'Split-up' | 'On hold' | 'Changed name' | 'Disputed'
-  formed_in: number
+  formed_in: string
   years_active: string
   genres: string
   themes: string
   label: string
   links: SocialLink[]
-  logo_url: string
-  photo_url: string
+  logo_url: string | null
+  photo_url: string | null
   discography: Album[]
   current_lineup: MemberLineUp[]
   past_lineup: MemberLineUp[]
@@ -30,7 +30,7 @@ export interface Album {
   type: 'Full-length' | 'EP' | 'Single' | 'Demo' | 'Split'
   release_date: string
   label: string
-  cover_url: string
+  cover_url: string | null
   cover_loading: boolean
   tracklist: Track[]
   current_lineup: MemberLineUp[]
@@ -175,11 +175,18 @@ export interface ShortAlbum {
   cover_url: string | null
 }
 
+export interface Rating {
+  id: number
+  rating: number
+}
+
 export interface User {
   username: string
   real_name: string | null
   gender: string | null
   country: string | null
+  bands_ratings: Rating[]
+  albums_ratings: Rating[]
   favorite_genre: string | null
   favorite_bands: ShortBand[]
   favorite_albums: ShortAlbum[]

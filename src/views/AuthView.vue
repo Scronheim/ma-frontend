@@ -49,10 +49,16 @@ const register = () => {
           <el-input v-model="form.password" type="password" placeholder="Введите пароль" />
         </el-form-item>
       </el-form>
-      <div class="flex justify-between">
+      <div class="flex justify-between mt-5">
         <el-button type="primary" @click="register">Регистрация</el-button>
         <el-button type="success" @click="login">Войти</el-button>
       </div>
     </div>
   </div>
 </template>
+
+<style lang="css" scoped>
+.el-form-item {
+  margin-bottom: 5px;
+}
+</style>
