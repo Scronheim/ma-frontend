@@ -71,29 +71,51 @@
       <main class="container mx-auto px-4 py-6">
         <router-view />
       </main>
+      <AudioPlayer
+        ref="audioPlayerRef"
+        :playlist="playerStore.playlist"
+        :current-track-index="playerStore.trackIndex"
+        :autoplay="true"
+        @close="handlePlayerClose"
+        @track-change="handleTrackChange"
+      />
     </div>
   </el-config-provider>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, provide } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { User, SwitchButton } from '@element-plus/icons-vue'
 import ru from 'element-plus/es/locale/lang/ru'
 
+import { usePlayerStore } from '@/store/player'
 import { useStore } from './store/store'
 
 import SearchBar from './components/SearchBar.vue'
+import AudioPlayer from './components/AudioPlayer.vue'
 
 const route = useRoute()
 const router = useRouter()
 
 const store = useStore()
+const playerStore = usePlayerStore()
 
+const audioPlayerRef = ref<InstanceType<typeof AudioPlayer>>()
 const mobileMenuOpen = ref(false)
 
 const isMainPage = computed((): boolean => route.path === '/')
 const isAuthPage = computed((): boolean => route.path === '/auth')
+
+provide('audioPlayer', audioPlayerRef)
+
+const handlePlayerClose = () => {
+  playerStore.clearPlaylist()
+}
+
+const handleTrackChange = (track: any) => {
+  playerStore.setCurrentTrack(track)
+}
 
 onMounted(() => {
   store.connectToEvents()

@@ -32,6 +32,7 @@ export const useStore = defineStore('store', () => {
 
   const albumsExceptCurrent = computed(() => currentBand.value.discography.filter(a => a.id !== currentAlbum.value.id))
   const userIsAuth = computed(() => token.value)
+  const userIsAdmin = computed(() => user.value.role === 'admin')
   const isMobile = breakpoints.smaller('md')
 
   const getRandomBand = async () => {
@@ -60,6 +61,16 @@ export const useStore = defineStore('store', () => {
     try {
       albumIsLoading.value = true
       const { data } = await axios.get(`/api/album/${albumId}`)
+      currentAlbum.value = data.data
+    } finally {
+      albumIsLoading.value = false
+    }
+  }
+
+  const updateAlbum = async (albumId: string | number) => {
+    try {
+      albumIsLoading.value = true
+      const { data } = await axios.patch(`/api/album/${albumId}`, currentAlbum.value)
       currentAlbum.value = data.data
     } finally {
       albumIsLoading.value = false
@@ -233,9 +244,11 @@ export const useStore = defineStore('store', () => {
     fromRandom,
     isMobile,
     userIsAuth,
+    userIsAdmin,
     getRandomBand,
     getBandById,
     getAlbumById,
+    updateAlbum,
     getLyricsById,
     getMemberById,
     getStats,

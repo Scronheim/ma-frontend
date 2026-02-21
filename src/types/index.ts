@@ -46,6 +46,7 @@ export interface Track {
   cd_number: number | null
   side: number | null
   show_lyrics: boolean | null
+  url: string | null
 }
 
 export interface Member {

@@ -1,22 +1,32 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch, inject } from 'vue'
 import { useRoute } from 'vue-router'
 import dayjs from 'dayjs'
 import durationPlugin from 'dayjs/plugin/duration'
-import { Star, StarFilled } from '@element-plus/icons-vue'
+import { Star, StarFilled, EditPen } from '@element-plus/icons-vue'
 
 import { useStore } from '@/store/store'
+import { usePlayerStore } from '@/store/player'
 
 import LoadingSpinner from '@/components/LoadingSpinner.vue'
+import Modal from '@/components/Modal.vue'
 
 import DateNormalizer from '@/utils/dateNormalizer'
+
+import type { Track } from '@/types'
+import { PlayerTrack } from '@/components/AudioPlayer.vue'
+import { ElNotification } from 'element-plus'
 
 dayjs.extend(durationPlugin)
 
 const route = useRoute()
+
 const store = useStore()
+const playerStore = usePlayerStore()
 
 const showPreview = ref(false)
+const showEditDialog = ref(false)
+const audioPlayer = inject('audioPlayer')
 
 const album = computed(() => store.currentAlbum)
 const albumId = computed(() => route.params.id)
@@ -32,6 +42,23 @@ const albumUserFavoriteIndex = computed((): number =>
   store.user.favorite_albums.findIndex(b => b.id === parseInt(albumId.value))
 )
 
+const albumTracks = computed<PlayerTrack[]>(() => {
+  if (!album.value) return []
+
+  return album.value.tracklist.map((track: Track) => ({
+    id: `${album.value.id}-${track.number}`,
+    title: track.title,
+    artist: album.value.band_names_slug.join(', '),
+    artistId: album.value.band_ids.join(),
+    album: album.value.title,
+    album_slug: album.value.title_slug,
+    albumId: album.value.id,
+    coverUrl: album.value.cover_url,
+    duration: parseDuration(track.duration),
+    audioUrl: track.url
+  }))
+})
+
 const toggleFavoriteAlbum = async () => {
   if (albumUserFavoriteIndex.value > -1) store.user.favorite_albums.splice(albumUserFavoriteIndex.value, 1)
   else store.user.favorite_albums.push(store.currentAlbum)
@@ -42,6 +69,54 @@ const getBandById = async () => {
   const bandIndex = store.currentAlbum.band_names_slug.findIndex(name => name === route.params.bandName)
   const bandId = store.currentAlbum.band_ids[bandIndex]
   await store.getBandById(bandId)
+}
+
+const updateAlbum = async () => {
+  await store.updateAlbum(albumId.value)
+  ElNotification({
+    type: 'success',
+    message: 'Альбом обновлён'
+  })
+}
+
+const isPlaying = computed(() => playerStore.isPlaying)
+
+const isCurrentTrack = (track: any) => {
+  return playerStore.currentTrack?.id === `${album.value?.id}-${track.number}`
+}
+
+const parseDuration = (duration: string): number => {
+  const [minutes, seconds] = duration.split(':').map(Number)
+  return minutes * 60 + seconds
+}
+
+const playTrack = (track: Track) => {
+  const trackIndex = album.value.tracklist.findIndex((t: any) => t.number === track.number)
+  const playerTrack = albumTracks.value[trackIndex]
+
+  if (audioPlayer?.value) audioPlayer.value.playTrack(playerTrack, trackIndex)
+}
+
+const playAllTracks = () => {
+  playerStore.setPlaylist(albumTracks.value, 0)
+
+  if (audioPlayer?.value) {
+    audioPlayer.value.playTrack(albumTracks.value[0], 0)
+  }
+}
+
+const shuffleAllTracks = () => {
+  const shuffled = [...albumTracks.value].sort(() => Math.random() - 0.5)
+  playerStore.setPlaylist(shuffled, 0)
+
+  if (audioPlayer?.value) {
+    audioPlayer.value.playTrack(shuffled[0], 0)
+  }
+}
+
+const addToPlaylist = (track: any) => {
+  const trackIndex = album.value.tracklist.findIndex((t: any) => t.number === track.number)
+  playerStore.addToPlaylist(albumTracks.value[trackIndex])
 }
 
 watch(
@@ -132,6 +207,16 @@ onMounted(async () => {
         </div>
         <h3 class="text-gray-400 text-sm">Данные на {{ DateNormalizer.normalizeDate(album.updated_at) }}</h3>
       </div>
+      <button
+        v-if="store.userIsAdmin"
+        class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg flex items-center justify-center space-x-2 cursor-pointer"
+        @click="showEditDialog = true"
+      >
+        <el-icon>
+          <EditPen />
+        </el-icon>
+        <span>Редактировать</span>
+      </button>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -140,12 +225,30 @@ onMounted(async () => {
         <div class="bg-gray-800 rounded-lg border border-gray-700 py-3 px-3">
           <h2 class="text-2xl font-bold mb-4 text-red-400">Треклист</h2>
           <div class="space-y-2">
-            <div v-for="track in album.tracklist" :key="track.number">
+            <div v-for="track in album.tracklist" :key="track.id">
               <div
                 class="flex items-center justify-between p-1 hover:bg-gray-750 rounded transition-colors duration-150"
               >
-                <div class="flex items-center space-x-4">
+                <div class="flex items-center space-x-2">
+                  <button
+                    v-if="track.url"
+                    @click="playTrack(track)"
+                    class="text-gray-400 hover:text-red-400 cursor-pointer"
+                  >
+                    <svg
+                      v-if="isCurrentTrack(track) && isPlaying"
+                      class="w-5 h-5 text-white"
+                      fill="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
+                    </svg>
+                    <svg v-else class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M8 5v14l11-7L8 5z" />
+                    </svg>
+                  </button>
                   <span class="text-gray-400 w-6 text-center">{{ track.number }}</span>
+
                   <span>{{ track.title }}</span>
                 </div>
                 <div class="flex items-center gap-2">
@@ -217,4 +320,31 @@ onMounted(async () => {
       </div>
     </div>
   </div>
+
+  <Modal :model-value="showEditDialog" title="Редактирование альбома" @close="showEditDialog = false">
+    <el-form ref="formRef" :model="album" label-width="auto">
+      <el-form-item label="Название альбома" prop="title">
+        <el-input v-model="album.title" placeholder="Введите название альбома" />
+      </el-form-item>
+      <el-form-item label="Тип" prop="type">
+        <el-select v-model="album.type" placeholder="Выберите тип">
+          <el-option label="Full-length" value="Full-length" />
+          <el-option label="EP" value="EP" />
+          <el-option label="Single" value="Single" />
+          <el-option label="Demo" value="Demo" />
+          <el-option label="Live" value="Live" />
+          <el-option label="Compilation" value="Compilation" />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="Дата релиза" prop="release_date">
+        <el-input v-model="album.release_date" placeholder="Введите дату релиза" />
+      </el-form-item>
+      <el-form-item label="Лейбл" prop="label">
+        <el-input v-model="album.label" placeholder="Введите лейбл" />
+      </el-form-item>
+    </el-form>
+    <template #footer>
+      <el-button @click="updateAlbum">Сохранить</el-button>
+    </template>
+  </Modal>
 </template>

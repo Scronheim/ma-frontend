@@ -41,6 +41,10 @@ export default defineConfig({
       '/images': {
         target: 'https://www.metal-archives.ru',
         changeOrigin: true
+      },
+      '/music': {
+        target: 'https://www.metal-archives.ru',
+        changeOrigin: true
       }
     }
   }

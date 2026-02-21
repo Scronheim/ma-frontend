@@ -1,10 +1,10 @@
 <template>
   <div class="space-y-6">
-    <!-- Таблица результатов -->
-    <div v-if="!searchIsLoading" class="bg-gray-800 rounded-lg border border-gray-700 overflow-hidden">
-      <!-- Поиск по группе -->
+    <div
+      v-if="!searchIsLoading && searchResults.length"
+      class="bg-gray-800 rounded-lg border border-gray-700 overflow-hidden"
+    >
       <template v-if="isBandSearch">
-        <!-- Десктопная версия таблицы -->
         <div class="hidden md:block overflow-x-auto">
           <table class="w-full">
             <thead>
@@ -57,7 +57,6 @@
           </table>
         </div>
 
-        <!-- Мобильная версия (карточки) -->
         <div class="md:hidden">
           <div v-for="result in paginatedResults" :key="result.id" class="border-b border-gray-700 last:border-0">
             <div class="p-4 hover:bg-gray-750 transition-colors duration-150 cursor-pointer" @click="goToBand(result)">
@@ -78,9 +77,7 @@
           </div>
         </div>
       </template>
-      <!-- Поиск по альбому -->
       <template v-else>
-        <!-- Десктопная версия таблицы -->
         <div class="hidden md:block overflow-x-auto">
           <table class="w-full">
             <thead>
@@ -141,7 +138,6 @@
           </table>
         </div>
 
-        <!-- Мобильная версия (карточки) -->
         <div class="md:hidden">
           <div v-for="result in paginatedResults" :key="result.id" class="border-b border-gray-700 last:border-0">
             <div class="p-4 hover:bg-gray-750 transition-colors duration-150 cursor-pointer" @click="goToAlbum(result)">
@@ -162,7 +158,6 @@
           </div>
         </div>
       </template>
-      <!-- Пагинация -->
       <div
         class="flex flex-col md:flex-row md:items-center justify-between px-6 py-4 border-t border-gray-700 bg-gray-750"
       >
@@ -208,7 +203,6 @@
       </div>
     </div>
 
-    <!-- Пустые результаты -->
     <div v-if="searchResults.length === 0 && !searchIsLoading" class="text-center py-12">
       <div class="w-20 h-20 mx-auto mb-6 bg-gray-800 rounded-full flex items-center justify-center">
         <svg class="w-10 h-10 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -242,9 +236,7 @@ import { useRouter, useRoute } from 'vue-router'
 import axios from 'axios'
 import { ArrowLeftBold, ArrowRightBold } from '@element-plus/icons-vue'
 
-import { useStore } from '@/store/store'
-
-import type { SearchBandResult, SearchAlbumResult, Band, Album } from '@/types'
+import type { SearchBandResult, SearchAlbumResult, Band } from '@/types'
 
 const props = defineProps<{
   query?: string
@@ -252,7 +244,6 @@ const props = defineProps<{
 
 const router = useRouter()
 const route = useRoute()
-const store = useStore()
 
 const searchQuery = ref(props.query || '')
 const searchResults = ref<SearchBandResult[] | SearchAlbumResult[]>([])
@@ -262,7 +253,6 @@ const searchIsLoading = ref(false)
 
 const isBandSearch = computed(() => route.query.type === 'band')
 
-// Пагинированные результаты
 const paginatedResults = computed(() => {
   const start = (currentPage.value - 1) * pageSize.value
   const end = start + pageSize.value
@@ -273,9 +263,8 @@ const totalPages = computed(() => Math.ceil(searchResults.value.length / pageSiz
 const startIndex = computed(() => (currentPage.value - 1) * pageSize.value)
 const endIndex = computed(() => Math.min(startIndex.value + pageSize.value, searchResults.value.length))
 
-// Видимые страницы для пагинации
 const visiblePages = computed(() => {
-  const pages = []
+  const pages: number[] = []
   const maxVisible = 5
 
   if (totalPages.value <= maxVisible) {
@@ -302,7 +291,6 @@ const hasMorePages = computed(() => {
   return visiblePages.value.length > 0 && visiblePages.value[visiblePages.value.length - 1] < totalPages.value
 })
 
-// Методы
 const search = async () => {
   try {
     searchIsLoading.value = true
@@ -344,7 +332,6 @@ const goToPage = (page: number) => {
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
-// Наблюдаем за изменением запроса в URL
 watch(
   () => route.query.q,
   newQuery => {
@@ -355,7 +342,6 @@ watch(
   }
 )
 
-// Наблюдаем за изменением размера страницы
 watch(pageSize, () => {
   currentPage.value = 1
 })
@@ -363,9 +349,7 @@ watch(searchQuery, () => {
   search()
 })
 
-// Инициализация
 onMounted(async () => {
-  // Если есть поисковый запрос в URL, применяем его
   if (route.query.q) {
     searchQuery.value = route.query.q as string
   }
@@ -374,7 +358,6 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-/* Стили для мобильной таблицы */
 @media (max-width: 768px) {
   .mobile-table-row {
     display: flex;
