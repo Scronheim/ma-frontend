@@ -155,8 +155,8 @@ onMounted(async () => {
 </script>
 
 <template>
-  <LoadingSpinner :visible="store.albumIsLoading" />
-  <div class="space-y-6">
+  <LoadingSpinner v-if="store.albumIsLoading" :visible="store.albumIsLoading" />
+  <div class="space-y-6" v-else>
     <!-- Заголовок альбома -->
     <div class="flex flex-col md:flex-row items-start md:items-center space-y-4 md:space-y-0">
       <div class="flex-0">
