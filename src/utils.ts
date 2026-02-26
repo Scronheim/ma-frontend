@@ -171,98 +171,66 @@ export const countries: Country[] = [
 export const genres: Genre[] = [
   {
     id: 'black',
-    name: 'Black Metal',
-    color: '#6b21a8',
-    description: 'Мрачный, сырой, с высоким вокалом и бласт-битами'
+    name: 'Black Metal'
   },
   {
     id: 'death',
-    name: 'Death Metal',
-    color: '#7f1d1d',
-    description: 'Тяжелый, техничный, с гроулингом и низким строем'
+    name: 'Death Metal'
   },
   {
-    id: 'doom-stoner-sludge',
-    name: 'Doom/Stoner/Sludge',
-    color: '#854d0e',
-    description: 'Медленные темпы, тяжелые риффы, гипнотическая атмосфера'
+    id: 'doom',
+    name: 'Doom/Stoner/Sludge'
   },
   {
-    id: 'electronic-industrial',
-    name: 'Electronic/Industrial',
-    color: '#1e40af',
-    description: 'Синтезаторы, семплы, индустриальные ритмы'
+    id: 'electronic',
+    name: 'Electronic/Industrial'
   },
   {
-    id: 'experimental-avantgarde',
-    name: 'Experimental/Avant-garde',
-    color: '#9d174d',
-    description: 'Эксперименты с формой, нестандартные структуры'
+    id: 'avantgarde',
+    name: 'Experimental/Avant-garde'
   },
   {
-    id: 'folk-viking-pagan',
-    name: 'Folk/Viking/Pagan',
-    color: '#166534',
-    description: 'Народные инструменты, мифологическая тематика'
+    id: 'folk',
+    name: 'Folk/Viking/Pagan'
   },
   {
     id: 'gothic',
-    name: 'Gothic Metal',
-    color: '#4a044e',
-    description: 'Меланхоличный, с женским/мужским вокалом'
+    name: 'Gothic Metal'
   },
   {
-    id: 'grindcore',
-    name: 'Grindcore',
-    color: '#404040',
-    description: 'Ультра-быстрый, короткие песни, социальная тематика'
+    id: 'grind',
+    name: 'Grindcore'
   },
   {
     id: 'groove',
-    name: 'Groove Metal',
-    color: '#b45309',
-    description: 'Ритмичный, танцевальный, тяжелые грувы'
+    name: 'Groove Metal'
   },
   {
     id: 'heavy',
-    name: 'Heavy Metal',
-    color: '#b91c1c',
-    description: 'Классический метал, мощные риффы и мелодии'
+    name: 'Heavy Metal'
   },
   {
-    id: 'metalcore-deathcore',
-    name: 'Metalcore/Deathcore',
-    color: '#4c1d95',
-    description: 'Смесь метала и хардкора, брейкдауны'
+    id: 'metalcore',
+    name: 'Metalcore/Deathcore'
   },
   {
     id: 'power',
-    name: 'Power Metal',
-    color: '#1e3a8a',
-    description: 'Быстрый, эпичный, высокий вокал'
+    name: 'Power Metal'
   },
   {
-    id: 'progressive',
-    name: 'Progressive Metal',
-    color: '#065f46',
-    description: 'Сложные структуры, техничность, эксперименты'
+    id: 'prog',
+    name: 'Progressive Metal'
   },
   {
     id: 'speed',
-    name: 'Speed Metal',
-    color: '#9d174d',
-    description: 'Быстрый, агрессивный, между хеви и трэшем'
+    name: 'Speed Metal'
   },
   {
-    id: 'symphonic',
-    name: 'Symphonic Metal',
-    color: '#5b21b6',
-    description: 'Оркестровые аранжировки, оперный вокал'
+    id: 'orchestral',
+    name: 'Symphonic Metal'
   },
   {
     id: 'thrash',
-    name: 'Thrash Metal',
-    color: '#92400e',
-    description: 'Быстрый, агрессивный, социальные тексты'
+    name: 'Thrash Metal'
   }
 ]

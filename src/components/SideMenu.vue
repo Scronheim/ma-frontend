@@ -34,16 +34,21 @@ const register = () => {
     if (valid) store.register(form.value.username, form.value.password)
   })
 }
+
+const getRandomBand = async () => {
+  await store.getRandomBand()
+  emit('closeMenu')
+}
 </script>
 
 <template>
-  <div class="py-6">
+  <div class="py-5">
     <!-- Мои аккаунт -->
     <div class="px-4 mb-3">
       <template v-if="store.userIsAuth">
         <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Мой аккаунт</h3>
         <nav>
-          <router-link to="/profile" v-slot="{ isActive }">
+          <router-link to="/profile" v-slot="{ isActive }" @click="emit('closeMenu')">
             <div
               class="flex items-center space-x-2 py-3 rounded-lg transition-colors duration-200"
               :class="isActive ? 'bg-red-600 text-white' : 'text-gray-300 hover:bg-gray-700'"
@@ -53,7 +58,7 @@ const register = () => {
             </div>
           </router-link>
 
-          <router-link :to="{ path: '/profile', hash: '#bands' }">
+          <router-link :to="{ path: '/profile', hash: '#bands' }" @click="emit('closeMenu')">
             <div
               class="flex items-center space-x-2 py-3 rounded-lg transition-colors duration-200 text-gray-300 hover:bg-gray-700"
             >
@@ -65,7 +70,7 @@ const register = () => {
             </div>
           </router-link>
 
-          <router-link :to="{ path: '/profile', hash: '#albums' }">
+          <router-link :to="{ path: '/profile', hash: '#albums' }" @click="emit('closeMenu')">
             <div
               class="flex items-center space-x-2 py-3 rounded-lg transition-colors duration-200 text-gray-300 hover:bg-gray-700"
             >
@@ -126,19 +131,6 @@ const register = () => {
     </div>
     <!-- Навигация -->
     <div class="px-4">
-      <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Навигация</h3>
-      <nav class="mb-3">
-        <router-link to="/" v-slot="{ isActive }">
-          <div
-            class="flex items-center space-x-2 py-3 rounded-lg transition-colors duration-200"
-            :class="isActive ? 'bg-red-600 text-white' : 'text-gray-300 hover:bg-gray-700'"
-            @click="emit('closeMenu')"
-          >
-            <Icon icon="mdi:home" width="24" height="24" />
-            <span>Главная</span>
-          </div>
-        </router-link>
-      </nav>
       <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Группы</h3>
       <nav class="mb-3">
         <router-link to="/browse/letter" v-slot="{ isActive }" @click="emit('closeMenu')">
@@ -161,7 +153,7 @@ const register = () => {
           </div>
         </router-link>
 
-        <!-- <router-link to="/browse/genre" v-slot="{ isActive }" @click="emit('closeMenu')">
+        <router-link to="/browse/genre" v-slot="{ isActive }" @click="emit('closeMenu')">
           <div
             class="flex items-center space-x-2 py-3 rounded-lg transition-colors duration-200"
             :class="isActive ? 'bg-red-600 text-white' : 'text-gray-300 hover:bg-gray-700'"
@@ -169,10 +161,18 @@ const register = () => {
             <Icon icon="mdi:guitar-electric" width="24" height="24" />
             <span>По жанру</span>
           </div>
-        </router-link> -->
+        </router-link>
       </nav>
-      <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Разное</h3>
-      <nav>
+      <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Навигация</h3>
+      <nav class="mb-3">
+        <div
+          class="flex items-center space-x-2 py-3 rounded-lg transition-colors duration-200 text-gray-300 hover:bg-gray-700 cursor-pointer"
+          @click="getRandomBand"
+        >
+          <Icon v-if="store.randomBandIsLoading" icon="mdi:loading" width="24" height="24" class="animate-spin" />
+          <Icon v-else icon="mdi:help-circle" width="24" height="24" />
+          <span>Случайная группа</span>
+        </div>
         <router-link to="/artist/rip" v-slot="{ isActive }" @click="emit('closeMenu')">
           <div
             class="flex items-center space-x-2 py-3 rounded-lg transition-colors duration-200"
@@ -182,25 +182,15 @@ const register = () => {
             <span>R.I.P.</span>
           </div>
         </router-link>
-        <div
-          class="flex items-center space-x-2 py-3 rounded-lg transition-colors duration-200 text-gray-300 hover:bg-gray-700 cursor-pointer"
-          @click="store.getRandomBand"
-        >
-          <Icon v-if="store.randomBandIsLoading" icon="mdi:loading" width="24" height="24" class="animate-spin" />
-          <Icon v-else icon="mdi:help-circle" width="24" height="24" />
-          <span>Случайная группа</span>
-        </div>
       </nav>
     </div>
 
     <!-- Нижняя часть с доп. ссылками -->
-    <div class="px-4 mt-6 border-t border-gray-700">
-      <div class="mt-4 text-xs text-gray-500">
-        © 2025-2026 Encyclopaedia Metallum
-        <br />
-        Вся информация взята с сайта
-        <el-link href="https://www.metal-archives.com" target="_blank">www.metal-archives.com</el-link>
-      </div>
+    <div class="flex flex-col items-center justify-end px-4 border-t border-gray-700 text-xs text-gray-500">
+      © 2025-2026 Encyclopaedia Metallum
+      <br />
+      <p>Вся информация взята с сайта</p>
+      <el-link href="https://www.metal-archives.com" target="_blank">www.metal-archives.com</el-link>
     </div>
   </div>
 </template>

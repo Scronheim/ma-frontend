@@ -22,8 +22,6 @@ const pageSize = ref(500)
 const total = ref(0)
 
 const totalPages = computed(() => Math.ceil(total.value / pageSize.value))
-const startIndex = computed(() => (currentPage.value - 1) * pageSize.value)
-const endIndex = computed(() => Math.min(startIndex.value + pageSize.value, foundedBands.value.length))
 const visiblePages = computed(() => {
   const pages: number[] = []
   const maxVisible = 5
@@ -182,9 +180,7 @@ watch(selectedLetter, () => {
       </div>
     </div>
     <div v-if="selectedLetter" class="flex flex-col md:flex-row md:items-center justify-between bg-gray-750">
-      <div class="text-gray-400 mb-4 md:mb-0">
-        Показано {{ startIndex + 1 }}-{{ endIndex }} из {{ total }} результатов
-      </div>
+      <div class="text-gray-400 mb-4 md:mb-0">{{ total }} результатов</div>
 
       <div class="flex items-center justify-center space-x-2">
         <button

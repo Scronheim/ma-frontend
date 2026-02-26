@@ -219,6 +219,4 @@ export interface Country {
 export interface Genre {
   id: string
   name: string
-  color?: string
-  description?: string
 }

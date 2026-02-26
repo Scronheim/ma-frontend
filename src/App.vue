@@ -127,7 +127,7 @@ onMounted(() => {
             class="relative h-full bg-gray-800 border-r border-gray-700 shadow-2xl overflow-y-auto"
           >
             <div class="p-4">
-              <div class="flex items-center justify-between mb-6">
+              <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-2" @click="router.push('/')">
                   <div class="w-8 h-8 bg-red-600 rounded-full flex items-center justify-center">
                     <span class="text-white font-bold text-lg">M</span>
@@ -143,7 +143,7 @@ onMounted(() => {
                   </svg>
                 </button>
               </div>
-              <SideMenu @item-click="mobileMenuOpen = false" />
+              <SideMenu @close-menu="mobileMenuOpen = false" />
             </div>
           </el-aside>
         </div>
@@ -180,7 +180,7 @@ body {
 
 /* Стили для скроллбара */
 ::-webkit-scrollbar {
-  width: 10px;
+  width: 5px;
 }
 
 ::-webkit-scrollbar-track {

@@ -241,7 +241,7 @@ onMounted(async () => {
                 >
                   Нет добавленных составов
                 </div>
-                <div class="flex border-b border-gray-700">
+                <div v-else class="flex border-b border-gray-700">
                   <button
                     v-for="tab in membersTabs"
                     :key="tab.id"

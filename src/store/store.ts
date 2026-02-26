@@ -65,6 +65,11 @@ export const useStore = defineStore('store', () => {
     }
   }
 
+  const getBandByGenre = async (genre: string, page: number = 1) => {
+    const { data } = await axios.get(`/api/band/search/genre/${genre}?page=${page}`)
+    return data
+  }
+
   const getBandByCountry = async (countryCode: string, page: number = 1) => {
     const { data } = await axios.get(`/api/band/search/country/${countryCode}?page=${page}`)
     return data
@@ -277,6 +282,7 @@ export const useStore = defineStore('store', () => {
     userIsAdmin,
     getRandomBand,
     getBandById,
+    getBandByGenre,
     getBandByCountry,
     getBandByLetter,
     getAlbumById,
