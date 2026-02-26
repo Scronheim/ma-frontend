@@ -1,32 +1,31 @@
 <template>
-  <div class="flex items-center flex-col gap-2">
-    <el-input
-      v-model="searchQuery"
+  <div class="flex gap-2">
+    <input
       placeholder="Поиск..."
-      :prefix-icon="Search"
-      class="w-full bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent"
+      class="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-600 focus:border-transparent"
       @keypress.enter="performSearch"
+      v-model.number="searchQuery"
+    />
+    <select
+      v-model="selectedSearchField"
+      class="px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-600 focus:border-transparent"
     >
-      <template #append>
-        <el-select v-model="selectedSearchField" style="width: 100px">
-          <el-option label="Группа" value="band" />
-          <el-option label="Альбом" value="album" />
-        </el-select>
-      </template>
-    </el-input>
-    <div>
-      <el-button @click="performSearch" :loading="store.bandIsLoading" type="primary">
-        Искать в Metal Archives
-      </el-button>
-      <el-button @click="getRandomBand" :loading="store.bandIsLoading" type="info">Мне повезёт</el-button>
-    </div>
+      <option value="band">Группа</option>
+      <option value="album">Альбом</option>
+    </select>
+    <button
+      @click="performSearch"
+      :disabled="store.bandIsLoading"
+      class="px-4 py-2 bg-gray-600 hover:bg-red-700 text-white rounded-lg cursor-pointer"
+    >
+      Искать
+    </button>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { Search } from '@element-plus/icons-vue'
 
 import { useStore } from '@/store/store'
 
@@ -34,13 +33,9 @@ const emits = defineEmits(['closeMenu'])
 
 const router = useRouter()
 const store = useStore()
+
 const searchQuery = ref('')
 const selectedSearchField = ref('band')
-
-const getRandomBand = async () => {
-  await store.getRandomBand()
-  emits('closeMenu')
-}
 
 const performSearch = () => {
   if (searchQuery.value.trim()) {
@@ -48,11 +43,4 @@ const performSearch = () => {
     router.push({ path: '/search', query: { type: selectedSearchField.value, q: searchQuery.value } })
   }
 }
-
-// watch(
-//   () => route.path,
-//   () => {
-//     searchQuery.value = ''
-//   }
-// )
 </script>

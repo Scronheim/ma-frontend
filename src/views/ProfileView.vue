@@ -1,41 +1,39 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { EditPen } from '@element-plus/icons-vue'
+import { ElNotification } from 'element-plus'
 
 import { useStore } from '@/store/store'
 
 import BandCardMini from '../components/BandCardMini.vue'
 import AlbumCardMini from '../components/AlbumCardMini.vue'
 import Modal from '../components/Modal.vue'
+import TextInput from '../components/inputs/TextInput.vue'
+import SelectInput from '../components/inputs/SelectInput.vue'
 
 import type { ShortBand, ShortAlbum, User } from '../types'
-import { ElNotification } from 'element-plus'
+
+import { DEFAULT_USER } from '@/utils/consts'
 
 const route = useRoute()
 const router = useRouter()
 
 const store = useStore()
 
-const activeTab = ref('bands')
+const activeTab = ref(route.hash ? route.hash : '#bands')
 const userEditDialog = ref<boolean>(false)
-const otherUser = ref<User>({
-  username: '',
-  real_name: null,
-  country: null,
-  gender: null,
-  avatar_color: 'red',
-  favorite_genre: null,
-  favorite_bands: [],
-  favorite_albums: [],
-  role: 'user'
-})
+const otherUser = ref<User>(DEFAULT_USER)
 const predefineColors = ref(['#FF4D4D', '#FFB84D', '#FFE64D', '#4DFF4D', '#4DFFE6', '#4D4DFF', '#B84DFF'])
+const genders = ref([
+  { title: 'Мужской', value: 'Мужской' },
+  { title: 'Женский', value: 'Женский' }
+])
 
 const user = computed(() => (route.params.username ? otherUser.value : store.user))
 const tabs = computed(() => [
-  { id: 'bands', label: 'Избранные группы', count: user.value.favorite_bands.length },
-  { id: 'albums', label: 'Избранные альбомы', count: user.value.favorite_albums.length }
+  { id: '#bands', label: 'Избранные группы', count: user.value.favorite_bands.length },
+  { id: '#albums', label: 'Избранные альбомы', count: user.value.favorite_albums.length }
 ])
 
 const formatDate = (dateString: string) => {
@@ -69,6 +67,10 @@ const removeAlbumFromFavorite = async (index: number): Promise<void> => {
   store.user.favorite_albums.splice(index, 1)
   await store.updateMe()
 }
+
+watch(route, () => {
+  activeTab.value = route.hash
+})
 
 onMounted(async () => {
   if (route.params.username) {
@@ -132,7 +134,7 @@ onMounted(async () => {
       </div>
 
       <div class="p-6">
-        <div v-if="activeTab === 'bands'" class="space-y-4">
+        <div v-if="activeTab === '#bands'" class="space-y-4">
           <div v-if="user.favorite_bands.length === 0" class="text-center py-8 text-gray-400">
             Нет добавленых избранных групп
           </div>
@@ -147,7 +149,7 @@ onMounted(async () => {
           </div>
         </div>
 
-        <div v-if="activeTab === 'albums'" class="space-y-4">
+        <div v-if="activeTab === '#albums'" class="space-y-4">
           <div v-if="user.favorite_albums.length === 0" class="text-center py-8 text-gray-400">
             Нет добавленых избранных альбомов
           </div>
@@ -180,24 +182,31 @@ onMounted(async () => {
   <modal :model-value="userEditDialog" title="Редактирование пользователя" @close="userEditDialog = false">
     <el-form ref="formRef" :model="user" label-width="auto">
       <el-form-item label="Имя пользователя" prop="username">
-        <el-input v-model="user.username" readonly />
+        <TextInput :model-value="user.username" placeholder="Введите имя пользователя" readonly />
       </el-form-item>
       <el-form-item label="Реальное имя" prop="real_name">
-        <el-input v-model="user.real_name" placeholder="Введите настоящее имя" />
+        <TextInput
+          :model-value="user.real_name"
+          placeholder="Введите настоящее имя"
+          @update:model-value="user.real_name = $event"
+        />
       </el-form-item>
       <el-form-item label="Страна" prop="country">
-        <el-select v-model="user.country" placeholder="Выберите страну">
-          <el-option v-for="country in store.countryList" :label="country" :value="country" />
-        </el-select>
+        <SelectInput
+          :model-value="user.country"
+          :items="store.countryListForSelect"
+          @update:model-value="user.country = $event"
+        />
       </el-form-item>
       <el-form-item label="Пол" prop="gender">
-        <el-select v-model="user.gender" placeholder="Выберите пол">
-          <el-option label="Мужской" value="Мужской" />
-          <el-option label="Женский" value="Женский" />
-        </el-select>
+        <SelectInput :model-value="user.gender" :items="genders" @update:model-value="user.gender = $event" />
       </el-form-item>
       <el-form-item label="Любимый жанр" prop="favorite_genre">
-        <el-input v-model="user.favorite_genre" placeholder="Введите любимый жанр" />
+        <TextInput
+          :model-value="user.favorite_genre"
+          placeholder="Введите любимый жанр"
+          @update:model-value="user.favorite_genre = $event"
+        />
       </el-form-item>
       <el-form-item label="Цвет аватара" prop="avatar_color">
         <el-color-picker :predefine="predefineColors" v-model="user.avatar_color" />

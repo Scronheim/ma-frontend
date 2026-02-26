@@ -22,7 +22,7 @@ const route = useRoute()
     @click="$emit('click', band)"
   >
     <button
-      v-if="!route.params.username"
+      v-if="route.name === 'profile' && !route.params.username"
       @click.stop="$emit('remove', band)"
       class="absolute top-2 right-2 w-8 h-8 bg-gray-700 hover:bg-red-600 rounded-full flex items-center justify-center cursor-pointer"
     >
@@ -32,10 +32,15 @@ const route = useRoute()
     </button>
     <div class="flex items-start space-x-3">
       <div class="w-14 h-14 bg-gray-700 rounded shrink-0 flex items-center justify-center overflow-hidden">
-        <img v-if="band.logo_url" :src="band.logo_url" :alt="band.name" class="w-full h-full object-cover" />
+        <img
+          v-if="band.logo_url"
+          v-lazy.container="band.logo_url"
+          :alt="band.name"
+          class="w-full h-full object-cover"
+        />
         <img
           v-else-if="!band.logo_url && band.photo_url"
-          :src="band.photo_url"
+          v-lazy.container="band.logo_url"
           :alt="band.name"
           class="w-full h-full object-cover"
         />

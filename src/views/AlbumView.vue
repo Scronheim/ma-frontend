@@ -3,7 +3,7 @@ import { ref, computed, onMounted, watch, inject } from 'vue'
 import { useRoute } from 'vue-router'
 import dayjs from 'dayjs'
 import durationPlugin from 'dayjs/plugin/duration'
-import { Star, StarFilled, EditPen } from '@element-plus/icons-vue'
+import { Star, StarFilled, EditPen, Check } from '@element-plus/icons-vue'
 
 import { useStore } from '@/store/store'
 import { usePlayerStore } from '@/store/player'
@@ -13,7 +13,7 @@ import Modal from '@/components/Modal.vue'
 
 import DateNormalizer from '@/utils/dateNormalizer'
 
-import type { Track } from '@/types'
+import type { Rating, Track } from '@/types'
 import { PlayerTrack } from '@/components/AudioPlayer.vue'
 import { ElNotification } from 'element-plus'
 
@@ -29,7 +29,7 @@ const showEditDialog = ref(false)
 const audioPlayer = inject('audioPlayer')
 
 const album = computed(() => store.currentAlbum)
-const albumId = computed(() => route.params.id)
+const albumId = computed(() => route.params.id as string)
 const albumTotalDuration = computed((): string => {
   const totalSeconds = album.value?.tracklist.reduce((total, track) => {
     const [minutes, seconds] = track.duration.split(':').map(i => parseInt(i))
@@ -58,6 +58,12 @@ const albumTracks = computed<PlayerTrack[]>(() => {
     audioUrl: track.url
   }))
 })
+const albumUserRating = computed((): Rating => {
+  const rating = store.user.albums_ratings.find(b => b.id === parseInt(albumId.value))
+  if (rating) return rating
+  return { id: parseInt(albumId.value), rating: 0 }
+})
+const isPlaying = computed(() => playerStore.isPlaying)
 
 const toggleFavoriteAlbum = async () => {
   if (albumUserFavoriteIndex.value > -1) store.user.favorite_albums.splice(albumUserFavoriteIndex.value, 1)
@@ -73,13 +79,27 @@ const getBandById = async () => {
 
 const updateAlbum = async () => {
   await store.updateAlbum(albumId.value)
+  showEditDialog.value = false
   ElNotification({
     type: 'success',
     message: 'Альбом обновлён'
   })
 }
 
-const isPlaying = computed(() => playerStore.isPlaying)
+const changeAlbumRating = async (rating: number): Promise<void> => {
+  if (albumUserFavoriteIndex.value > -1) store.user.albums_ratings[albumUserFavoriteIndex.value].rating = rating
+  else if (rating === 0) store.user.bands_ratings.splice(albumUserFavoriteIndex.value, 1)
+  else store.user.albums_ratings.push({ id: parseInt(albumId.value), rating })
+  await store.updateMe()
+}
+
+const saveTrack = async () => {
+  await store.updateAlbum(albumId.value)
+  ElNotification({
+    type: 'success',
+    message: 'Трек сохранён'
+  })
+}
 
 const isCurrentTrack = (track: any) => {
   return playerStore.currentTrack?.id === `${album.value?.id}-${track.number}`
@@ -223,63 +243,89 @@ onMounted(async () => {
       <div class="lg:col-span-2 space-y-6">
         <!-- Треклист -->
         <div class="bg-gray-800 rounded-lg border border-gray-700 py-3 px-3">
-          <h2 class="text-2xl font-bold mb-4 text-red-400">Треклист</h2>
-          <div class="space-y-2">
-            <div v-for="track in album.tracklist" :key="track.id">
-              <div
-                class="flex items-center justify-between p-1 hover:bg-gray-750 rounded transition-colors duration-150"
-              >
-                <div class="flex items-center space-x-2">
-                  <button
-                    v-if="track.url"
-                    @click="playTrack(track)"
-                    class="text-gray-400 hover:text-red-400 cursor-pointer"
+          <div class="flex justify-between">
+            <h2 class="text-2xl font-bold mb-4 text-red-400">Треклист</h2>
+            <div v-if="store.userIsAuth" class="flex items-start">
+              <el-rate clearable allow-half v-model.number="albumUserRating.rating" @change="changeAlbumRating" />
+            </div>
+          </div>
+          <div v-for="track in album.tracklist" :key="track.id">
+            <div class="flex items-center justify-between p-1 hover:bg-gray-750 rounded transition-colors duration-150">
+              <div class="flex items-center space-x-2">
+                <button
+                  v-if="track.url"
+                  @click="playTrack(track)"
+                  class="text-gray-400 hover:text-red-400 cursor-pointer"
+                >
+                  <svg
+                    v-if="isCurrentTrack(track) && isPlaying"
+                    class="w-5 h-5 text-white"
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
                   >
-                    <svg
-                      v-if="isCurrentTrack(track) && isPlaying"
-                      class="w-5 h-5 text-white"
-                      fill="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
-                    </svg>
-                    <svg v-else class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M8 5v14l11-7L8 5z" />
-                    </svg>
-                  </button>
-                  <span class="text-gray-400 w-6 text-center">{{ track.number }}</span>
-
-                  <span>{{ track.title }}</span>
-                </div>
-                <div class="flex items-center gap-2">
-                  <el-button
-                    v-if="typeof track.id === 'number' && !track.lyrics"
-                    type="primary"
-                    text
-                    size="small"
-                    :loading="store.lyricsIsLoading"
-                    @click="store.getLyricsById(track, album.id)"
-                  >
-                    Загрузить текст
-                  </el-button>
-                  <el-button
-                    v-else-if="track.lyrics"
-                    type="primary"
-                    text
-                    size="small"
-                    @click="track.show_lyrics = !track.show_lyrics"
-                  >
-                    {{ track.show_lyrics ? 'Скрыть текст' : 'Показать текст' }}
-                  </el-button>
-                  <span v-else-if="typeof track.id === 'string'" class="text-gray-400 text-sm mr-3">
-                    {{ track.id }}
-                  </span>
-                  <span class="text-gray-400">{{ track.duration }}</span>
-                </div>
+                    <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
+                  </svg>
+                  <svg v-else class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M8 5v14l11-7L8 5z" />
+                  </svg>
+                </button>
+                <el-input
+                  v-if="track.is_edit"
+                  type="number"
+                  v-model.number="track.number"
+                  placeholder="Введите номер трека"
+                  style="width: 130px"
+                />
+                <span v-else class="text-gray-400 w-6 text-center">{{ track.number }}</span>
+                <template v-if="track.is_edit">
+                  <el-input v-model="track.title" placeholder="Введите название трека" />
+                  <el-input v-model="track.url" placeholder="Введите ссылку на трек" />
+                </template>
+                <span v-else>{{ track.title }}</span>
               </div>
-              <div v-show="track.show_lyrics">
-                <span class="overflow-auto" v-html="track.lyrics" />
+              <div class="flex items-center gap-2">
+                <el-button
+                  v-if="typeof track.id === 'number' && !track.lyrics"
+                  type="primary"
+                  text
+                  size="small"
+                  :loading="store.lyricsIsLoading"
+                  @click="store.getLyricsById(track, album.id)"
+                >
+                  Загрузить текст
+                </el-button>
+                <el-button
+                  v-else-if="track.lyrics"
+                  type="primary"
+                  text
+                  size="small"
+                  @click="track.show_lyrics = !track.show_lyrics"
+                >
+                  {{ track.show_lyrics ? 'Скрыть текст' : 'Показать текст' }}
+                </el-button>
+                <span v-else-if="typeof track.id === 'string'" class="text-gray-400 text-sm mr-3">
+                  {{ track.id }}
+                </span>
+                <el-input
+                  v-if="track.is_edit"
+                  v-model="track.duration"
+                  placeholder="Введите длительность трека"
+                  style="width: 90px"
+                />
+                <span v-else class="text-gray-400">{{ track.duration }}</span>
+                <el-button
+                  v-if="!track.is_edit && store.userIsAdmin"
+                  :icon="EditPen"
+                  circle
+                  text
+                  type="primary"
+                  @click="track.is_edit = !track.is_edit"
+                />
+                <el-button v-else :icon="Check" circle text type="success" @click="saveTrack" />
               </div>
+            </div>
+            <div v-show="track.show_lyrics">
+              <span class="overflow-auto" v-html="track.lyrics" />
             </div>
           </div>
           <div class="mt-4 pt-4 border-t border-gray-700 text-gray-400">
@@ -341,6 +387,9 @@ onMounted(async () => {
       </el-form-item>
       <el-form-item label="Лейбл" prop="label">
         <el-input v-model="album.label" placeholder="Введите лейбл" />
+      </el-form-item>
+      <el-form-item label="Ссылка на обложку" prop="cover_url">
+        <el-input v-model="album.cover_url" placeholder="Введите ссылку" />
       </el-form-item>
     </el-form>
     <template #footer>

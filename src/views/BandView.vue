@@ -104,7 +104,7 @@ onMounted(async () => {
           <span v-else class="text-3xl">🎸</span>
         </div>
         <div>
-          <div class="flex gap-2">
+          <div class="flex items-center gap-2">
             <h1 class="text-3xl md:text-4xl font-bold">{{ band.name }}</h1>
             <el-tooltip
               v-if="store.userIsAuth"
@@ -142,7 +142,7 @@ onMounted(async () => {
                 <el-rate clearable allow-half v-model.number="bandUserRating.rating" @change="changeBandRating" />
               </div>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="grid grid-cols-2 gap-4">
               <div>
                 <h3 class="text-gray-400 text-sm uppercase tracking-wider">Жанр</h3>
                 <p>{{ band.genres }}</p>
@@ -217,7 +217,7 @@ onMounted(async () => {
                               v-if="album.cover_loading"
                               class="w-8 h-8 border-4 border-red-600 border-t-transparent rounded-full animate-spin mx-auto"
                             />
-                            <img v-else-if="album.cover_url && !album.cover_loading" :src="album.cover_url" />
+                            <img v-else-if="album.cover_url && !album.cover_loading" v-lazy="album.cover_url" />
                             <span v-else>💿</span>
                           </div>
                           <span>{{ album.title }}</span>

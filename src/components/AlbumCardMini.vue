@@ -29,7 +29,7 @@ defineEmits<{
     <div class="flex items-start space-x-3">
       <!-- Обложка альбома -->
       <div class="w-14 h-14 bg-gray-700 rounded shrink-0 flex items-center justify-center overflow-hidden">
-        <img v-if="album.cover_url" :src="album.cover_url" :alt="album.title" class="w-full h-full object-cover" />
+        <img v-if="album.cover_url" v-lazy="album.cover_url" :alt="album.title" class="w-full h-full object-cover" />
         <span v-else class="text-xl">💿</span>
       </div>
 

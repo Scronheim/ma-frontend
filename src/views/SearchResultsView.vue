@@ -1,3 +1,145 @@
+<script setup lang="ts">
+import { ref, computed, onMounted, watch } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
+import axios from 'axios'
+import { ArrowLeftBold, ArrowRightBold } from '@element-plus/icons-vue'
+
+import type { SearchBandResult, SearchAlbumResult, Band } from '@/types'
+
+const props = defineProps<{
+  query?: string
+}>()
+
+const router = useRouter()
+const route = useRoute()
+
+const searchQuery = ref(props.query || '')
+const searchResults = ref<SearchBandResult[] | SearchAlbumResult[]>([])
+const currentPage = ref(1)
+const pageSize = ref(25)
+const searchIsLoading = ref(false)
+
+const isBandSearch = computed(() => route.query.type === 'band')
+
+const paginatedResults = computed(() => {
+  const start = (currentPage.value - 1) * pageSize.value
+  const end = start + pageSize.value
+  return searchResults.value.slice(start, end)
+})
+
+const totalPages = computed(() => Math.ceil(searchResults.value.length / pageSize.value))
+const startIndex = computed(() => (currentPage.value - 1) * pageSize.value)
+const endIndex = computed(() => Math.min(startIndex.value + pageSize.value, searchResults.value.length))
+
+const visiblePages = computed(() => {
+  const pages: number[] = []
+  const maxVisible = 5
+
+  if (totalPages.value <= maxVisible) {
+    for (let i = 1; i <= totalPages.value; i++) {
+      pages.push(i)
+    }
+  } else {
+    let start = Math.max(1, currentPage.value - 2)
+    let end = Math.min(totalPages.value, start + maxVisible - 1)
+
+    if (end - start + 1 < maxVisible) {
+      start = Math.max(1, end - maxVisible + 1)
+    }
+
+    for (let i = start; i <= end; i++) {
+      pages.push(i)
+    }
+  }
+
+  return pages
+})
+
+const hasMorePages = computed(() => {
+  return visiblePages.value.length > 0 && visiblePages.value[visiblePages.value.length - 1] < totalPages.value
+})
+
+const search = async () => {
+  try {
+    searchIsLoading.value = true
+    const { data } = await axios.get(`/api/${route.query.type}/search?query=${searchQuery.value}`)
+    searchResults.value = data.data
+  } finally {
+    searchIsLoading.value = false
+  }
+}
+
+const goToBand = async (band: Band) => {
+  try {
+    searchIsLoading.value = true
+    router.push(`/bands/${band.name_slug}/${band.id}`)
+  } finally {
+    searchIsLoading.value = false
+  }
+}
+const goToAlbum = (album: SearchAlbumResult) => {
+  router.push(`/albums/${album.band_name_slug}/${album.title_slug}/${album.id}`)
+}
+
+const previousPage = () => {
+  if (currentPage.value > 1) {
+    currentPage.value--
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+}
+
+const nextPage = () => {
+  if (currentPage.value < totalPages.value) {
+    currentPage.value++
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+}
+
+const goToPage = (page: number) => {
+  currentPage.value = page
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+}
+
+watch(
+  () => route.query.q,
+  newQuery => {
+    if (newQuery !== undefined) {
+      searchQuery.value = newQuery as string
+      currentPage.value = 1
+    }
+  }
+)
+
+watch(pageSize, () => {
+  currentPage.value = 1
+})
+watch(searchQuery, () => {
+  search()
+})
+
+onMounted(async () => {
+  if (route.query.q) {
+    searchQuery.value = route.query.q as string
+  }
+  await search()
+})
+</script>
+
+<style scoped>
+@media (max-width: 768px) {
+  .mobile-table-row {
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
+    border-bottom: 1px solid #374151;
+  }
+
+  .mobile-table-row:last-child {
+    border-bottom: none;
+  }
+}
+</style>
+
 <template>
   <div class="space-y-6">
     <div
@@ -43,7 +185,7 @@
                 <td class="py-4 px-6">
                   <div class="flex flex-wrap gap-1">
                     <span class="px-2 py-1 bg-gray-700 rounded text-xs">
-                      {{ result.genre }}
+                      {{ result.genres }}
                     </span>
                   </div>
                 </td>
@@ -68,7 +210,7 @@
                   </div>
                   <div class="flex flex-wrap gap-1 mb-3">
                     <span class="px-2 py-1 bg-gray-700 rounded text-xs">
-                      {{ result.genre }}
+                      {{ result.genres }}
                     </span>
                   </div>
                 </div>
@@ -229,145 +371,3 @@
     </div>
   </div>
 </template>
-
-<script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
-import axios from 'axios'
-import { ArrowLeftBold, ArrowRightBold } from '@element-plus/icons-vue'
-
-import type { SearchBandResult, SearchAlbumResult, Band } from '@/types'
-
-const props = defineProps<{
-  query?: string
-}>()
-
-const router = useRouter()
-const route = useRoute()
-
-const searchQuery = ref(props.query || '')
-const searchResults = ref<SearchBandResult[] | SearchAlbumResult[]>([])
-const currentPage = ref(1)
-const pageSize = ref(25)
-const searchIsLoading = ref(false)
-
-const isBandSearch = computed(() => route.query.type === 'band')
-
-const paginatedResults = computed(() => {
-  const start = (currentPage.value - 1) * pageSize.value
-  const end = start + pageSize.value
-  return searchResults.value.slice(start, end)
-})
-
-const totalPages = computed(() => Math.ceil(searchResults.value.length / pageSize.value))
-const startIndex = computed(() => (currentPage.value - 1) * pageSize.value)
-const endIndex = computed(() => Math.min(startIndex.value + pageSize.value, searchResults.value.length))
-
-const visiblePages = computed(() => {
-  const pages: number[] = []
-  const maxVisible = 5
-
-  if (totalPages.value <= maxVisible) {
-    for (let i = 1; i <= totalPages.value; i++) {
-      pages.push(i)
-    }
-  } else {
-    let start = Math.max(1, currentPage.value - 2)
-    let end = Math.min(totalPages.value, start + maxVisible - 1)
-
-    if (end - start + 1 < maxVisible) {
-      start = Math.max(1, end - maxVisible + 1)
-    }
-
-    for (let i = start; i <= end; i++) {
-      pages.push(i)
-    }
-  }
-
-  return pages
-})
-
-const hasMorePages = computed(() => {
-  return visiblePages.value.length > 0 && visiblePages.value[visiblePages.value.length - 1] < totalPages.value
-})
-
-const search = async () => {
-  try {
-    searchIsLoading.value = true
-    const { data } = await axios.get(`/api/${route.query.type}/search?query=${searchQuery.value}`)
-    searchResults.value = data.data
-  } finally {
-    searchIsLoading.value = false
-  }
-}
-
-const goToBand = async (band: Band) => {
-  try {
-    searchIsLoading.value = true
-    router.push(`/bands/${band.name_slug}/${band.id}`)
-  } finally {
-    searchIsLoading.value = false
-  }
-}
-const goToAlbum = (album: SearchAlbumResult) => {
-  router.push(`/albums/${album.band_name_slug}/${album.title_slug}/${album.id}`)
-}
-
-const previousPage = () => {
-  if (currentPage.value > 1) {
-    currentPage.value--
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }
-}
-
-const nextPage = () => {
-  if (currentPage.value < totalPages.value) {
-    currentPage.value++
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }
-}
-
-const goToPage = (page: number) => {
-  currentPage.value = page
-  window.scrollTo({ top: 0, behavior: 'smooth' })
-}
-
-watch(
-  () => route.query.q,
-  newQuery => {
-    if (newQuery !== undefined) {
-      searchQuery.value = newQuery as string
-      currentPage.value = 1
-    }
-  }
-)
-
-watch(pageSize, () => {
-  currentPage.value = 1
-})
-watch(searchQuery, () => {
-  search()
-})
-
-onMounted(async () => {
-  if (route.query.q) {
-    searchQuery.value = route.query.q as string
-  }
-  await search()
-})
-</script>
-
-<style scoped>
-@media (max-width: 768px) {
-  .mobile-table-row {
-    display: flex;
-    flex-direction: column;
-    padding: 1rem;
-    border-bottom: 1px solid #374151;
-  }
-
-  .mobile-table-row:last-child {
-    border-bottom: none;
-  }
-}
-</style>

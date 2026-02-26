@@ -46,7 +46,18 @@ export interface Track {
   cd_number: number | null
   side: number | null
   show_lyrics: boolean | null
+  is_edit?: boolean
   url: string | null
+}
+
+export interface RipMember {
+  id: number
+  fullname: string
+  fullname_slug: string
+  country: string
+  bands: { id: number; band_name: string; band_name_slug: string }[]
+  date_of_death: string
+  cause_of_death: string
 }
 
 export interface Member {
@@ -99,8 +110,11 @@ export interface SearchBandResult {
   id: number
   name: string
   name_slug: string
-  genre: string
+  genres: string
   country: string
+}
+export interface SearchBandByLetterResult extends SearchBandResult {
+  status: string
 }
 
 export interface SearchAlbumResult {
@@ -183,15 +197,28 @@ export interface Rating {
 
 export interface User {
   username: string
-  real_name: string | null
-  gender: string | null
-  country: string | null
+  real_name: string
+  gender: string
+  country: string
   bands_ratings: Rating[]
   albums_ratings: Rating[]
-  favorite_genre: string | null
+  favorite_genre: string
   favorite_bands: ShortBand[]
   favorite_albums: ShortAlbum[]
   role: 'admin' | 'moderator' | 'user'
   avatar_color: string
   created_at?: string
+}
+
+export interface Country {
+  name: string
+  nameEn: string
+  code: string
+}
+
+export interface Genre {
+  id: string
+  name: string
+  color?: string
+  description?: string
 }

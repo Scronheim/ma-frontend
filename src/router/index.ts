@@ -7,6 +7,10 @@ import StatsView from '../views/StatsView.vue'
 import MemberView from '../views/MemberView.vue'
 import AuthView from '../views/AuthView.vue'
 import ProfileView from '../views/ProfileView.vue'
+import AlphabetSearchView from '../views/AlphabetSearchView.vue'
+import CountrySearchView from '../views/CountrySearchView.vue'
+import GenreSearchView from '../views/GenreSearchView.vue'
+import ArtistRip from '../views/ArtistRip.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -37,6 +41,11 @@ const router = createRouter({
       component: MemberView
     },
     {
+      path: '/artist/rip',
+      name: 'artists rip',
+      component: ArtistRip
+    },
+    {
       path: '/search',
       name: 'search',
       component: SearchResultsView,
@@ -54,8 +63,23 @@ const router = createRouter({
     },
     {
       path: '/profile/:username?',
-      name: 'Profile',
+      name: 'profile',
       component: ProfileView
+    },
+    {
+      path: '/browse/letter',
+      name: 'alphabet-search',
+      component: AlphabetSearchView
+    },
+    {
+      path: '/browse/country',
+      name: 'country-search',
+      component: CountrySearchView
+    },
+    {
+      path: '/browse/genre',
+      name: 'genre-search',
+      component: GenreSearchView
     }
   ],
   scrollBehavior() {

@@ -6,7 +6,8 @@ import { breakpointsTailwind, useBreakpoints } from '@vueuse/core'
 import { ElNotification } from 'element-plus'
 
 import { DEFAULT_BAND, DEFAULT_ALBUM, DEFAULT_BAND_MEMBER, DEFAULT_USER } from '@/utils/consts'
-import countries from '@/utils/countries'
+import countriesArray from '@/utils/countries'
+import { countries } from '@/utils'
 
 import type { Band, Album, Track, SSEResponse, AllStatInfo, Member, User } from '@/types'
 
@@ -18,7 +19,7 @@ export const useStore = defineStore('store', () => {
   const currentAlbum = ref<Album>(DEFAULT_ALBUM)
   const currentMember = ref<Member>(DEFAULT_BAND_MEMBER)
   const user = ref<User>(DEFAULT_USER)
-  const countryList = ref(countries)
+  const countryList = ref(countriesArray)
   const token = ref('')
   const stats = ref<AllStatInfo>()
   const bandIsLoading = ref<boolean>(false)
@@ -33,6 +34,11 @@ export const useStore = defineStore('store', () => {
   const albumsExceptCurrent = computed(() => currentBand.value.discography.filter(a => a.id !== currentAlbum.value.id))
   const userIsAuth = computed(() => token.value)
   const userIsAdmin = computed(() => user.value.role === 'admin')
+  const countryListForSelect = computed(() => {
+    return countries.flatMap(c => {
+      return { title: c.name, value: c.name }
+    })
+  })
   const isMobile = breakpoints.smaller('md')
 
   const getRandomBand = async () => {
@@ -55,6 +61,11 @@ export const useStore = defineStore('store', () => {
     } finally {
       bandIsLoading.value = false
     }
+  }
+
+  const getBandByLetter = async (letter: string, page: number = 1) => {
+    const { data } = await axios.get(`/api/band/search/letter/${letter}?page=${page}`)
+    return data
   }
 
   const getAlbumById = async (albumId: string | number) => {
@@ -93,6 +104,16 @@ export const useStore = defineStore('store', () => {
       memberIsLoading.value = true
       const { data } = await axios.get(`/api/artist/${artistId}`)
       currentMember.value = data.data
+    } finally {
+      memberIsLoading.value = false
+    }
+  }
+
+  const getRipMembers = async (page: number = 1, year: number) => {
+    try {
+      memberIsLoading.value = true
+      const { data } = await axios.get(`/api/artist/rip?page=${page}&year=${year}`)
+      return data
     } finally {
       memberIsLoading.value = false
     }
@@ -233,6 +254,7 @@ export const useStore = defineStore('store', () => {
     user,
     stats,
     countryList,
+    countryListForSelect,
     bandIsLoading,
     albumIsLoading,
     lyricsIsLoading,
@@ -247,10 +269,12 @@ export const useStore = defineStore('store', () => {
     userIsAdmin,
     getRandomBand,
     getBandById,
+    getBandByLetter,
     getAlbumById,
     updateAlbum,
     getLyricsById,
     getMemberById,
+    getRipMembers,
     getStats,
     connectToEvents,
     login,

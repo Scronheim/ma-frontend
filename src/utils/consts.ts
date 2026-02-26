@@ -2,9 +2,9 @@ import type { Album, Band, Member, User } from '@/types'
 
 export const DEFAULT_USER: User = {
   username: '',
-  real_name: null,
-  country: null,
-  gender: null,
+  real_name: '',
+  country: '',
+  gender: '',
   avatar_color: 'red',
   bands_ratings: [],
   albums_ratings: [],
