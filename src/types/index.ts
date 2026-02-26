@@ -113,7 +113,7 @@ export interface SearchBandResult {
   genres: string
   country: string
 }
-export interface SearchBandByLetterResult extends SearchBandResult {
+export interface SearchBandByResult extends SearchBandResult {
   status: string
 }
 

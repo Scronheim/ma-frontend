@@ -1,1 +1,382 @@
 @import "tailwindcss";
+/* src/style.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ===== Стилизация Element Plus Collapse ===== */
+.el-collapse {
+  --el-collapse-border-color: #374151;
+  --el-collapse-header-height: 48px;
+  --el-collapse-header-bg-color: #1f2937;
+  --el-collapse-header-text-color: #f3f4f6;
+  --el-collapse-header-font-size: 1rem;
+  --el-collapse-content-bg-color: #111827;
+  --el-collapse-content-text-color: #d1d5db;
+  --el-collapse-content-font-size: 0.95rem;
+  --el-collapse-disabled-text-color: #6b7280;
+  --el-collapse-disabled-border-color: #4b5563;
+  
+  border: none;
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+/* Стиль для каждого элемента аккордеона */
+.el-collapse-item {
+  border-bottom: 1px solid #374151;
+}
+
+.el-collapse-item:last-child {
+  border-bottom: none;
+}
+
+/* Заголовок аккордеона */
+.el-collapse-item__header {
+  background-color: #1f2937;
+  color: #f3f4f6;
+  font-weight: 500;
+  padding: 0 1.25rem;
+  height: 56px;
+  line-height: 56px;
+  border: none;
+  transition: all 0.2s ease;
+  border-radius: 0;
+  font-family: 'Roboto Condensed', sans-serif;
+}
+
+.el-collapse-item__header:hover {
+  background-color: #2d3748;
+  padding-left: 1.5rem;
+}
+
+.el-collapse-item__header.is-active {
+  background-color: #2d3748;
+  border-bottom: 1px solid #374151;
+  color: #ef4444;
+}
+
+/* Иконка стрелочка */
+.el-collapse-item__arrow {
+  color: #9ca3af;
+  transition: transform 0.3s ease, color 0.2s ease;
+  margin: 0 8px 0 0;
+  font-size: 1.2rem;
+  font-weight: 300;
+}
+
+.el-collapse-item__header.is-active .el-collapse-item__arrow {
+  color: #ef4444;
+  transform: rotate(90deg);
+}
+
+.el-collapse-item__header:hover .el-collapse-item__arrow {
+  color: #ef4444;
+}
+
+/* Контент аккордеона */
+.el-collapse-item__wrap {
+  background-color: #111827;
+  border: none;
+}
+
+.el-collapse-item__content {
+  background-color: #111827;
+  color: #d1d5db;
+  padding: 1.25rem 1.5rem;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  border-bottom: none;
+}
+
+/* Стили для вложенного контента */
+.el-collapse-item__content p {
+  margin-bottom: 1rem;
+}
+
+.el-collapse-item__content p:last-child {
+  margin-bottom: 0;
+}
+
+.el-collapse-item__content a {
+  color: #ef4444;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.el-collapse-item__content a:hover {
+  color: #f87171;
+  text-decoration: underline;
+}
+
+.el-collapse-item__content ul,
+.el-collapse-item__content ol {
+  margin: 0.75rem 0 1rem 1.5rem;
+}
+
+.el-collapse-item__content li {
+  margin-bottom: 0.5rem;
+}
+
+.el-collapse-item__content li:last-child {
+  margin-bottom: 0;
+}
+
+.el-collapse-item__content hr {
+  border-color: #374151;
+  margin: 1rem 0;
+}
+
+.el-collapse-item__content table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.el-collapse-item__content th,
+.el-collapse-item__content td {
+  padding: 0.5rem;
+  border-bottom: 1px solid #374151;
+}
+
+.el-collapse-item__content th {
+  color: #9ca3af;
+  font-weight: 600;
+  text-align: left;
+}
+
+.el-collapse-item__content td {
+  color: #d1d5db;
+}
+
+.el-collapse-item__content code {
+  background-color: #1f2937;
+  color: #f87171;
+  padding: 0.2rem 0.4rem;
+  border-radius: 0.25rem;
+  font-size: 0.9em;
+}
+
+.el-collapse-item__content blockquote {
+  border-left: 4px solid #ef4444;
+  background-color: #1f2937;
+  padding: 0.75rem 1rem;
+  margin: 1rem 0;
+  border-radius: 0 0.375rem 0.375rem 0;
+  color: #9ca3af;
+  font-style: italic;
+}
+
+/* Кастомные классы для разных вариантов использования */
+.el-collapse.accent-red .el-collapse-item__header.is-active {
+  color: #ef4444;
+}
+
+.el-collapse.accent-red .el-collapse-item__header.is-active .el-collapse-item__arrow {
+  color: #ef4444;
+}
+
+.el-collapse.accent-blue .el-collapse-item__header.is-active {
+  color: #3b82f6;
+}
+
+.el-collapse.accent-blue .el-collapse-item__header.is-active .el-collapse-item__arrow {
+  color: #3b82f6;
+}
+
+.el-collapse.accent-green .el-collapse-item__header.is-active {
+  color: #10b981;
+}
+
+.el-collapse.accent-green .el-collapse-item__header.is-active .el-collapse-item__arrow {
+  color: #10b981;
+}
+
+.el-collapse.accent-purple .el-collapse-item__header.is-active {
+  color: #a855f7;
+}
+
+.el-collapse.accent-purple .el-collapse-item__header.is-active .el-collapse-item__arrow {
+  color: #a855f7;
+}
+
+.el-collapse.accent-yellow .el-collapse-item__header.is-active {
+  color: #f59e0b;
+}
+
+.el-collapse.accent-yellow .el-collapse-item__header.is-active .el-collapse-item__arrow {
+  color: #f59e0b;
+}
+
+.el-collapse.accent-pink .el-collapse-item__header.is-active {
+  color: #ec4899;
+}
+
+.el-collapse.accent-pink .el-collapse-item__header.is-active .el-collapse-item__arrow {
+  color: #ec4899;
+}
+
+/* Размеры */
+.el-collapse.small .el-collapse-item__header {
+  height: 44px;
+  line-height: 44px;
+  font-size: 0.9rem;
+  padding: 0 1rem;
+}
+
+.el-collapse.small .el-collapse-item__content {
+  padding: 1rem 1.25rem;
+  font-size: 0.9rem;
+}
+
+.el-collapse.large .el-collapse-item__header {
+  height: 64px;
+  line-height: 64px;
+  font-size: 1.1rem;
+  padding: 0 1.5rem;
+}
+
+.el-collapse.large .el-collapse-item__content {
+  padding: 1.5rem 2rem;
+  font-size: 1rem;
+}
+
+/* Без границ */
+.el-collapse.no-border,
+.el-collapse.no-border .el-collapse-item,
+.el-collapse.no-border .el-collapse-item__header,
+.el-collapse.no-border .el-collapse-item__wrap {
+  border: none;
+}
+
+.el-collapse.no-border .el-collapse-item__header.is-active {
+  border-bottom: none;
+}
+
+/* Card style - как карточка */
+.el-collapse.card-style {
+  border: 1px solid #374151;
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.el-collapse.card-style .el-collapse-item__header {
+  padding: 0 1.25rem;
+}
+
+.el-collapse.card-style .el-collapse-item__content {
+  padding: 1.25rem;
+}
+
+/* Трансформации при наведении */
+.el-collapse-item__header {
+  position: relative;
+  overflow: hidden;
+}
+
+.el-collapse-item__header::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 0;
+  height: 2px;
+  background-color: #ef4444;
+  transition: width 0.3s ease;
+}
+
+.el-collapse-item__header:hover::after {
+  width: 100%;
+}
+
+.el-collapse-item__header.is-active::after {
+  width: 100%;
+  background-color: #ef4444;
+}
+
+/* Анимация для контента */
+.el-collapse-item__wrap {
+  transition: height 0.3s ease-in-out;
+}
+
+/* Стили для иконок внутри заголовка */
+.el-collapse-item__header .header-icon {
+  margin-right: 0.75rem;
+  color: #9ca3af;
+  transition: color 0.2s ease;
+}
+
+.el-collapse-item__header:hover .header-icon {
+  color: #ef4444;
+}
+
+.el-collapse-item__header.is-active .header-icon {
+  color: #ef4444;
+}
+
+/* Темная тема (уже применена, но для явного указания) */
+.dark .el-collapse {
+  --el-collapse-header-bg-color: #1f2937;
+  --el-collapse-header-text-color: #f3f4f6;
+  --el-collapse-content-bg-color: #111827;
+  --el-collapse-content-text-color: #d1d5db;
+}
+
+/* Мобильная адаптация */
+@media (max-width: 768px) {
+  .el-collapse-item__header {
+    padding: 0 1rem;
+    font-size: 0.95rem;
+  }
+  
+  .el-collapse-item__content {
+    padding: 1rem;
+    font-size: 0.9rem;
+  }
+  
+  .el-collapse.large .el-collapse-item__header {
+    height: 56px;
+    line-height: 56px;
+    font-size: 1rem;
+  }
+  
+  .el-collapse.large .el-collapse-item__content {
+    padding: 1.25rem;
+  }
+}
+
+/* Стили для disabled состояния */
+.el-collapse-item.is-disabled .el-collapse-item__header {
+  color: #6b7280;
+  cursor: not-allowed;
+  background-color: #1a202c;
+}
+
+.el-collapse-item.is-disabled .el-collapse-item__header:hover {
+  background-color: #1a202c;
+  padding-left: 1.25rem;
+}
+
+.el-collapse-item.is-disabled .el-collapse-item__header:hover::after {
+  width: 0;
+}
+
+.el-collapse-item.is-disabled .el-collapse-item__arrow {
+  color: #4b5563;
+}
+
+/* Стили для вложенных аккордеонов */
+.el-collapse .el-collapse {
+  border-radius: 0;
+  border: 1px solid #374151;
+  margin: 0.5rem 0;
+}
+
+.el-collapse .el-collapse .el-collapse-item__header {
+  background-color: #1f2937;
+  padding-left: 1rem;
+}
+
+.el-collapse .el-collapse .el-collapse-item__content {
+  background-color: #111827;
+  padding-left: 2rem;
+}

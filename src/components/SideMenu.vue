@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useRouter } from 'vue-router'
 import { Icon } from '@iconify/vue'
 
 import { useStore } from '@/store/store'
@@ -11,8 +10,6 @@ import type { AuthData } from '@/types'
 const emit = defineEmits<{
   (e: 'closeMenu'): void
 }>()
-
-const router = useRouter()
 
 const store = useStore()
 
@@ -42,7 +39,7 @@ const register = () => {
 <template>
   <div class="py-6">
     <!-- Мои аккаунт -->
-    <div class="px-4 mb-6">
+    <div class="px-4 mb-3">
       <template v-if="store.userIsAuth">
         <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Мой аккаунт</h3>
         <nav>
@@ -128,7 +125,7 @@ const register = () => {
       </template>
     </div>
     <!-- Навигация -->
-    <div class="px-4 mb-6">
+    <div class="px-4">
       <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Навигация</h3>
       <nav class="mb-3">
         <router-link to="/" v-slot="{ isActive }">
@@ -143,7 +140,7 @@ const register = () => {
         </router-link>
       </nav>
       <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Группы</h3>
-      <nav>
+      <nav class="mb-3">
         <router-link to="/browse/letter" v-slot="{ isActive }" @click="emit('closeMenu')">
           <div
             class="flex items-center space-x-2 py-3 rounded-lg transition-colors duration-200"
@@ -154,7 +151,7 @@ const register = () => {
           </div>
         </router-link>
 
-        <!-- <router-link to="/browse/country" v-slot="{ isActive }" @click="emit('closeMenu')">
+        <router-link to="/browse/country" v-slot="{ isActive }" @click="emit('closeMenu')">
           <div
             class="flex items-center space-x-2 py-3 rounded-lg transition-colors duration-200"
             :class="isActive ? 'bg-red-600 text-white' : 'text-gray-300 hover:bg-gray-700'"
@@ -164,7 +161,7 @@ const register = () => {
           </div>
         </router-link>
 
-        <router-link to="/browse/genre" v-slot="{ isActive }" @click="emit('closeMenu')">
+        <!-- <router-link to="/browse/genre" v-slot="{ isActive }" @click="emit('closeMenu')">
           <div
             class="flex items-center space-x-2 py-3 rounded-lg transition-colors duration-200"
             :class="isActive ? 'bg-red-600 text-white' : 'text-gray-300 hover:bg-gray-700'"
@@ -185,13 +182,21 @@ const register = () => {
             <span>R.I.P.</span>
           </div>
         </router-link>
+        <div
+          class="flex items-center space-x-2 py-3 rounded-lg transition-colors duration-200 text-gray-300 hover:bg-gray-700 cursor-pointer"
+          @click="store.getRandomBand"
+        >
+          <Icon v-if="store.randomBandIsLoading" icon="mdi:loading" width="24" height="24" class="animate-spin" />
+          <Icon v-else icon="mdi:help-circle" width="24" height="24" />
+          <span>Случайная группа</span>
+        </div>
       </nav>
     </div>
 
     <!-- Нижняя часть с доп. ссылками -->
     <div class="px-4 mt-6 border-t border-gray-700">
       <div class="mt-4 text-xs text-gray-500">
-        © 2025-2026 www.metal-archives.ru
+        © 2025-2026 Encyclopaedia Metallum
         <br />
         Вся информация взята с сайта
         <el-link href="https://www.metal-archives.com" target="_blank">www.metal-archives.com</el-link>

@@ -22,6 +22,7 @@ export const useStore = defineStore('store', () => {
   const countryList = ref(countriesArray)
   const token = ref('')
   const stats = ref<AllStatInfo>()
+  const randomBandIsLoading = ref<boolean>(false)
   const bandIsLoading = ref<boolean>(false)
   const albumIsLoading = ref<boolean>(false)
   const lyricsIsLoading = ref<boolean>(false)
@@ -42,14 +43,15 @@ export const useStore = defineStore('store', () => {
   const isMobile = breakpoints.smaller('md')
 
   const getRandomBand = async () => {
+    if (randomBandIsLoading.value) return
     try {
-      bandIsLoading.value = true
+      randomBandIsLoading.value = true
       const { data } = await axios.get('/api/band/random')
       currentBand.value = data.data
       router.push({ path: `/bands/${data.data.name_slug}/${data.data.id}` })
       fromRandom.value = true
     } finally {
-      bandIsLoading.value = false
+      randomBandIsLoading.value = false
     }
   }
 
@@ -61,6 +63,11 @@ export const useStore = defineStore('store', () => {
     } finally {
       bandIsLoading.value = false
     }
+  }
+
+  const getBandByCountry = async (countryCode: string, page: number = 1) => {
+    const { data } = await axios.get(`/api/band/search/country/${countryCode}?page=${page}`)
+    return data
   }
 
   const getBandByLetter = async (letter: string, page: number = 1) => {
@@ -256,6 +263,7 @@ export const useStore = defineStore('store', () => {
     countryList,
     countryListForSelect,
     bandIsLoading,
+    randomBandIsLoading,
     albumIsLoading,
     lyricsIsLoading,
     statsIsLoading,
@@ -269,6 +277,7 @@ export const useStore = defineStore('store', () => {
     userIsAdmin,
     getRandomBand,
     getBandById,
+    getBandByCountry,
     getBandByLetter,
     getAlbumById,
     updateAlbum,

@@ -79,7 +79,10 @@ onMounted(async () => {
 </script>
 
 <template>
-  <LoadingSpinner v-if="store.bandIsLoading" :visible="store.bandIsLoading" />
+  <LoadingSpinner
+    v-if="store.bandIsLoading || store.randomBandIsLoading"
+    :visible="store.bandIsLoading || store.randomBandIsLoading"
+  />
   <div class="space-y-6" v-else>
     <!-- Заголовок группы -->
     <div class="flex flex-col md:flex-row items-start md:items-center justify-between">

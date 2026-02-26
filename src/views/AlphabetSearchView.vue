@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import { ArrowLeftBold, ArrowRightBold } from '@element-plus/icons-vue'
+import { Icon } from '@iconify/vue'
 
 import { useStore } from '@/store/store'
 
-import type { SearchBandByLetterResult } from '@/types'
+import type { SearchBandByResult } from '@/types'
 
 const router = useRouter()
 
@@ -51,7 +51,7 @@ const visiblePages = computed(() => {
 const hasMorePages = computed(() => {
   return visiblePages.value.length > 0 && visiblePages.value[visiblePages.value.length - 1] < totalPages.value
 })
-const foundedBands = ref<SearchBandByLetterResult[]>([])
+const foundedBands = ref<SearchBandByResult[]>([])
 
 // Методы
 const selectLetter = async (letter: string) => {
@@ -88,7 +88,7 @@ const selectSymbol = async () => {
     isLoading.value = false
   }
 }
-const goToBand = (band: SearchBandByLetterResult) => {
+const goToBand = (band: SearchBandByResult) => {
   router.push(`/bands/${band.name_slug}/${band.id}`)
 }
 const previousPage = async () => {
@@ -142,8 +142,8 @@ watch(selectedLetter, () => {
 <template>
   <div class="space-y-3">
     <!-- Алфавитные кнопки -->
-    <div class="bg-gray-800 rounded-lg border border-gray-700 p-6">
-      <div class="flex flex-wrap gap-2">
+    <div class="bg-gray-800 rounded-lg border border-gray-700 p-4">
+      <div class="flex flex-wrap justify-center gap-2">
         <button
           v-for="letter in letters"
           :key="letter"
@@ -187,15 +187,14 @@ watch(selectedLetter, () => {
       </div>
 
       <div class="flex items-center justify-center space-x-2">
-        <el-button
-          :icon="ArrowLeftBold"
+        <button
           @click="previousPage"
           :disabled="currentPage === 1"
-          :class="[
-            'px-3 py-1 rounded border border-gray-700 transition-colors duration-200',
-            currentPage === 1 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-700'
-          ]"
-        />
+          class="px-3 py-2 bg-gray-700 text-white rounded-lg"
+          :class="[currentPage === 1 ? 'cursor-not-allowed ' : 'cursor-pointer hover:bg-red-700']"
+        >
+          <Icon icon="mdi:arrow-left" />
+        </button>
 
         <div class="flex space-x-1">
           <button
@@ -211,15 +210,14 @@ watch(selectedLetter, () => {
           </button>
           <span v-if="hasMorePages" class="px-2 flex items-center">...</span>
         </div>
-        <el-button
-          :icon="ArrowRightBold"
+        <button
           @click="nextPage"
           :disabled="currentPage === totalPages"
-          :class="[
-            'px-3 py-1 rounded border border-gray-700 transition-colors duration-200',
-            currentPage === totalPages ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-700'
-          ]"
-        />
+          class="px-3 py-2 bg-gray-700 text-white rounded-lg"
+          :class="[currentPage === totalPages ? 'cursor-not-allowed ' : 'cursor-pointer hover:bg-red-700']"
+        >
+          <Icon icon="mdi:arrow-right" />
+        </button>
       </div>
     </div>
     <!-- Результаты -->
@@ -237,7 +235,7 @@ watch(selectedLetter, () => {
       </div>
 
       <!-- Результаты в виде таблицы -->
-      <div v-else-if="foundedBands.length > 0" style="height: 69vh; overflow-y: auto">
+      <div v-else-if="foundedBands.length > 0" style="height: 70vh; overflow-y: auto">
         <table class="w-full">
           <thead>
             <tr class="bg-gray-750 border-b border-gray-700">
@@ -254,30 +252,28 @@ watch(selectedLetter, () => {
               class="hover:bg-gray-750 transition-colors duration-150 cursor-pointer"
               @click="goToBand(result)"
             >
-              <td class="py-4 px-6">
+              <td class="py-2 px-4">
                 <div class="flex items-center">
                   <div class="font-medium">{{ result.name }}</div>
                 </div>
               </td>
-              <td class="py-4 px-6">
+              <td class="py-2 px-4">
                 <div class="flex flex-wrap gap-1">
                   <span class="px-2 py-1 bg-gray-700 rounded text-xs">
                     {{ result.country }}
                   </span>
                 </div>
               </td>
-              <td class="py-4 px-6">
+              <td class="py-2 px-4">
                 {{ result.genres }}
               </td>
-              <td class="py-4 px-6">
+              <td class="py-2 px-4">
                 {{ result.status }}
               </td>
             </tr>
           </tbody>
         </table>
       </div>
-
-      <!-- <BandCardMini v-for="band in foundedBands" :band="band" /> -->
 
       <!-- Пустое состояние -->
       <div v-else class="text-center py-12">
@@ -289,8 +285,7 @@ watch(selectedLetter, () => {
             d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
           />
         </svg>
-        <p class="text-gray-400">No bands found starting with "{{ selectedLetter }}"</p>
-        <p class="text-sm text-gray-500 mt-2">Try another letter or browse all bands</p>
+        <p class="text-gray-400">Групп, начинающихся на "{{ selectedLetter }} не найдено"</p>
       </div>
     </div>
   </div>

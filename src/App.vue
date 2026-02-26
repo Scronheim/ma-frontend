@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { ref, onMounted, provide } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { ElContainer, ElAside, ElMain } from 'element-plus'
+import { Icon } from '@iconify/vue'
 
 import { usePlayerStore } from './store/player'
 import { useStore } from './store/store'
@@ -9,9 +10,9 @@ import { useStore } from './store/store'
 import SearchBar from './components/SearchBar.vue'
 import SideMenu from './components/SideMenu.vue'
 import AudioPlayer from './components/AudioPlayer.vue'
-import { Icon } from '@iconify/vue'
 
 const route = useRoute()
+const router = useRouter()
 
 const store = useStore()
 const playerStore = usePlayerStore()
@@ -104,7 +105,7 @@ onMounted(() => {
       </div>
     </header>
 
-    <el-container class="min-h-[calc(100vh-64px)]">
+    <el-container class="min-h-[calc(100vh-68px)]">
       <!-- Десктопное меню (el-aside) -->
       <el-aside width="260px" class="hidden md:block bg-gray-800 border-r border-gray-700">
         <SideMenu @close-menu="mobileMenuOpen = false" />
@@ -127,7 +128,7 @@ onMounted(() => {
           >
             <div class="p-4">
               <div class="flex items-center justify-between mb-6">
-                <div class="flex items-center space-x-2">
+                <div class="flex items-center space-x-2" @click="router.push('/')">
                   <div class="w-8 h-8 bg-red-600 rounded-full flex items-center justify-center">
                     <span class="text-white font-bold text-lg">M</span>
                   </div>

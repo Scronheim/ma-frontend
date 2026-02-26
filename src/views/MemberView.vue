@@ -35,7 +35,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <loading-spinner v-if="store.memberIsLoading" :visible="store.memberIsLoading" />
+  <LoadingSpinner v-if="store.memberIsLoading" :visible="store.memberIsLoading" />
   <div class="space-y-6" v-else>
     <div class="flex flex-col md:flex-row items-start md:items-center justify-between">
       <div class="flex items-center space-x-4">
