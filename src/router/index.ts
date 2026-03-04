@@ -11,6 +11,7 @@ import AlphabetSearchView from '../views/AlphabetSearchView.vue'
 import CountrySearchView from '../views/CountrySearchView.vue'
 import GenreSearchView from '../views/GenreSearchView.vue'
 import ArtistRip from '../views/ArtistRip.vue'
+import AdvancedSearch from '../views/AdvancedSearch.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -68,18 +69,23 @@ const router = createRouter({
     },
     {
       path: '/browse/letter',
-      name: 'alphabet-search',
+      name: 'alphabet search',
       component: AlphabetSearchView
     },
     {
       path: '/browse/country',
-      name: 'country-search',
+      name: 'country search',
       component: CountrySearchView
     },
     {
       path: '/browse/genre',
-      name: 'genre-search',
+      name: 'genre search',
       component: GenreSearchView
+    },
+    {
+      path: '/search/advanced',
+      name: 'advanced search',
+      component: AdvancedSearch
     }
   ],
   scrollBehavior() {

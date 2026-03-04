@@ -1,21 +1,27 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch, inject } from 'vue'
 import { useRoute } from 'vue-router'
+import { ElNotification } from 'element-plus'
 import dayjs from 'dayjs'
 import durationPlugin from 'dayjs/plugin/duration'
-import { Star, StarFilled, EditPen, Check } from '@element-plus/icons-vue'
+import { Star, StarFilled, EditPen } from '@element-plus/icons-vue'
 
 import { useStore } from '@/store/store'
 import { usePlayerStore } from '@/store/player'
 
-import LoadingSpinner from '@/components/LoadingSpinner.vue'
-import Modal from '@/components/Modal.vue'
-
+import { albumTypes } from '@/utils'
 import DateNormalizer from '@/utils/dateNormalizer'
 
-import type { Rating, Track } from '@/types'
 import { PlayerTrack } from '@/components/AudioPlayer.vue'
-import { ElNotification } from 'element-plus'
+import LoadingSpinner from '@/components/LoadingSpinner.vue'
+import Modal from '@/components/Modal.vue'
+import TextInput from '@/components/inputs/TextInput.vue'
+import NumberInput from '@/components/inputs/NumberInput.vue'
+import CustomButton from '@/components/inputs/CustomButton.vue'
+import CustomTextarea from '@/components/inputs/CustomTextarea.vue'
+import SelectInput from '@/components/inputs/SelectInput.vue'
+
+import type { Rating, Track } from '@/types'
 
 dayjs.extend(durationPlugin)
 
@@ -25,7 +31,9 @@ const store = useStore()
 const playerStore = usePlayerStore()
 
 const showPreview = ref(false)
-const showEditDialog = ref(false)
+const showCommonEditDialog = ref(false)
+const showTrackEditDialog = ref(false)
+const editableTrack = ref<Track>({})
 const audioPlayer = inject('audioPlayer')
 
 const album = computed(() => store.currentAlbum)
@@ -79,7 +87,7 @@ const getBandById = async () => {
 
 const updateAlbum = async () => {
   await store.updateAlbum(albumId.value)
-  showEditDialog.value = false
+  showCommonEditDialog.value = false
   ElNotification({
     type: 'success',
     message: 'Альбом обновлён'
@@ -93,8 +101,14 @@ const changeAlbumRating = async (rating: number): Promise<void> => {
   await store.updateMe()
 }
 
+const editTrack = (track: Track) => {
+  editableTrack.value = track
+  showTrackEditDialog.value = true
+}
+
 const saveTrack = async () => {
   await store.updateAlbum(albumId.value)
+  showTrackEditDialog.value = false
   ElNotification({
     type: 'success',
     message: 'Трек сохранён'
@@ -230,7 +244,7 @@ onMounted(async () => {
       <button
         v-if="store.userIsAdmin"
         class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg flex items-center justify-center space-x-2 cursor-pointer"
-        @click="showEditDialog = true"
+        @click="showCommonEditDialog = true"
       >
         <el-icon>
           <EditPen />
@@ -269,19 +283,9 @@ onMounted(async () => {
                     <path d="M8 5v14l11-7L8 5z" />
                   </svg>
                 </button>
-                <el-input
-                  v-if="track.is_edit"
-                  type="number"
-                  v-model.number="track.number"
-                  placeholder="Введите номер трека"
-                  style="width: 130px"
-                />
-                <span v-else class="text-gray-400 w-6 text-center">{{ track.number }}</span>
-                <template v-if="track.is_edit">
-                  <el-input v-model="track.title" placeholder="Введите название трека" />
-                  <el-input v-model="track.url" placeholder="Введите ссылку на трек" />
-                </template>
-                <span v-else>{{ track.title }}</span>
+                <span class="text-gray-400 w-6 text-center">{{ track.number }}</span>
+
+                <span>{{ track.title }}</span>
               </div>
               <div class="flex items-center gap-2">
                 <el-button
@@ -303,25 +307,15 @@ onMounted(async () => {
                 >
                   {{ track.show_lyrics ? 'Скрыть текст' : 'Показать текст' }}
                 </el-button>
-                <span v-else-if="typeof track.id === 'string'" class="text-gray-400 text-sm mr-3">
-                  {{ track.id }}
-                </span>
-                <el-input
-                  v-if="track.is_edit"
-                  v-model="track.duration"
-                  placeholder="Введите длительность трека"
-                  style="width: 90px"
-                />
-                <span v-else class="text-gray-400">{{ track.duration }}</span>
+                <span class="text-gray-400">{{ track.duration }}</span>
                 <el-button
-                  v-if="!track.is_edit && store.userIsAdmin"
+                  v-if="store.userIsAdmin"
                   :icon="EditPen"
                   circle
                   text
                   type="primary"
-                  @click="track.is_edit = !track.is_edit"
+                  @click="editTrack(track)"
                 />
-                <el-button v-else :icon="Check" circle text type="success" @click="saveTrack" />
               </div>
             </div>
             <div v-show="track.show_lyrics">
@@ -367,33 +361,61 @@ onMounted(async () => {
     </div>
   </div>
 
-  <Modal :model-value="showEditDialog" title="Редактирование альбома" @close="showEditDialog = false">
+  <Modal :model-value="showCommonEditDialog" title="Редактирование альбома" @close="showCommonEditDialog = false">
     <el-form ref="formRef" :model="album" label-width="auto">
       <el-form-item label="Название альбома" prop="title">
-        <el-input v-model="album.title" placeholder="Введите название альбома" />
+        <TextInput
+          placeholder="Введите название альбома"
+          :model-value="album.title"
+          @update:model-value="album.title = $event"
+        />
       </el-form-item>
       <el-form-item label="Тип" prop="type">
-        <el-select v-model="album.type" placeholder="Выберите тип">
-          <el-option label="Full-length" value="Full-length" />
-          <el-option label="EP" value="EP" />
-          <el-option label="Single" value="Single" />
-          <el-option label="Demo" value="Demo" />
-          <el-option label="Live" value="Live" />
-          <el-option label="Compilation" value="Compilation" />
-        </el-select>
+        <SelectInput :model-value="album.type" :items="albumTypes" />
       </el-form-item>
       <el-form-item label="Дата релиза" prop="release_date">
-        <el-input v-model="album.release_date" placeholder="Введите дату релиза" />
+        <TextInput
+          placeholder="Введите дату релиза"
+          :model-value="album.release_date"
+          @update:model-value="album.release_date = $event"
+        />
       </el-form-item>
       <el-form-item label="Лейбл" prop="label">
-        <el-input v-model="album.label" placeholder="Введите лейбл" />
+        <TextInput placeholder="Введите лейбл" :model-value="album.label" @update:model-value="album.label = $event" />
       </el-form-item>
       <el-form-item label="Ссылка на обложку" prop="cover_url">
-        <el-input v-model="album.cover_url" placeholder="Введите ссылку" />
+        <TextInput
+          placeholder="Введите ссылку"
+          :model-value="album.cover_url"
+          @update:model-value="album.cover_url = $event"
+        />
       </el-form-item>
     </el-form>
     <template #footer>
-      <el-button @click="updateAlbum">Сохранить</el-button>
+      <CustomButton text="Сохранить" @click="updateAlbum" />
+    </template>
+  </Modal>
+
+  <Modal :model-value="showTrackEditDialog" title="Редактирование трека" @close="showTrackEditDialog = false">
+    <el-form ref="formRefTracklist" :model="editableTrack" label-width="auto">
+      <el-form-item label="№ трека" prop="number">
+        <NumberInput :model-value="editableTrack.number" @update:model-value="editableTrack.number = $event" />
+      </el-form-item>
+      <el-form-item label="Название" prop="title">
+        <TextInput :model-value="editableTrack.title" @update:model-value="editableTrack.title = $event" />
+      </el-form-item>
+      <el-form-item label="Длительность" prop="duration">
+        <TextInput :model-value="editableTrack.duration" @update:model-value="editableTrack.duration = $event" />
+      </el-form-item>
+      <el-form-item label="Ссылка на трек" prop="url">
+        <TextInput :model-value="editableTrack.url" @update:model-value="editableTrack.url = $event" />
+      </el-form-item>
+      <el-form-item label="Текст" prop="lyrics">
+        <CustomTextarea :model-value="editableTrack.lyrics" @update:model-value="editableTrack.lyrics = $event" />
+      </el-form-item>
+    </el-form>
+    <template #footer>
+      <CustomButton text="Сохранить" @click="saveTrack" />
     </template>
   </Modal>
 </template>

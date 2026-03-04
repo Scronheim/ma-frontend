@@ -31,7 +31,7 @@
     <modal :model-value="showMoreDialog" title="Дополнительные заметки" @close="showMoreDialog = false" size="full">
       <span v-html="content" class="desciption-link" />
       <template #footer>
-        <el-button @click="showMoreDialog = false">Закрыть</el-button>
+        <CustomButton text="Закрыть" @click="showMoreDialog = false" />
       </template>
     </modal>
   </div>
@@ -44,6 +44,7 @@ import { ArrowRight } from '@element-plus/icons-vue'
 import { useStore } from '@/store/store'
 
 import Modal from '../components/Modal.vue'
+import CustomButton from '../components/inputs/CustomButton.vue'
 
 interface Props {
   content?: string

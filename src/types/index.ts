@@ -30,7 +30,7 @@ export interface Album {
   type: 'Full-length' | 'EP' | 'Single' | 'Demo' | 'Split'
   release_date: string
   label: string
-  cover_url: string | null
+  cover_url: string
   cover_loading: boolean
   tracklist: Track[]
   current_lineup: MemberLineUp[]
@@ -42,12 +42,12 @@ export interface Track {
   number: number
   title: string
   duration: string
-  lyrics: string | null
+  lyrics: string
   cd_number: number | null
   side: number | null
   show_lyrics: boolean | null
   is_edit?: boolean
-  url: string | null
+  url: string
 }
 
 export interface RipMember {
@@ -211,12 +211,17 @@ export interface User {
 }
 
 export interface Country {
-  name: string
-  nameEn: string
-  code: string
+  title: string
+  titleEn: string
+  value: string
 }
 
 export interface Genre {
   id: string
   name: string
+}
+
+export interface SelectItem {
+  title: string
+  value: string | number
 }

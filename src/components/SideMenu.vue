@@ -165,6 +165,15 @@ const getRandomBand = async () => {
       </nav>
       <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Навигация</h3>
       <nav class="mb-3">
+        <router-link to="/search/advanced" v-slot="{ isActive }" @click="emit('closeMenu')">
+          <div
+            class="flex items-center space-x-2 py-3 rounded-lg transition-colors duration-200"
+            :class="isActive ? 'bg-red-600 text-white' : 'text-gray-300 hover:bg-gray-700'"
+          >
+            <Icon icon="mdi:magnify" width="24" height="24" />
+            <span>Расширенный поиск</span>
+          </div>
+        </router-link>
         <div
           class="flex items-center space-x-2 py-3 rounded-lg transition-colors duration-200 text-gray-300 hover:bg-gray-700 cursor-pointer"
           @click="getRandomBand"

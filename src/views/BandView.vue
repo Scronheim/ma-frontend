@@ -183,13 +183,13 @@ onMounted(async () => {
                 v-for="tab in tabs"
                 :key="tab.id"
                 @click="activeTab = tab.id"
-                class="flex-1 py-2 px-2 text-center font-medium transition-colors duration-200 cursor-pointer"
+                class="flex-1 py-2 text-center font-medium transition-colors duration-200 cursor-pointer"
                 :class="
                   activeTab === tab.id ? 'text-red-400 border-b-2 border-red-400' : 'text-gray-400 hover:text-gray-200'
                 "
               >
                 {{ tab.label }}
-                <span class="ml-2 text-sm bg-gray-700 rounded-full px-2 py-0.5">{{ tab.count }}</span>
+                <span class="text-sm bg-gray-700 rounded-full px-2 py-0.5">{{ tab.count }}</span>
               </button>
             </div>
 

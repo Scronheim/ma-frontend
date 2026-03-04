@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { Icon } from '@iconify/vue'
 
@@ -58,9 +58,7 @@ const bands = ref<SearchBandByResult[]>([])
 // Фильтрация и сортировка стран
 const filteredCountries = computed(() => {
   let filtered = countries.filter(
-    country =>
-      country.name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-      country.nameEn.toLowerCase().includes(searchQuery.value.toLowerCase())
+    country => country.title.toLowerCase().includes(searchQuery.value.toLowerCase()) || country.titleEn.toLowerCase().includes(searchQuery.value.toLowerCase())
   )
 
   return filtered
@@ -71,7 +69,7 @@ const selectCountry = async (country: Country) => {
     activeCollapse.value = ''
     selectedCountry.value = country
     isLoading.value = true
-    const { data } = await store.getBandByCountry(selectedCountry.value.code, currentPage.value)
+    const { data } = await store.getBandByCountry(selectedCountry.value.value, currentPage.value)
     bands.value = data.results
     total.value = data.total
   } finally {
@@ -86,7 +84,7 @@ const previousPage = async () => {
     try {
       currentPage.value--
       isLoading.value = true
-      const { data } = await store.getBandByCountry(selectedCountry.value.code, currentPage.value)
+      const { data } = await store.getBandByCountry(selectedCountry.value.value, currentPage.value)
       bands.value = data.results
       window.scrollTo({ top: 0, behavior: 'smooth' })
     } finally {
@@ -100,7 +98,7 @@ const nextPage = async () => {
     try {
       currentPage.value++
       isLoading.value = true
-      const { data } = await store.getBandByCountry(selectedCountry.value.code, currentPage.value)
+      const { data } = await store.getBandByCountry(selectedCountry.value.value, currentPage.value)
       bands.value = data.results
       window.scrollTo({ top: 0, behavior: 'smooth' })
     } finally {
@@ -113,7 +111,7 @@ const goToPage = async (page: number) => {
   try {
     currentPage.value = page
     isLoading.value = true
-    const { data } = await store.getBandByCountry(selectedCountry.value.code, currentPage.value)
+    const { data } = await store.getBandByCountry(selectedCountry.value.value, currentPage.value)
     bands.value = data.results
     window.scrollTo({ top: 0, behavior: 'smooth' })
   } finally {
@@ -125,23 +123,15 @@ const goToPage = async (page: number) => {
 <template>
   <div class="bg-gray-800 rounded-lg border border-gray-700 p-3 mb-3">
     <div class="flex items-center mb-2">
-      <TextInput
-        placeholder="Введите название страны"
-        :model-value="searchQuery"
-        @update:model-value="searchQuery = $event"
-        class="w-full py-2"
-      />
+      <TextInput placeholder="Введите название страны" :model-value="searchQuery" @update:model-value="searchQuery = $event" class="w-full py-2" />
     </div>
     <el-collapse v-model="activeCollapse">
       <el-collapse-item title="Страны" name="countries">
         <!-- Сетка стран -->
-        <div
-          class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 overflow-y-auto"
-          style="max-height: 80vh"
-        >
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 overflow-y-auto" style="max-height: 80vh">
           <div
             v-for="country in filteredCountries"
-            :key="country.code"
+            :key="country.value"
             class="bg-gray-750 rounded-lg p-1 hover:bg-gray-700 transition-colors duration-200 cursor-pointer"
             @click="selectCountry(country)"
           >
@@ -157,7 +147,7 @@ const goToPage = async (page: number) => {
   </div>
 
   <!-- Результаты для выбранной страны -->
-  <div v-if="selectedCountry?.code" class="bg-gray-800 rounded-lg border border-gray-700 p-3">
+  <div v-if="selectedCountry?.value" class="bg-gray-800 rounded-lg border border-gray-700 p-3">
     <h2 class="text-2xl font-bold text-white">{{ selectedCountry.name }}</h2>
 
     <!-- Состояние загрузки -->
@@ -185,10 +175,7 @@ const goToPage = async (page: number) => {
               v-for="page in visiblePages"
               :key="page"
               @click="goToPage(page)"
-              :class="[
-                'w-8 h-8 rounded flex items-center justify-center cursor-pointer',
-                page === currentPage ? 'bg-red-600 text-white' : 'bg-gray-700 hover:bg-gray-600'
-              ]"
+              :class="['w-8 h-8 rounded flex items-center justify-center cursor-pointer', page === currentPage ? 'bg-red-600 text-white' : 'bg-gray-700 hover:bg-gray-600']"
             >
               {{ page }}
             </button>
@@ -215,12 +202,7 @@ const goToPage = async (page: number) => {
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-700">
-            <tr
-              v-for="result in bands"
-              :key="result.id"
-              class="hover:bg-gray-750 transition-colors duration-150 cursor-pointer"
-              @click="goToBand(result)"
-            >
+            <tr v-for="result in bands" :key="result.id" class="hover:bg-gray-750 transition-colors duration-150 cursor-pointer" @click="goToBand(result)">
               <td class="py-2 px-4">
                 <div class="flex items-center">
                   <div class="font-medium">{{ result.name }}</div>

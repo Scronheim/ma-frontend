@@ -6,8 +6,6 @@ import { breakpointsTailwind, useBreakpoints } from '@vueuse/core'
 import { ElNotification } from 'element-plus'
 
 import { DEFAULT_BAND, DEFAULT_ALBUM, DEFAULT_BAND_MEMBER, DEFAULT_USER } from '@/utils/consts'
-import countriesArray from '@/utils/countries'
-import { countries } from '@/utils'
 
 import type { Band, Album, Track, SSEResponse, AllStatInfo, Member, User } from '@/types'
 
@@ -19,7 +17,6 @@ export const useStore = defineStore('store', () => {
   const currentAlbum = ref<Album>(DEFAULT_ALBUM)
   const currentMember = ref<Member>(DEFAULT_BAND_MEMBER)
   const user = ref<User>(DEFAULT_USER)
-  const countryList = ref(countriesArray)
   const token = ref('')
   const stats = ref<AllStatInfo>()
   const randomBandIsLoading = ref<boolean>(false)
@@ -29,18 +26,44 @@ export const useStore = defineStore('store', () => {
   const statsIsLoading = ref<boolean>(false)
   const memberIsLoading = ref<boolean>(false)
   const userIsLoading = ref<boolean>(false)
+  const advancedSearchIsLoading = ref<boolean>(false)
   const fromRandom = ref<boolean>(false)
   const sseEvents = ref<EventSource>()
 
   const albumsExceptCurrent = computed(() => currentBand.value.discography.filter(a => a.id !== currentAlbum.value.id))
   const userIsAuth = computed(() => token.value)
   const userIsAdmin = computed(() => user.value.role === 'admin')
-  const countryListForSelect = computed(() => {
-    return countries.flatMap(c => {
-      return { title: c.name, value: c.name }
-    })
-  })
   const isMobile = breakpoints.smaller('md')
+
+  const advancedSongSearch = async (query: string) => {
+    try {
+      advancedSearchIsLoading.value = true
+      const { data } = await axios.get(`/api/song/search/advanced?${query}`)
+      return data
+    } finally {
+      advancedSearchIsLoading.value = false
+    }
+  }
+
+  const advancedAlbumSearch = async (query: string) => {
+    try {
+      advancedSearchIsLoading.value = true
+      const { data } = await axios.get(`/api/album/search/advanced?${query}`)
+      return data
+    } finally {
+      advancedSearchIsLoading.value = false
+    }
+  }
+
+  const advancedBandSearch = async (query: string) => {
+    try {
+      advancedSearchIsLoading.value = true
+      const { data } = await axios.get(`/api/band/search/advanced?${query}`)
+      return data
+    } finally {
+      advancedSearchIsLoading.value = false
+    }
+  }
 
   const getRandomBand = async () => {
     if (randomBandIsLoading.value) return
@@ -265,8 +288,6 @@ export const useStore = defineStore('store', () => {
     currentMember,
     user,
     stats,
-    countryList,
-    countryListForSelect,
     bandIsLoading,
     randomBandIsLoading,
     albumIsLoading,
@@ -291,6 +312,9 @@ export const useStore = defineStore('store', () => {
     getMemberById,
     getRipMembers,
     getStats,
+    advancedBandSearch,
+    advancedAlbumSearch,
+    advancedSongSearch,
     connectToEvents,
     login,
     logout,
