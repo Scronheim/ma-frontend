@@ -195,6 +195,15 @@ export interface Rating {
   rating: number
 }
 
+export interface SimilarBand {
+  id: number
+  name: string
+  name_slug: string
+  genres: string
+  country: string
+  score: number
+}
+
 export interface User {
   username: string
   real_name: string

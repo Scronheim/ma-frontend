@@ -7,13 +7,14 @@ import { ElNotification } from 'element-plus'
 
 import { DEFAULT_BAND, DEFAULT_ALBUM, DEFAULT_BAND_MEMBER, DEFAULT_USER } from '@/utils/consts'
 
-import type { Band, Album, Track, SSEResponse, AllStatInfo, Member, User } from '@/types'
+import type { Band, Album, Track, SSEResponse, AllStatInfo, Member, User, SimilarBand } from '@/types'
 
 export const useStore = defineStore('store', () => {
   const router = useRouter()
   const breakpoints = useBreakpoints(breakpointsTailwind)
 
   const currentBand = ref<Band>(DEFAULT_BAND)
+  const currentBandSimilar = ref<SimilarBand[]>([])
   const currentAlbum = ref<Album>(DEFAULT_ALBUM)
   const currentMember = ref<Member>(DEFAULT_BAND_MEMBER)
   const user = ref<User>(DEFAULT_USER)
@@ -27,6 +28,7 @@ export const useStore = defineStore('store', () => {
   const memberIsLoading = ref<boolean>(false)
   const userIsLoading = ref<boolean>(false)
   const advancedSearchIsLoading = ref<boolean>(false)
+  const similarBandsIsLoading = ref<boolean>(false)
   const fromRandom = ref<boolean>(false)
   const sseEvents = ref<EventSource>()
 
@@ -75,6 +77,17 @@ export const useStore = defineStore('store', () => {
       fromRandom.value = true
     } finally {
       randomBandIsLoading.value = false
+    }
+  }
+
+  const getBandSimilar = async () => {
+    if (similarBandsIsLoading.value) return
+    try {
+      similarBandsIsLoading.value = true
+      const { data } = await axios.get(`/api/band/${currentBand.value.id}/similar`)
+      currentBandSimilar.value = data.data
+    } finally {
+      similarBandsIsLoading.value = false
     }
   }
 
@@ -284,6 +297,7 @@ export const useStore = defineStore('store', () => {
 
   return {
     currentBand,
+    currentBandSimilar,
     currentAlbum,
     currentMember,
     user,
@@ -295,6 +309,7 @@ export const useStore = defineStore('store', () => {
     statsIsLoading,
     memberIsLoading,
     userIsLoading,
+    similarBandsIsLoading,
     albumsExceptCurrent,
     sseEvents,
     fromRandom,
@@ -307,6 +322,7 @@ export const useStore = defineStore('store', () => {
     getBandByCountry,
     getBandByLetter,
     getAlbumById,
+    getBandSimilar,
     updateAlbum,
     getLyricsById,
     getMemberById,

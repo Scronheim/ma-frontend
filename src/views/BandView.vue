@@ -24,6 +24,7 @@ const activeTab = ref<string>('discography')
 const activeMembersTab = ref<string>('current')
 
 const band = computed(() => store.currentBand)
+const bandSimilar = computed(() => store.currentBandSimilar)
 const bandName = computed(() => route.params.bandName)
 const bandId = computed((): number => parseInt(route.params.id as string))
 const sortedDiscography = computed(() => {
@@ -37,9 +38,10 @@ const bandUserRating = computed((): Rating => {
   return { id: bandId.value, rating: 0 }
 })
 const tabs = computed(() => [
-  { id: 'discography', label: 'Дискография', count: band.value.discography.length },
-  { id: 'members', label: 'Состав', count: band.value.current_lineup.length + band.value.past_lineup.length },
-  { id: 'links', label: 'Ссылки', count: band.value.links.length }
+  { id: 'discography', label: 'Дискография' },
+  { id: 'members', label: 'Состав' },
+  { id: 'similar', label: 'Похожие группы' },
+  { id: 'links', label: 'Ссылки' }
 ])
 const membersTabs = computed(() => [
   { id: 'current', label: 'Текущий', count: band.value.current_lineup.length },
@@ -65,6 +67,10 @@ const changeBandRating = async (rating: number): Promise<void> => {
   else store.user.bands_ratings.push({ id: bandId.value, rating })
   await store.updateMe()
 }
+const changeTab = async (tabName: string) => {
+  activeTab.value = tabName
+  if (tabName === 'similar') await store.getBandSimilar()
+}
 
 watch(bandId, async () => {
   await getBandById()
@@ -79,10 +85,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <LoadingSpinner
-    v-if="store.bandIsLoading || store.randomBandIsLoading"
-    :visible="store.bandIsLoading || store.randomBandIsLoading"
-  />
+  <LoadingSpinner v-if="store.bandIsLoading || store.randomBandIsLoading" :visible="store.bandIsLoading || store.randomBandIsLoading" />
   <div class="space-y-6" v-else>
     <!-- Заголовок группы -->
     <div class="flex flex-col md:flex-row items-start md:items-center justify-between">
@@ -91,36 +94,16 @@ onMounted(async () => {
           class="w-20 h-20 md:w-24 md:h-24 bg-linear-to-br from-gray-800 to-gray-900 rounded-lg border border-gray-700 flex items-center justify-center overflow-hidden cursor-pointer"
         >
           <template v-if="band.logo_url">
-            <img
-              :src="band.logo_url"
-              :alt="band.name"
-              class="w-full h-full object-cover"
-              @click="showLogoPreview = true"
-            />
-            <el-image-viewer
-              v-if="showLogoPreview"
-              :url-list="[band.logo_url]"
-              hide-on-click-modal
-              @close="showLogoPreview = false"
-            />
+            <img :src="band.logo_url" :alt="band.name" class="w-full h-full object-cover" @click="showLogoPreview = true" />
+            <el-image-viewer v-if="showLogoPreview" :url-list="[band.logo_url]" hide-on-click-modal @close="showLogoPreview = false" />
           </template>
           <span v-else class="text-3xl">🎸</span>
         </div>
         <div>
           <div class="flex items-center gap-2">
             <h1 class="text-3xl md:text-4xl font-bold">{{ band.name }}</h1>
-            <el-tooltip
-              v-if="store.userIsAuth"
-              :content="bandUserFavoriteIndex > -1 ? 'Убрать из избранных' : 'Добавить в избранные'"
-              placement="top"
-            >
-              <el-button
-                :icon="bandUserFavoriteIndex > -1 ? StarFilled : Star"
-                circle
-                plain
-                :type="bandUserFavoriteIndex > -1 ? 'warning' : 'info'"
-                @click="toggleFavoriteBand"
-              />
+            <el-tooltip v-if="store.userIsAuth" :content="bandUserFavoriteIndex > -1 ? 'Убрать из избранных' : 'Добавить в избранные'" placement="top">
+              <el-button :icon="bandUserFavoriteIndex > -1 ? StarFilled : Star" circle plain :type="bandUserFavoriteIndex > -1 ? 'warning' : 'info'" @click="toggleFavoriteBand" />
             </el-tooltip>
           </div>
           <div class="flex flex-wrap items-center gap-2 mt-2">
@@ -182,19 +165,16 @@ onMounted(async () => {
               <button
                 v-for="tab in tabs"
                 :key="tab.id"
-                @click="activeTab = tab.id"
+                @click="changeTab(tab.id)"
                 class="flex-1 py-2 text-center font-medium transition-colors duration-200 cursor-pointer"
-                :class="
-                  activeTab === tab.id ? 'text-red-400 border-b-2 border-red-400' : 'text-gray-400 hover:text-gray-200'
-                "
+                :class="activeTab === tab.id ? 'text-red-400 border-b-2 border-red-400' : 'text-gray-400 hover:text-gray-200'"
               >
                 {{ tab.label }}
-                <span class="text-sm bg-gray-700 rounded-full px-2 py-0.5">{{ tab.count }}</span>
               </button>
             </div>
 
             <div>
-              <div v-if="activeTab === 'discography'" class="space-y-4">
+              <div v-if="activeTab === 'discography'">
                 <div v-if="band.discography.length === 0" class="text-center py-8 text-gray-400">Нет альбомов</div>
                 <table v-if="band.discography.length" class="w-full">
                   <thead>
@@ -216,10 +196,7 @@ onMounted(async () => {
                       <td class="py-3 px-3 font-medium">
                         <div class="flex items-center space-x-3">
                           <div class="w-10 h-10 bg-gray-700 rounded shrink-0 flex items-center justify-center">
-                            <div
-                              v-if="album.cover_loading"
-                              class="w-8 h-8 border-4 border-red-600 border-t-transparent rounded-full animate-spin mx-auto"
-                            />
+                            <div v-if="album.cover_loading" class="w-8 h-8 border-4 border-red-600 border-t-transparent rounded-full animate-spin mx-auto" />
                             <img v-else-if="album.cover_url && !album.cover_loading" v-lazy="album.cover_url" />
                             <span v-else>💿</span>
                           </div>
@@ -233,25 +210,15 @@ onMounted(async () => {
                   </tbody>
                 </table>
               </div>
-
-              <div v-if="activeTab === 'members'" class="space-y-4">
-                <div
-                  v-if="band.current_lineup.length === 0 && band.past_lineup.length === 0"
-                  class="text-center py-8 text-gray-400"
-                >
-                  Нет добавленных составов
-                </div>
+              <div v-else-if="activeTab === 'members'">
+                <div v-if="band.current_lineup.length === 0 && band.past_lineup.length === 0" class="text-center py-8 text-gray-400">Нет добавленных составов</div>
                 <div v-else class="flex border-b border-gray-700">
                   <button
                     v-for="tab in membersTabs"
                     :key="tab.id"
                     @click="activeMembersTab = tab.id"
                     class="flex-1 py-2 px-2 text-center font-medium transition-colors duration-200 cursor-pointer"
-                    :class="
-                      activeMembersTab === tab.id
-                        ? 'text-red-400 border-b-2 border-red-400'
-                        : 'text-gray-400 hover:text-gray-200'
-                    "
+                    :class="activeMembersTab === tab.id ? 'text-red-400 border-b-2 border-red-400' : 'text-gray-400 hover:text-gray-200'"
                   >
                     {{ tab.label }}
                     <span class="ml-2 text-sm bg-gray-700 rounded-full px-2 py-0.5">{{ tab.count }}</span>
@@ -269,16 +236,46 @@ onMounted(async () => {
                   </div>
                 </div>
               </div>
-              <div v-if="activeTab === 'links'" class="space-y-4">
+              <div v-else-if="activeTab === 'similar'">
+                <LoadingSpinner v-if="store.similarBandsIsLoading" :visible="store.similarBandsIsLoading" />
+                <template v-else>
+                  <div v-if="bandSimilar.length === 0" class="text-center py-8 text-gray-400">Нет рекомендованных похожих групп</div>
+                  <table v-if="bandSimilar.length" class="w-full">
+                    <thead>
+                      <tr class="border-b border-gray-700">
+                        <th class="text-left py-3">Группа</th>
+                        <th class="text-left py-3 px-3">Страна</th>
+                        <th class="text-left py-3 px-3">Жанр</th>
+                        <th class="text-left py-3 px-3">Оценка</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr
+                        v-for="(band, index) in bandSimilar"
+                        :key="band.id"
+                        :class="{ 'border-b': index !== bandSimilar.length - 1 }"
+                        class="border-gray-700 hover:bg-gray-800 transition-colors duration-150 cursor-pointer"
+                      >
+                        <td class="py-3">
+                          <RouterLink :to="`/bands/${band.name_slug}/${band.id}`" class="font-medium">{{ band.name }}</RouterLink>
+                        </td>
+                        <td class="py-3 px-3 font-medium">
+                          {{ band.country }}
+                        </td>
+                        <td class="py-3 px-3">
+                          {{ band.genres }}
+                        </td>
+                        <td class="py-3 px-3">
+                          {{ band.score }}
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </template>
+              </div>
+              <div v-else-if="activeTab === 'links'">
                 <div class="grid grid-cols-3">
-                  <el-link
-                    v-for="link in band.links"
-                    :key="link.url"
-                    :href="link.url"
-                    type="primary"
-                    underline="never"
-                    target="_blank"
-                  >
+                  <el-link v-for="link in band.links" :key="link.url" :href="link.url" type="primary" underline="never" target="_blank">
                     {{ link.social }}
                   </el-link>
                 </div>
@@ -294,9 +291,7 @@ onMounted(async () => {
         <div class="bg-gray-800 rounded-lg border border-gray-700 py-3 px-3">
           <h2 class="text-xl font-bold mb-4 text-red-400">Фото группы</h2>
           <div class="bg-gray-750 rounded-lg overflow-hidden">
-            <div
-              class="bg-linear-to-br from-gray-700 to-gray-900 flex flex-col items-center justify-center cursor-pointer"
-            >
+            <div class="bg-linear-to-br from-gray-700 to-gray-900 flex flex-col items-center justify-center cursor-pointer">
               <template v-if="band.logo_url || band.photo_url">
                 <img
                   v-if="band.logo_url"
@@ -312,12 +307,7 @@ onMounted(async () => {
                   class="w-full h-full object-cover"
                   @click="openImagePreview([band.photo_url, band.logo_url])"
                 />
-                <el-image-viewer
-                  v-if="showPreview"
-                  :url-list="urlList"
-                  hide-on-click-modal
-                  @close="showPreview = false"
-                />
+                <el-image-viewer v-if="showPreview" :url-list="urlList" hide-on-click-modal @close="showPreview = false" />
               </template>
               <span v-else class="text-5xl">📸</span>
             </div>

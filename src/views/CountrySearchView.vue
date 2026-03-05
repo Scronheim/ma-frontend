@@ -123,7 +123,7 @@ const goToPage = async (page: number) => {
 <template>
   <div class="bg-gray-800 rounded-lg border border-gray-700 p-3 mb-3">
     <div class="flex items-center mb-2">
-      <TextInput placeholder="Введите название страны" :model-value="searchQuery" @update:model-value="searchQuery = $event" class="w-full py-2" />
+      <TextInput placeholder="Введите название страны" :model-value="searchQuery" @update:model-value="searchQuery = $event" class="w-full" />
     </div>
     <el-collapse v-model="activeCollapse">
       <el-collapse-item title="Страны" name="countries">
@@ -137,7 +137,7 @@ const goToPage = async (page: number) => {
           >
             <div class="flex items-start space-x-3">
               <div class="flex-1">
-                <h3 class="font-bold text-white">{{ country.name }}</h3>
+                <h3 class="font-bold text-white">{{ country.title }}</h3>
               </div>
             </div>
           </div>
@@ -148,7 +148,7 @@ const goToPage = async (page: number) => {
 
   <!-- Результаты для выбранной страны -->
   <div v-if="selectedCountry?.value" class="bg-gray-800 rounded-lg border border-gray-700 p-3">
-    <h2 class="text-2xl font-bold text-white">{{ selectedCountry.name }}</h2>
+    <h2 class="text-2xl font-bold text-white">{{ selectedCountry.title }}</h2>
 
     <!-- Состояние загрузки -->
     <div v-if="isLoading" class="flex items-center justify-center py-12">
@@ -225,11 +225,6 @@ const goToPage = async (page: number) => {
           </tbody>
         </table>
       </div>
-    </div>
-
-    <!-- Пустое состояние -->
-    <div v-else class="text-center py-12">
-      <p class="text-gray-400">No bands found from {{ selectedCountry.name }}</p>
     </div>
   </div>
 </template>

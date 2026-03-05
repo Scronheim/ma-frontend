@@ -120,7 +120,7 @@ const goToBand = (band: SearchBandByResult) => {
         placeholder="Введите название жанра"
         :model-value="searchQuery"
         @update:model-value="searchQuery = $event"
-        class="w-full py-2"
+        class="w-full"
       />
     </div>
     <el-collapse v-model="activeCollapse">
