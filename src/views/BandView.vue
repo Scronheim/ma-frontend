@@ -275,7 +275,7 @@ onMounted(async () => {
                       </tr>
                     </tbody>
                   </table>
-                  <el-text type="danger" class="cursor-pointer" @click="store.getBandSimilar(store.currentBandSimilar.length > 20)">{{ loadMoreText }}</el-text>
+                  <el-text type="danger" class="cursor-pointer" @click="store.getBandSimilar(store.currentBandSimilar.length === 20)">{{ loadMoreText }}</el-text>
                 </template>
               </div>
               <div v-else-if="activeTab === 'links'">
