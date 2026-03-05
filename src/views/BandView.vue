@@ -47,6 +47,9 @@ const membersTabs = computed(() => [
   { id: 'current', label: 'Текущий', count: band.value.current_lineup.length },
   { id: 'past', label: 'Прошлые', count: band.value.past_lineup.length }
 ])
+const loadMoreText = computed(() => {
+  return store.currentBandSimilar.length > 20 ? 'Показать меньше' : 'Показать больше'
+})
 
 const toggleFavoriteBand = async () => {
   if (bandUserFavoriteIndex.value > -1) store.user.favorite_bands.splice(bandUserFavoriteIndex.value, 1)
@@ -255,22 +258,24 @@ onMounted(async () => {
                         :key="band.id"
                         :class="{ 'border-b': index !== bandSimilar.length - 1 }"
                         class="border-gray-700 hover:bg-gray-800 transition-colors duration-150 cursor-pointer"
+                        @click="$router.push(`/bands/${band.name_slug}/${band.id}`)"
                       >
-                        <td class="py-3">
-                          <RouterLink :to="`/bands/${band.name_slug}/${band.id}`" class="font-medium">{{ band.name }}</RouterLink>
+                        <td class="py-2 px-2">
+                          {{ band.name }}
                         </td>
-                        <td class="py-3 px-3 font-medium">
+                        <td class="py-2 px-2">
                           {{ band.country }}
                         </td>
-                        <td class="py-3 px-3">
+                        <td class="py-2 px-2">
                           {{ band.genres }}
                         </td>
-                        <td class="py-3 px-3">
+                        <td class="py-2 px-2">
                           {{ band.score }}
                         </td>
                       </tr>
                     </tbody>
                   </table>
+                  <el-text type="danger" class="cursor-pointer" @click="store.getBandSimilar(store.currentBandSimilar.length > 20)">{{ loadMoreText }}</el-text>
                 </template>
               </div>
               <div v-else-if="activeTab === 'links'">

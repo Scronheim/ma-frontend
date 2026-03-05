@@ -80,11 +80,11 @@ export const useStore = defineStore('store', () => {
     }
   }
 
-  const getBandSimilar = async () => {
+  const getBandSimilar = async (showMore: boolean = false) => {
     if (similarBandsIsLoading.value) return
     try {
       similarBandsIsLoading.value = true
-      const { data } = await axios.get(`/api/band/${currentBand.value.id}/similar`)
+      const { data } = await axios.get(`/api/band/${currentBand.value.id}/similar?show_more=${showMore}`)
       currentBandSimilar.value = data.data
     } finally {
       similarBandsIsLoading.value = false
