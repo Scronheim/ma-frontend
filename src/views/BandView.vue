@@ -13,6 +13,7 @@ import LoadingSpinner from '@/components/LoadingSpinner.vue'
 import BandMember from '@/components/BandMember.vue'
 
 import type { Rating } from '@/types'
+import CustomButton from '@/components/inputs/CustomButton.vue'
 
 const route = useRoute()
 const store = useStore()
@@ -74,6 +75,9 @@ const changeTab = async (tabName: string) => {
   activeTab.value = tabName
   if (tabName === 'similar') await store.getBandSimilar()
 }
+const refreshBand = async () => {
+  await store.getBandById(store.currentBand.id, true)
+}
 
 watch(bandId, async () => {
   await getBandById()
@@ -110,13 +114,13 @@ onMounted(async () => {
             </el-tooltip>
           </div>
           <div class="flex flex-wrap items-center gap-2 mt-2">
-            <span class="px-3 py-1 bg-gray-800 rounded-full text-sm">{{ band.country }}</span>
             <span class="px-3 py-1 bg-gray-800 rounded-full text-sm">{{ band.status }}</span>
             <span class="px-3 py-1 bg-gray-800 rounded-full text-sm">Образована в {{ band.formed_in }}</span>
           </div>
           <h3 class="text-gray-400 text-sm">Данные на {{ dateNormalizer.normalizeDate(band.updated_at) }}</h3>
         </div>
       </div>
+      <CustomButton v-if="store.userIsAuth" text="Обновить" :loading="store.bandIsLoading" @click="refreshBand" />
     </div>
 
     <!-- Основная информация -->
@@ -243,39 +247,41 @@ onMounted(async () => {
                 <LoadingSpinner v-if="store.similarBandsIsLoading" :visible="store.similarBandsIsLoading" />
                 <template v-else>
                   <div v-if="bandSimilar.length === 0" class="text-center py-8 text-gray-400">Нет рекомендованных похожих групп</div>
-                  <table v-if="bandSimilar.length" class="w-full">
-                    <thead>
-                      <tr class="border-b border-gray-700">
-                        <th class="text-left py-3">Группа</th>
-                        <th class="text-left py-3 px-3">Страна</th>
-                        <th class="text-left py-3 px-3">Жанр</th>
-                        <th class="text-left py-3 px-3">Оценка</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr
-                        v-for="(band, index) in bandSimilar"
-                        :key="band.id"
-                        :class="{ 'border-b': index !== bandSimilar.length - 1 }"
-                        class="border-gray-700 hover:bg-gray-800 transition-colors duration-150 cursor-pointer"
-                        @click="$router.push(`/bands/${band.name_slug}/${band.id}`)"
-                      >
-                        <td class="py-2 px-2">
-                          {{ band.name }}
-                        </td>
-                        <td class="py-2 px-2">
-                          {{ band.country }}
-                        </td>
-                        <td class="py-2 px-2">
-                          {{ band.genres }}
-                        </td>
-                        <td class="py-2 px-2">
-                          {{ band.score }}
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                  <el-text type="danger" class="cursor-pointer" @click="store.getBandSimilar(store.currentBandSimilar.length === 20)">{{ loadMoreText }}</el-text>
+                  <template v-if="bandSimilar.length">
+                    <table class="w-full">
+                      <thead>
+                        <tr class="border-b border-gray-700">
+                          <th class="text-left py-3">Группа</th>
+                          <th class="text-left py-3 px-3">Страна</th>
+                          <th class="text-left py-3 px-3">Жанр</th>
+                          <th class="text-left py-3 px-3">Оценка</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr
+                          v-for="(band, index) in bandSimilar"
+                          :key="band.id"
+                          :class="{ 'border-b': index !== bandSimilar.length - 1 }"
+                          class="border-gray-700 hover:bg-gray-800 transition-colors duration-150 cursor-pointer"
+                          @click="$router.push(`/bands/${band.name_slug}/${band.id}`)"
+                        >
+                          <td class="py-2 px-2">
+                            {{ band.name }}
+                          </td>
+                          <td class="py-2 px-2">
+                            {{ band.country }}
+                          </td>
+                          <td class="py-2 px-2">
+                            {{ band.genres }}
+                          </td>
+                          <td class="py-2 px-2">
+                            {{ band.score }}
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    <el-text type="danger" class="cursor-pointer" @click="store.getBandSimilar(store.currentBandSimilar.length === 20)">{{ loadMoreText }}</el-text>
+                  </template>
                 </template>
               </div>
               <div v-else-if="activeTab === 'links'">

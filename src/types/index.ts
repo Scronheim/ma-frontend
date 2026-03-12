@@ -1,5 +1,5 @@
 export interface Band {
-  id: number | null
+  id: number
   name: string
   name_slug: string
   description: string
@@ -187,6 +187,7 @@ export interface ShortAlbum {
   band_names: string[]
   band_names_slug: string[]
   type: string
+  release_date: string
   cover_url: string | null
 }
 

@@ -111,19 +111,14 @@ onMounted(async () => {
         @input="handleInputYear"
         v-model.number="year"
       />
-      <div class="text-gray-400 mb-4 md:mb-0">
-        Показано {{ startIndex + 1 }}-{{ endIndex }} из {{ total }} результатов
-      </div>
+      <div class="text-gray-400 mb-4 md:mb-0">{{ total }} результатов</div>
 
       <div class="flex items-center justify-center space-x-2">
         <el-button
           :icon="ArrowLeftBold"
           @click="previousPage"
           :disabled="currentPage === 1"
-          :class="[
-            'px-3 py-1 rounded border border-gray-700 transition-colors duration-200',
-            currentPage === 1 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-700'
-          ]"
+          :class="['px-3 py-1 rounded border border-gray-700 transition-colors duration-200', currentPage === 1 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-700']"
         />
 
         <div class="flex space-x-1">
@@ -131,10 +126,7 @@ onMounted(async () => {
             v-for="page in visiblePages"
             :key="page"
             @click="goToPage(page)"
-            :class="[
-              'w-8 h-8 rounded flex items-center justify-center',
-              page === currentPage ? 'bg-red-600 text-white' : 'bg-gray-700 hover:bg-gray-600'
-            ]"
+            :class="['w-8 h-8 rounded flex items-center justify-center', page === currentPage ? 'bg-red-600 text-white' : 'bg-gray-700 hover:bg-gray-600']"
           >
             {{ page }}
           </button>
@@ -144,10 +136,7 @@ onMounted(async () => {
           :icon="ArrowRightBold"
           @click="nextPage"
           :disabled="currentPage === totalPages"
-          :class="[
-            'px-3 py-1 rounded border border-gray-700 transition-colors duration-200',
-            currentPage === totalPages ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-700'
-          ]"
+          :class="['px-3 py-1 rounded border border-gray-700 transition-colors duration-200', currentPage === totalPages ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-700']"
         />
       </div>
     </div>
@@ -163,11 +152,7 @@ onMounted(async () => {
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-700">
-          <tr
-            v-for="result in foundedMembers"
-            :key="result.id"
-            class="hover:bg-gray-750 transition-colors duration-150"
-          >
+          <tr v-for="result in foundedMembers" :key="result.id" class="hover:bg-gray-750 transition-colors duration-150">
             <td class="py-2">
               <div class="flex items-center">
                 <div class="font-medium">
@@ -186,11 +171,7 @@ onMounted(async () => {
             </td>
             <td class="py-2 px-4">
               <template v-for="(band, index) in result.bands">
-                <RouterLink
-                  v-if="band.id"
-                  :to="`/bands/${band.band_name_slug}/${band.id}`"
-                  class="text-blue-400 font-bold"
-                >
+                <RouterLink v-if="band.id" :to="`/bands/${band.band_name_slug}/${band.id}`" class="text-blue-400 font-bold">
                   {{ band.band_name }}
                 </RouterLink>
                 <template v-if="index !== result.bands.length - 1">,&nbsp;</template>

@@ -7,7 +7,7 @@ import { ElNotification } from 'element-plus'
 
 import { DEFAULT_BAND, DEFAULT_ALBUM, DEFAULT_BAND_MEMBER, DEFAULT_USER } from '@/utils/consts'
 
-import type { Band, Album, Track, SSEResponse, AllStatInfo, Member, User, SimilarBand } from '@/types'
+import type { Band, Album, Track, SSEResponse, AllStatInfo, Member, User, SimilarBand, ShortAlbum } from '@/types'
 
 export const useStore = defineStore('store', () => {
   const router = useRouter()
@@ -26,6 +26,7 @@ export const useStore = defineStore('store', () => {
   const lyricsIsLoading = ref<boolean>(false)
   const statsIsLoading = ref<boolean>(false)
   const memberIsLoading = ref<boolean>(false)
+  const ripMembersIsLoading = ref<boolean>(false)
   const userIsLoading = ref<boolean>(false)
   const advancedSearchIsLoading = ref<boolean>(false)
   const similarBandsIsLoading = ref<boolean>(false)
@@ -91,10 +92,12 @@ export const useStore = defineStore('store', () => {
     }
   }
 
-  const getBandById = async (bandId: string | number) => {
+  const getBandById = async (bandId: string | number, updateBand: boolean = false) => {
     try {
       bandIsLoading.value = true
-      const { data } = await axios.get(`/api/band/${bandId}`)
+      let url = `/api/band/${bandId}`
+      if (updateBand) url += '?update=true'
+      const { data } = await axios.get(url)
       currentBand.value = data.data
     } finally {
       bandIsLoading.value = false
@@ -159,11 +162,11 @@ export const useStore = defineStore('store', () => {
 
   const getRipMembers = async (page: number = 1, year: number) => {
     try {
-      memberIsLoading.value = true
+      ripMembersIsLoading.value = true
       const { data } = await axios.get(`/api/artist/rip?page=${page}&year=${year}`)
       return data
     } finally {
-      memberIsLoading.value = false
+      ripMembersIsLoading.value = false
     }
   }
 
@@ -189,6 +192,14 @@ export const useStore = defineStore('store', () => {
           album.cover_url = data.data.cover_url
           album.cover_loading = false
         }
+        break
+      case 'refresh_band':
+        JSON.parse(data.data.old_albums).forEach((album: ShortAlbum, index: number) => {
+          const albumTemp = currentBand.value.discography.find(a => a.id === album.id)
+          if (albumTemp) albumTemp.cover_loading = false
+        })
+        currentBand.value.discography = currentBand.value.discography.concat(JSON.parse(data.data.new_albums))
+
         break
 
       default:
@@ -308,6 +319,7 @@ export const useStore = defineStore('store', () => {
     lyricsIsLoading,
     statsIsLoading,
     memberIsLoading,
+    ripMembersIsLoading,
     userIsLoading,
     similarBandsIsLoading,
     albumsExceptCurrent,

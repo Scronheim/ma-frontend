@@ -13,6 +13,7 @@ const props = withDefaults(
     startIcon?: string
     endIcon?: string
     loading?: boolean
+    thin?: boolean
     disabled?: boolean
   }>(),
   {
@@ -21,6 +22,7 @@ const props = withDefaults(
     startIcon: '',
     endIcon: '',
     loading: false,
+    thin: false,
     disabled: false
   }
 )
@@ -32,17 +34,22 @@ const buttonIconStart = computed((): string => {
 const buttonIconEnd = computed((): string => {
   return `mdi:${props.endIcon}`
 })
+
+const buttonYPadding = computed((): string => {
+  return props.thin ? 'py-1' : 'py-2'
+})
 </script>
 
 <template>
   <button
-    class="px-2 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg flex items-center justify-center space-x-2 cursor-pointer"
+    class="px-2 bg-gray-700 hover:bg-gray-600 rounded-lg flex items-center justify-center cursor-pointer"
+    :class="[buttonYPadding]"
     :disabled="props.disabled"
     @click="emits('click')"
   >
     <Icon v-if="props.loading" icon="mdi:loading" class="animate-spin" width="20" height="20" />
     <Icon v-if="props.startIcon" :icon="buttonIconStart" width="20" height="20" />
-    <span>{{ props.text }}</span>
+    <span class="mr-0">{{ props.text }}</span>
     <Icon v-if="props.endIcon" :icon="buttonIconEnd" width="20" height="20" />
   </button>
 </template>

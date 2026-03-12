@@ -49,19 +49,14 @@ const getRandomBand = async () => {
         <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Мой аккаунт</h3>
         <nav>
           <router-link to="/profile" v-slot="{ isActive }" @click="emit('closeMenu')">
-            <div
-              class="flex items-center space-x-2 py-3 rounded-lg transition-colors duration-200"
-              :class="isActive ? 'bg-red-600 text-white' : 'text-gray-300 hover:bg-gray-700'"
-            >
+            <div class="flex items-center space-x-2 py-3 rounded-lg transition-colors duration-200" :class="isActive ? 'bg-red-600 text-white' : 'text-gray-300 hover:bg-gray-700'">
               <Icon icon="mdi:account" width="24" height="24" />
               <span>Профиль</span>
             </div>
           </router-link>
 
           <router-link :to="{ path: '/profile', hash: '#bands' }" @click="emit('closeMenu')">
-            <div
-              class="flex items-center space-x-2 py-3 rounded-lg transition-colors duration-200 text-gray-300 hover:bg-gray-700"
-            >
+            <div class="flex items-center space-x-2 py-3 rounded-lg transition-colors duration-200 text-gray-300 hover:bg-gray-700">
               <Icon icon="mdi:heart-multiple" width="24" height="24" />
               <span>Избранные группы</span>
               <span class="ml-auto bg-gray-700 text-xs px-2 py-1 rounded-full">
@@ -71,9 +66,7 @@ const getRandomBand = async () => {
           </router-link>
 
           <router-link :to="{ path: '/profile', hash: '#albums' }" @click="emit('closeMenu')">
-            <div
-              class="flex items-center space-x-2 py-3 rounded-lg transition-colors duration-200 text-gray-300 hover:bg-gray-700"
-            >
+            <div class="flex items-center space-x-2 py-3 rounded-lg transition-colors duration-200 text-gray-300 hover:bg-gray-700">
               <Icon icon="mdi:heart-multiple" width="24" height="24" />
               <span>Избранные альбомы</span>
               <span class="ml-auto bg-gray-700 text-xs px-2 py-1 rounded-full">
@@ -82,24 +75,14 @@ const getRandomBand = async () => {
             </div>
           </router-link>
         </nav>
-        <div
-          class="flex items-center space-x-2 py-3 rounded-lg transition-colors duration-200 text-gray-300 hover:bg-gray-700 cursor-pointer"
-          @click="store.logout"
-        >
+        <div class="flex items-center space-x-2 py-3 rounded-lg transition-colors duration-200 text-gray-300 hover:bg-gray-700 cursor-pointer" @click="store.logout">
           <Icon icon="mdi:exit-run" width="24" height="24" />
           <span>Выйти</span>
         </div>
       </template>
       <template v-else>
         <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Вход/Регистрация</h3>
-        <el-form
-          ref="formRef"
-          :model="form"
-          :rules="rules"
-          label-width="auto"
-          label-position="top"
-          @keypress.enter="login"
-        >
+        <el-form ref="formRef" :model="form" :rules="rules" label-width="auto" label-position="top" @keypress.enter="login">
           <el-form-item label="Имя пользователя" prop="username">
             <input
               placeholder="Введите имя пользователя"
@@ -117,15 +100,8 @@ const getRandomBand = async () => {
           </el-form-item>
         </el-form>
         <div class="flex justify-between">
-          <button
-            @click="register"
-            class="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-lg cursor-pointer"
-          >
-            Регистрация
-          </button>
-          <button @click="login" class="px-3 py-1 bg-green-600 hover:bg-green-700 text-white rounded-lg cursor-pointer">
-            Войти
-          </button>
+          <button @click="register" class="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-lg cursor-pointer">Регистрация</button>
+          <button @click="login" class="px-3 py-1 bg-green-600 hover:bg-green-700 text-white rounded-lg cursor-pointer">Войти</button>
         </div>
       </template>
     </div>
@@ -134,30 +110,21 @@ const getRandomBand = async () => {
       <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Группы</h3>
       <nav class="mb-3">
         <router-link to="/browse/letter" v-slot="{ isActive }" @click="emit('closeMenu')">
-          <div
-            class="flex items-center space-x-2 py-3 rounded-lg transition-colors duration-200"
-            :class="isActive ? 'bg-red-600 text-white' : 'text-gray-300 hover:bg-gray-700'"
-          >
+          <div class="flex items-center space-x-2 py-3 rounded-lg transition-colors duration-200" :class="isActive ? 'bg-red-600 text-white' : 'text-gray-300 hover:bg-gray-700'">
             <Icon icon="mdi:alphabetical" width="24" height="24" />
             <span>По алфавиту</span>
           </div>
         </router-link>
 
         <router-link to="/browse/country" v-slot="{ isActive }" @click="emit('closeMenu')">
-          <div
-            class="flex items-center space-x-2 py-3 rounded-lg transition-colors duration-200"
-            :class="isActive ? 'bg-red-600 text-white' : 'text-gray-300 hover:bg-gray-700'"
-          >
+          <div class="flex items-center space-x-2 py-3 rounded-lg transition-colors duration-200" :class="isActive ? 'bg-red-600 text-white' : 'text-gray-300 hover:bg-gray-700'">
             <Icon icon="mdi:flag" width="24" height="24" />
             <span>По стране</span>
           </div>
         </router-link>
 
         <router-link to="/browse/genre" v-slot="{ isActive }" @click="emit('closeMenu')">
-          <div
-            class="flex items-center space-x-2 py-3 rounded-lg transition-colors duration-200"
-            :class="isActive ? 'bg-red-600 text-white' : 'text-gray-300 hover:bg-gray-700'"
-          >
+          <div class="flex items-center space-x-2 py-3 rounded-lg transition-colors duration-200" :class="isActive ? 'bg-red-600 text-white' : 'text-gray-300 hover:bg-gray-700'">
             <Icon icon="mdi:guitar-electric" width="24" height="24" />
             <span>По жанру</span>
           </div>
@@ -166,28 +133,20 @@ const getRandomBand = async () => {
       <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Навигация</h3>
       <nav class="mb-3">
         <router-link to="/search/advanced" v-slot="{ isActive }" @click="emit('closeMenu')">
-          <div
-            class="flex items-center space-x-2 py-3 rounded-lg transition-colors duration-200"
-            :class="isActive ? 'bg-red-600 text-white' : 'text-gray-300 hover:bg-gray-700'"
-          >
+          <div class="flex items-center space-x-2 py-3 rounded-lg transition-colors duration-200" :class="isActive ? 'bg-red-600 text-white' : 'text-gray-300 hover:bg-gray-700'">
             <Icon icon="mdi:magnify" width="24" height="24" />
             <span>Расширенный поиск</span>
           </div>
         </router-link>
-        <div
-          class="flex items-center space-x-2 py-3 rounded-lg transition-colors duration-200 text-gray-300 hover:bg-gray-700 cursor-pointer"
-          @click="getRandomBand"
-        >
+        <div class="flex items-center space-x-2 py-3 rounded-lg transition-colors duration-200 text-gray-300 hover:bg-gray-700 cursor-pointer" @click="getRandomBand">
           <Icon v-if="store.randomBandIsLoading" icon="mdi:loading" width="24" height="24" class="animate-spin" />
           <Icon v-else icon="mdi:help-circle" width="24" height="24" />
           <span>Случайная группа</span>
         </div>
         <router-link to="/artist/rip" v-slot="{ isActive }" @click="emit('closeMenu')">
-          <div
-            class="flex items-center space-x-2 py-3 rounded-lg transition-colors duration-200"
-            :class="isActive ? 'bg-red-600 text-white' : 'text-gray-300 hover:bg-gray-700'"
-          >
-            <Icon icon="mdi:grave-stone" width="24" height="24" />
+          <div class="flex items-center space-x-2 py-3 rounded-lg transition-colors duration-200" :class="isActive ? 'bg-red-600 text-white' : 'text-gray-300 hover:bg-gray-700'">
+            <Icon v-if="store.ripMembersIsLoading" icon="mdi:loading" width="24" height="24" class="animate-spin" />
+            <Icon v-else icon="mdi:grave-stone" width="24" height="24" />
             <span>R.I.P.</span>
           </div>
         </router-link>

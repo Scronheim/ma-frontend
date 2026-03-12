@@ -15,6 +15,7 @@ declare module 'vue' {
     CollapsibleText: typeof import('./src/components/CollapsibleText.vue')['default']
     ConfirmModal: typeof import('./src/components/ConfirmModal.vue')['default']
     CustomButton: typeof import('./src/components/inputs/CustomButton.vue')['default']
+    CustomDropdown: typeof import('./src/components/inputs/CustomDropdown.vue')['default']
     CustomTable: typeof import('./src/components/CustomTable.vue')['default']
     CustomTextarea: typeof import('./src/components/inputs/CustomTextarea.vue')['default']
     ElButton: typeof import('element-plus/es')['ElButton']

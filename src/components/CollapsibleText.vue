@@ -20,12 +20,7 @@
     </div>
 
     <div v-if="isOverflowing" class="controls">
-      <el-button type="primary" link size="small" @click="showMoreDialog = true">
-        Читать далее
-        <el-icon>
-          <ArrowRight />
-        </el-icon>
-      </el-button>
+      <CustomButton text="Далее" end-icon="chevron-right" thin @click="showMoreDialog = true" />
     </div>
 
     <modal :model-value="showMoreDialog" title="Дополнительные заметки" @close="showMoreDialog = false" size="full">
@@ -39,7 +34,6 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { ArrowRight } from '@element-plus/icons-vue'
 
 import { useStore } from '@/store/store'
 

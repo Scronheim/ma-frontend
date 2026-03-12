@@ -8,18 +8,12 @@
     />
     <select
       v-model="selectedSearchField"
-      class="px-3 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-600 focus:border-transparent"
+      class="px-3 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-600 focus:border-transparent w-auto"
     >
       <option value="band">Группа</option>
       <option value="album">Альбом</option>
     </select>
-    <button
-      @click="performSearch"
-      :disabled="store.bandIsLoading"
-      class="px-4 py-2 bg-gray-600 hover:bg-red-700 text-white rounded-lg cursor-pointer"
-    >
-      Искать
-    </button>
+    <button @click="performSearch" :disabled="store.bandIsLoading" class="px-4 py-2 bg-gray-600 hover:bg-red-700 text-white rounded-lg cursor-pointer">Искать</button>
   </div>
 </template>
 

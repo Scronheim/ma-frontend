@@ -55,21 +55,12 @@ onMounted(() => {
   <div class="min-h-screen bg-gray-900 text-gray-100 font-sans">
     <!-- Хедер с кнопкой меню для мобильных -->
     <header class="sticky top-0 z-50 bg-gray-800 border-b border-gray-700 shadow-lg">
-      <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+      <div class="container mx-auto px-4 py-2 flex justify-between items-center">
         <div class="flex items-center space-x-4">
           <!-- Кнопка гамбургер для мобильных -->
-          <button
-            @click="toggleMobileMenu"
-            class="md:hidden text-gray-300 hover:text-white p-2 rounded-lg hover:bg-gray-700 transition-colors duration-200"
-          >
+          <button @click="toggleMobileMenu" class="md:hidden text-gray-300 hover:text-white p-2 rounded-lg hover:bg-gray-700 transition-colors duration-200">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                v-if="!mobileMenuOpen"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M4 6h16M4 12h16M4 18h16"
-              />
+              <path v-if="!mobileMenuOpen" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
               <path v-else stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
@@ -86,21 +77,14 @@ onMounted(() => {
         <div v-if="route.fullPath !== '/'" class="hidden md:block w-96">
           <SearchBar />
         </div>
-        <button
-          v-if="route.fullPath !== '/'"
-          @click="searchMenuOpen = !searchMenuOpen"
-          class="md:hidden text-gray-300 hover:text-white"
-        >
+        <button v-if="route.fullPath !== '/'" @click="searchMenuOpen = !searchMenuOpen" class="md:hidden text-gray-300 hover:text-white">
           <Icon :icon="searchMenuOpen ? 'mdi:close' : 'mdi:search'" width="24" height="24" />
         </button>
       </div>
 
       <!-- Поиск для мобильных (под хедером) -->
 
-      <div
-        v-if="route.fullPath !== '/' && searchMenuOpen"
-        class="md:hidden bg-gray-800 px-4 py-3 border-t border-gray-700"
-      >
+      <div v-if="route.fullPath !== '/' && searchMenuOpen" class="md:hidden bg-gray-800 px-4 py-3 border-t border-gray-700">
         <SearchBar />
       </div>
     </header>
@@ -122,10 +106,7 @@ onMounted(() => {
       >
         <div v-if="mobileMenuOpen" class="fixed inset-0 z-50 md:hidden">
           <!-- Меню -->
-          <el-aside
-            width="100%"
-            class="relative h-full bg-gray-800 border-r border-gray-700 shadow-2xl overflow-y-auto"
-          >
+          <el-aside width="100%" class="relative h-full bg-gray-800 border-r border-gray-700 shadow-2xl overflow-y-auto">
             <div class="p-4">
               <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-2" @click="router.push('/')">
@@ -134,10 +115,7 @@ onMounted(() => {
                   </div>
                   <span class="text-xl font-bold">METAL ARCHIVES</span>
                 </div>
-                <button
-                  @click="mobileMenuOpen = false"
-                  class="text-gray-400 hover:text-white p-2 rounded-lg hover:bg-gray-700 transition-colors duration-200"
-                >
+                <button @click="mobileMenuOpen = false" class="text-gray-400 hover:text-white p-2 rounded-lg hover:bg-gray-700 transition-colors duration-200">
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                   </svg>
