@@ -5,7 +5,7 @@ export interface Band {
   description: string
   country: string
   city: string
-  status: 'Active' | 'Split-up' | 'On hold' | 'Changed name' | 'Disputed'
+  status: 'Active' | 'Split-up' | 'On hold' | 'Changed name' | 'Disputed' | 'Unknown'
   formed_in: string
   years_active: string
   genres: string

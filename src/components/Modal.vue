@@ -33,11 +33,7 @@
                   <slot name="title">{{ title }}</slot>
                 </div>
 
-                <button
-                  @click="closeModal"
-                  class="text-gray-400 hover:text-white transition-colors duration-200 rounded-lg p-1 hover:bg-gray-700"
-                  aria-label="Close modal"
-                >
+                <button @click="closeModal" class="text-gray-400 hover:text-white transition-colors duration-200 rounded-lg p-1 hover:bg-gray-700" aria-label="Close modal">
                   <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                   </svg>
@@ -50,21 +46,14 @@
 
               <div v-if="showFooter || $slots.footer" class="flex justify-end space-x-3 p-3 border-t border-gray-700">
                 <slot name="footer">
-                  <button
-                    v-if="showCancelButton"
-                    @click="handleCancel"
-                    class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors duration-200"
-                  >
+                  <button v-if="showCancelButton" @click="handleCancel" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors duration-200">
                     {{ cancelText }}
                   </button>
                   <button
                     v-if="showConfirmButton"
                     @click="handleConfirm"
                     :disabled="confirmDisabled"
-                    :class="[
-                      'px-4 py-2 rounded-lg transition-colors duration-200 font-medium',
-                      confirmDisabled ? 'bg-gray-600 cursor-not-allowed opacity-50' : confirmButtonClass
-                    ]"
+                    :class="['px-4 py-2 rounded-lg transition-colors duration-200 font-medium', confirmDisabled ? 'bg-gray-600 cursor-not-allowed opacity-50' : confirmButtonClass]"
                   >
                     {{ confirmText }}
                   </button>
@@ -131,7 +120,7 @@ const modalSizeClasses = computed(() => {
     case 'lg':
       return 'max-w-2xl'
     case 'xl':
-      return 'max-w-4xl'
+      return 'max-w-3xl'
     case 'full':
       return 'max-w-6xl'
     default:

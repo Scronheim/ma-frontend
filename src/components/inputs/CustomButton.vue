@@ -48,8 +48,8 @@ const buttonYPadding = computed((): string => {
     @click="emits('click')"
   >
     <Icon v-if="props.loading" icon="mdi:loading" class="animate-spin" width="20" height="20" />
-    <Icon v-if="props.startIcon" :icon="buttonIconStart" width="20" height="20" />
+    <Icon v-if="props.startIcon" :icon="buttonIconStart" class="mx-1" width="20" height="20" />
     <span class="mr-0">{{ props.text }}</span>
-    <Icon v-if="props.endIcon" :icon="buttonIconEnd" width="20" height="20" />
+    <Icon v-if="props.endIcon" :icon="buttonIconEnd" class="mx-1" width="20" height="20" />
   </button>
 </template>

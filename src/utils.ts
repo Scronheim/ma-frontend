@@ -7,6 +7,15 @@ export const sortByDate = (a: Album, b: Album): number => {
   return 1
 }
 
+export const bandStatusesMap = {
+  Active: 'Активна',
+  Unknown: 'Неизвестно',
+  Disputed: 'Оспариваемый',
+  'On hold': 'На паузе',
+  'Split-up': 'Распалась',
+  'Changed name': 'Сменила название'
+}
+
 export const bandStatuses: SelectItem[] = [
   { title: 'Любой', value: '' },
   { title: 'Активна', value: 1 },

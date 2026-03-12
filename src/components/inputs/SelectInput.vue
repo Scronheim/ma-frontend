@@ -7,6 +7,8 @@ const props = withDefaults(
     modelValue: string
     items: { title: string; value: any }[]
     width?: string
+    titleText?: string
+    valueText?: string
     multiple?: boolean
     disabled?: boolean
   }>(),
@@ -14,6 +16,8 @@ const props = withDefaults(
     modelValue: '',
     items: [],
     width: '100%',
+    titleText: 'title',
+    valueText: 'value',
     multiple: false,
     disabled: false
   }
@@ -21,14 +25,16 @@ const props = withDefaults(
 </script>
 
 <template>
-  <select
-    :value="props.modelValue"
-    :disabled="props.disabled"
-    :multiple="props.multiple"
-    class="pl-3 px-1 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-600 focus:border-transparent"
-    @change="emits('update:modelValue', $event.target.value)"
-    :style="{ width: props.width }"
-  >
-    <option v-for="item in props.items" :value="item.value">{{ item.title }}</option>
-  </select>
+  <div class="w-full h-10">
+    <select
+      :value="props.modelValue"
+      :disabled="props.disabled"
+      :multiple="props.multiple"
+      class="pl-3 h-full bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-600 focus:border-transparent"
+      @change="emits('update:modelValue', $event.target.value)"
+      :style="{ width: props.width }"
+    >
+      <option v-for="item in props.items" :value="item[props.valueText]">{{ item[props.titleText] }}</option>
+    </select>
+  </div>
 </template>

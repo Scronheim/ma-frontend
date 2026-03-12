@@ -104,6 +104,16 @@ export const useStore = defineStore('store', () => {
     }
   }
 
+  const updateBand = async (bandId: string | number) => {
+    try {
+      bandIsLoading.value = true
+      const { data } = await axios.patch(`/api/band/${bandId}`, currentBand.value)
+      currentBand.value = data.data
+    } finally {
+      bandIsLoading.value = false
+    }
+  }
+
   const getBandByGenre = async (genre: string, page: number = 1) => {
     const { data } = await axios.get(`/api/band/search/genre/${genre}?page=${page}`)
     return data
@@ -335,6 +345,7 @@ export const useStore = defineStore('store', () => {
     getBandByLetter,
     getAlbumById,
     getBandSimilar,
+    updateBand,
     updateAlbum,
     getLyricsById,
     getMemberById,

@@ -19,7 +19,7 @@ const props = withDefaults(
 </script>
 
 <template>
-  <div class="h-10">
+  <div class="w-full h-10">
     <input
       :placeholder="props.placeholder"
       :readonly="props.readonly"

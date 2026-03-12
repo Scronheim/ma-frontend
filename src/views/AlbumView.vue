@@ -46,9 +46,7 @@ const albumTotalDuration = computed((): string => {
 
   return dayjs.duration(totalSeconds, 'seconds').format('HH:mm:ss')
 })
-const albumUserFavoriteIndex = computed((): number =>
-  store.user.favorite_albums.findIndex(b => b.id === parseInt(albumId.value))
-)
+const albumUserFavoriteIndex = computed((): number => store.user.favorite_albums.findIndex(b => b.id === parseInt(albumId.value)))
 
 const albumTracks = computed<PlayerTrack[]>(() => {
   if (!album.value) return []
@@ -178,18 +176,8 @@ onMounted(async () => {
           class="w-40 h-40 md:w-60 md:h-60 bg-linear-to-br from-gray-800 to-gray-900 rounded-lg border border-gray-700 flex items-center justify-center overflow-hidden cursor-pointer"
         >
           <template v-if="album.cover_url">
-            <img
-              :src="album.cover_url"
-              :alt="album.title"
-              class="w-full h-full object-cover"
-              @click="showPreview = true"
-            />
-            <el-image-viewer
-              v-if="showPreview"
-              :url-list="[album.cover_url]"
-              hide-on-click-modal
-              @close="showPreview = false"
-            />
+            <img :src="album.cover_url" :alt="album.title" class="w-full h-full object-cover" @click="showPreview = true" />
+            <el-image-viewer v-if="showPreview" :url-list="[album.cover_url]" hide-on-click-modal @close="showPreview = false" />
           </template>
           <span v-else class="text-5xl">💿</span>
         </div>
@@ -199,25 +187,13 @@ onMounted(async () => {
         <div>
           <h1 class="text-3xl md:text-4xl font-bold">
             {{ album.title }}
-            <el-tooltip
-              v-if="store.userIsAuth"
-              :content="albumUserFavoriteIndex > -1 ? 'Убрать из любимых' : 'Добавить в любимые'"
-              placement="top"
-            >
-              <el-button
-                :icon="albumUserFavoriteIndex > -1 ? StarFilled : Star"
-                circle
-                text
-                @click="toggleFavoriteAlbum"
-              />
+            <el-tooltip v-if="store.userIsAuth" :content="albumUserFavoriteIndex > -1 ? 'Убрать из любимых' : 'Добавить в любимые'" placement="top">
+              <el-button :icon="albumUserFavoriteIndex > -1 ? StarFilled : Star" circle text @click="toggleFavoriteAlbum" />
             </el-tooltip>
           </h1>
           <div class="mt-2 break-all">
             <template v-for="(b, i) in album.band_names" :key="b">
-              <router-link
-                :to="`/bands/${album.band_names_slug[i]}/${album.band_ids[i]}`"
-                class="text-xl text-red-400 hover:text-red-300 transition-colors duration-150"
-              >
+              <router-link :to="`/bands/${album.band_names_slug[i]}/${album.band_ids[i]}`" class="text-xl text-red-400 hover:text-red-300 transition-colors duration-150">
                 {{ album.band_names[i] }}
               </router-link>
               <span v-if="album.band_names.length && i < album.band_names.length - 1" class="mx-2">/</span>
@@ -241,16 +217,7 @@ onMounted(async () => {
         </div>
         <h3 class="text-gray-400 text-sm">Данные на {{ DateNormalizer.normalizeDate(album.updated_at) }}</h3>
       </div>
-      <button
-        v-if="store.userIsAdmin"
-        class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg flex items-center justify-center space-x-2 cursor-pointer"
-        @click="showCommonEditDialog = true"
-      >
-        <el-icon>
-          <EditPen />
-        </el-icon>
-        <span>Редактировать</span>
-      </button>
+      <CustomButton v-if="store.userIsAdmin" text="Редактировать" start-icon="edit" :loading="store.bandIsLoading" @click="showCommonEditDialog = true" />
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -266,17 +233,8 @@ onMounted(async () => {
           <div v-for="track in album.tracklist" :key="track.id">
             <div class="flex items-center justify-between p-1 hover:bg-gray-750 rounded transition-colors duration-150">
               <div class="flex items-center space-x-2">
-                <button
-                  v-if="track.url"
-                  @click="playTrack(track)"
-                  class="text-gray-400 hover:text-red-400 cursor-pointer"
-                >
-                  <svg
-                    v-if="isCurrentTrack(track) && isPlaying"
-                    class="w-5 h-5 text-white"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                  >
+                <button v-if="track.url" @click="playTrack(track)" class="text-gray-400 hover:text-red-400 cursor-pointer">
+                  <svg v-if="isCurrentTrack(track) && isPlaying" class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
                   </svg>
                   <svg v-else class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
@@ -298,33 +256,18 @@ onMounted(async () => {
                 >
                   Загрузить текст
                 </el-button>
-                <el-button
-                  v-else-if="track.lyrics"
-                  type="primary"
-                  text
-                  size="small"
-                  @click="track.show_lyrics = !track.show_lyrics"
-                >
+                <el-button v-else-if="track.lyrics" type="primary" text size="small" @click="track.show_lyrics = !track.show_lyrics">
                   {{ track.show_lyrics ? 'Скрыть текст' : 'Показать текст' }}
                 </el-button>
                 <span class="text-gray-400">{{ track.duration }}</span>
-                <el-button
-                  v-if="store.userIsAdmin"
-                  :icon="EditPen"
-                  circle
-                  text
-                  type="primary"
-                  @click="editTrack(track)"
-                />
+                <el-button v-if="store.userIsAdmin" :icon="EditPen" circle text type="primary" @click="editTrack(track)" />
               </div>
             </div>
             <div v-show="track.show_lyrics">
               <span class="overflow-auto" v-html="track.lyrics" />
             </div>
           </div>
-          <div class="mt-4 pt-4 border-t border-gray-700 text-gray-400">
-            Полная длительность: {{ albumTotalDuration }}
-          </div>
+          <div class="mt-4 pt-4 border-t border-gray-700 text-gray-400">Полная длительность: {{ albumTotalDuration }}</div>
         </div>
       </div>
 
@@ -341,12 +284,7 @@ onMounted(async () => {
               @click="$router.push(`/albums/${route.params.bandName}/${otherAlbum.title_slug}/${otherAlbum.id}`)"
             >
               <div class="w-12 h-12 bg-gray-700 rounded flex shrink-0 items-center justify-center mr-3">
-                <img
-                  v-if="otherAlbum.cover_url"
-                  :src="otherAlbum.cover_url"
-                  :alt="otherAlbum.title"
-                  class="w-full h-full object-cover"
-                />
+                <img v-if="otherAlbum.cover_url" :src="otherAlbum.cover_url" :alt="otherAlbum.title" class="w-full h-full object-cover" />
                 <span v-else>💿</span>
               </div>
               <div class="flex-col">
@@ -364,31 +302,19 @@ onMounted(async () => {
   <Modal :model-value="showCommonEditDialog" title="Редактирование альбома" @close="showCommonEditDialog = false">
     <el-form ref="formRef" :model="album" label-width="auto">
       <el-form-item label="Название альбома" prop="title">
-        <TextInput
-          placeholder="Введите название альбома"
-          :model-value="album.title"
-          @update:model-value="album.title = $event"
-        />
+        <TextInput placeholder="Введите название альбома" :model-value="album.title" @update:model-value="album.title = $event" />
       </el-form-item>
       <el-form-item label="Тип" prop="type">
-        <SelectInput :model-value="album.type" :items="albumTypes" />
+        <SelectInput :model-value="album.type" :items="albumTypes" @update:model-value="album.type = $event" />
       </el-form-item>
       <el-form-item label="Дата релиза" prop="release_date">
-        <TextInput
-          placeholder="Введите дату релиза"
-          :model-value="album.release_date"
-          @update:model-value="album.release_date = $event"
-        />
+        <TextInput placeholder="Введите дату релиза" :model-value="album.release_date" @update:model-value="album.release_date = $event" />
       </el-form-item>
       <el-form-item label="Лейбл" prop="label">
         <TextInput placeholder="Введите лейбл" :model-value="album.label" @update:model-value="album.label = $event" />
       </el-form-item>
       <el-form-item label="Ссылка на обложку" prop="cover_url">
-        <TextInput
-          placeholder="Введите ссылку"
-          :model-value="album.cover_url"
-          @update:model-value="album.cover_url = $event"
-        />
+        <TextInput placeholder="Введите ссылку" :model-value="album.cover_url" @update:model-value="album.cover_url = $event" />
       </el-form-item>
     </el-form>
     <template #footer>

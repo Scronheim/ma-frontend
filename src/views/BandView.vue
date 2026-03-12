@@ -6,20 +6,25 @@ import { Star, StarFilled } from '@element-plus/icons-vue'
 import { useStore } from '@/store/store'
 
 import dateNormalizer from '@/utils/dateNormalizer'
-import { sortByDate } from '@/utils'
+import { sortByDate, bandStatusesMap, countries } from '@/utils'
 
 import CollapsibleText from '@/components/CollapsibleText.vue'
 import LoadingSpinner from '@/components/LoadingSpinner.vue'
 import BandMember from '@/components/BandMember.vue'
+import TextInput from '@/components/inputs/TextInput.vue'
+import CustomButton from '@/components/inputs/CustomButton.vue'
+import SelectInput from '@/components/inputs/SelectInput.vue'
+import Modal from '@/components/Modal.vue'
 
 import type { Rating } from '@/types'
-import CustomButton from '@/components/inputs/CustomButton.vue'
+import { ElNotification } from 'element-plus'
 
 const route = useRoute()
 const store = useStore()
 
 const showPreview = ref(false)
 const showLogoPreview = ref(false)
+const showCommonEditDialog = ref(false)
 const urlList = ref<string[]>([])
 const activeTab = ref<string>('discography')
 const activeMembersTab = ref<string>('current')
@@ -51,6 +56,24 @@ const membersTabs = computed(() => [
 const loadMoreText = computed(() => {
   return store.currentBandSimilar.length > 20 ? 'Показать меньше' : 'Показать больше'
 })
+const bandStatusColor = computed(() => {
+  switch (band.value.status) {
+    case 'Active':
+      return 'text-green-500'
+    case 'Split-up':
+      return 'text-red-500'
+    case 'Changed name':
+      return 'text-blue-500'
+    case 'On hold':
+      return 'text-yellow-500'
+    case 'Unknown':
+      return 'text-orange-500'
+    case 'Disputed':
+      return 'text-purple-500'
+    default:
+      return 'text-green-500'
+  }
+})
 
 const toggleFavoriteBand = async () => {
   if (bandUserFavoriteIndex.value > -1) store.user.favorite_bands.splice(bandUserFavoriteIndex.value, 1)
@@ -79,6 +102,15 @@ const refreshBand = async () => {
   await store.getBandById(store.currentBand.id, true)
 }
 
+const updateBand = async () => {
+  await store.updateBand(bandId.value)
+  showCommonEditDialog.value = false
+  ElNotification({
+    type: 'success',
+    message: 'Группа обновлена'
+  })
+}
+
 watch(bandId, async () => {
   await getBandById()
   activeTab.value = 'discography'
@@ -95,14 +127,11 @@ onMounted(async () => {
   <LoadingSpinner v-if="store.bandIsLoading || store.randomBandIsLoading" :visible="store.bandIsLoading || store.randomBandIsLoading" />
   <div class="space-y-6" v-else>
     <!-- Заголовок группы -->
-    <div class="flex flex-col md:flex-row items-start md:items-center justify-between">
-      <div class="flex items-center space-x-4">
-        <div
-          class="w-20 h-20 md:w-24 md:h-24 bg-linear-to-br from-gray-800 to-gray-900 rounded-lg border border-gray-700 flex items-center justify-center overflow-hidden cursor-pointer"
-        >
+    <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-2">
+      <div class="flex items-center gap-4">
+        <div class="w-24 h-24 bg-linear-to-br from-gray-800 to-gray-900 rounded-lg border border-gray-700 flex items-center justify-center overflow-hidden cursor-pointer">
           <template v-if="band.logo_url">
             <img :src="band.logo_url" :alt="band.name" class="w-full h-full object-cover" @click="showLogoPreview = true" />
-            <el-image-viewer v-if="showLogoPreview" :url-list="[band.logo_url]" hide-on-click-modal @close="showLogoPreview = false" />
           </template>
           <span v-else class="text-3xl">🎸</span>
         </div>
@@ -114,13 +143,16 @@ onMounted(async () => {
             </el-tooltip>
           </div>
           <div class="flex flex-wrap items-center gap-2 mt-2">
-            <span class="px-3 py-1 bg-gray-800 rounded-full text-sm">{{ band.status }}</span>
+            <span class="px-3 py-1 bg-gray-800 rounded-full text-sm" :class="bandStatusColor">{{ bandStatusesMap[band.status] }}</span>
             <span class="px-3 py-1 bg-gray-800 rounded-full text-sm">Образована в {{ band.formed_in }}</span>
           </div>
           <h3 class="text-gray-400 text-sm">Данные на {{ dateNormalizer.normalizeDate(band.updated_at) }}</h3>
         </div>
       </div>
-      <CustomButton v-if="store.userIsAuth" text="Обновить" :loading="store.bandIsLoading" @click="refreshBand" />
+      <div class="flex gap-2">
+        <CustomButton v-if="store.userIsAuth" text="Обновить" :loading="store.bandIsLoading" @click="refreshBand" />
+        <CustomButton v-if="store.userIsAdmin" text="Редактировать" start-icon="edit" :loading="store.bandIsLoading" @click="showCommonEditDialog = true" />
+      </div>
     </div>
 
     <!-- Основная информация -->
@@ -328,4 +360,38 @@ onMounted(async () => {
       </div>
     </div>
   </div>
+  <el-image-viewer v-if="showLogoPreview" :url-list="[band.logo_url]" hide-on-click-modal @close="showLogoPreview = false" />
+
+  <Modal size="sm" :model-value="showCommonEditDialog" title="Редактирование группы" @close="showCommonEditDialog = false">
+    <el-form ref="formRef" :model="band" label-width="auto" label-position="top" class="flex gap-2">
+      <div>
+        <el-form-item label="Название группы" prop="title">
+          <TextInput :model-value="band.name" @update:model-value="band.name = $event" />
+        </el-form-item>
+        <el-form-item label="Жанр(ы)" prop="genres">
+          <TextInput :model-value="band.genres" @update:model-value="band.genres = $event" />
+        </el-form-item>
+        <el-form-item label="Страна" prop="country">
+          <SelectInput :model-value="band.country" :items="countries" value-text="titleEn" @update:model-value="band.country = $event" />
+        </el-form-item>
+        <el-form-item label="Годы активности" prop="years_active">
+          <TextInput :model-value="band.years_active" @update:model-value="band.years_active = $event" />
+        </el-form-item>
+      </div>
+      <div>
+        <el-form-item label="Темы текстов" prop="themes">
+          <TextInput :model-value="band.themes" @update:model-value="band.themes = $event" />
+        </el-form-item>
+        <el-form-item label="Город" prop="city">
+          <TextInput :model-value="band.city" @update:model-value="band.city = $event" />
+        </el-form-item>
+        <el-form-item label="Лейбл" prop="label">
+          <TextInput :model-value="band.label" @update:model-value="band.label = $event" />
+        </el-form-item>
+      </div>
+    </el-form>
+    <template #footer>
+      <CustomButton text="Сохранить" @click="updateBand" />
+    </template>
+  </Modal>
 </template>

@@ -12,6 +12,8 @@ import Modal from '../components/Modal.vue'
 import TextInput from '../components/inputs/TextInput.vue'
 import SelectInput from '../components/inputs/SelectInput.vue'
 
+import { countries } from '@/utils'
+
 import type { ShortBand, ShortAlbum, User } from '../types'
 
 import { DEFAULT_USER } from '@/utils/consts'
@@ -135,32 +137,16 @@ onMounted(async () => {
 
       <div class="p-6">
         <div v-if="activeTab === '#bands'" class="space-y-4">
-          <div v-if="user.favorite_bands.length === 0" class="text-center py-8 text-gray-400">
-            Нет добавленых избранных групп
-          </div>
+          <div v-if="user.favorite_bands.length === 0" class="text-center py-8 text-gray-400">Нет добавленых избранных групп</div>
           <div class="grid grid-cols-1 md:grid-cols-4 gap-4 h-82 overflow-y-auto">
-            <BandCardMini
-              v-for="(band, index) in user.favorite_bands"
-              :key="band.id"
-              :band="band"
-              @click="goToBand(band)"
-              @remove="removeBandFromFavorite(index)"
-            />
+            <BandCardMini v-for="(band, index) in user.favorite_bands" :key="band.id" :band="band" @click="goToBand(band)" @remove="removeBandFromFavorite(index)" />
           </div>
         </div>
 
         <div v-if="activeTab === '#albums'" class="space-y-4">
-          <div v-if="user.favorite_albums.length === 0" class="text-center py-8 text-gray-400">
-            Нет добавленых избранных альбомов
-          </div>
+          <div v-if="user.favorite_albums.length === 0" class="text-center py-8 text-gray-400">Нет добавленых избранных альбомов</div>
           <div class="grid grid-cols-1 md:grid-cols-4 gap-4 h-82 overflow-y-auto">
-            <AlbumCardMini
-              v-for="(album, index) in user.favorite_albums"
-              :key="album.id"
-              :album="album"
-              @click="goToAlbum(album)"
-              @remove="removeAlbumFromFavorite(index)"
-            />
+            <AlbumCardMini v-for="(album, index) in user.favorite_albums" :key="album.id" :album="album" @click="goToAlbum(album)" @remove="removeAlbumFromFavorite(index)" />
           </div>
         </div>
       </div>
@@ -185,28 +171,16 @@ onMounted(async () => {
         <TextInput :model-value="user.username" placeholder="Введите имя пользователя" readonly />
       </el-form-item>
       <el-form-item label="Реальное имя" prop="real_name">
-        <TextInput
-          :model-value="user.real_name"
-          placeholder="Введите настоящее имя"
-          @update:model-value="user.real_name = $event"
-        />
+        <TextInput :model-value="user.real_name" placeholder="Введите настоящее имя" @update:model-value="user.real_name = $event" />
       </el-form-item>
       <el-form-item label="Страна" prop="country">
-        <SelectInput
-          :model-value="user.country"
-          :items="store.countryListForSelect"
-          @update:model-value="user.country = $event"
-        />
+        <SelectInput :model-value="user.country" :items="countries" @update:model-value="user.country = $event" />
       </el-form-item>
       <el-form-item label="Пол" prop="gender">
         <SelectInput :model-value="user.gender" :items="genders" @update:model-value="user.gender = $event" />
       </el-form-item>
       <el-form-item label="Любимый жанр" prop="favorite_genre">
-        <TextInput
-          :model-value="user.favorite_genre"
-          placeholder="Введите любимый жанр"
-          @update:model-value="user.favorite_genre = $event"
-        />
+        <TextInput :model-value="user.favorite_genre" placeholder="Введите любимый жанр" @update:model-value="user.favorite_genre = $event" />
       </el-form-item>
       <el-form-item label="Цвет аватара" prop="avatar_color">
         <el-color-picker :predefine="predefineColors" v-model="user.avatar_color" />
