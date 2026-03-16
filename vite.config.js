@@ -9,13 +9,7 @@ import vueDevTools from 'vite-plugin-vue-devtools'
 // https://vite.dev/config/
 export default defineConfig({
   base: '/',
-  plugins: [
-    vue(),
-    tailwindcss(),
-    AutoImport({ resolvers: ElementPlusResolver() }),
-    Components({ resolvers: ElementPlusResolver() }),
-    vueDevTools()
-  ],
+  plugins: [vue(), tailwindcss(), AutoImport({ resolvers: ElementPlusResolver() }), Components({ resolvers: ElementPlusResolver() }), vueDevTools()],
   resolve: {
     extensions: ['.mjs', '.js', '.ts', '.jsx', '.tsx', '.json', '.vue'],
     alias: {

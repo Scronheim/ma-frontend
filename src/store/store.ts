@@ -19,6 +19,9 @@ export const useStore = defineStore('store', () => {
   const currentMember = ref<Member>(DEFAULT_BAND_MEMBER)
   const user = ref<User>(DEFAULT_USER)
   const token = ref('')
+  const fileManagerSearchObject = ref({
+    query: ''
+  })
   const stats = ref<AllStatInfo>()
   const randomBandIsLoading = ref<boolean>(false)
   const bandIsLoading = ref<boolean>(false)
@@ -30,6 +33,7 @@ export const useStore = defineStore('store', () => {
   const userIsLoading = ref<boolean>(false)
   const advancedSearchIsLoading = ref<boolean>(false)
   const similarBandsIsLoading = ref<boolean>(false)
+  const fileManagerBandsIsLoading = ref<boolean>(false)
   const fromRandom = ref<boolean>(false)
   const sseEvents = ref<EventSource>()
 
@@ -99,6 +103,7 @@ export const useStore = defineStore('store', () => {
       if (updateBand) url += '?update=true'
       const { data } = await axios.get(url)
       currentBand.value = data.data
+      return data.data
     } finally {
       bandIsLoading.value = false
     }
@@ -111,6 +116,16 @@ export const useStore = defineStore('store', () => {
       currentBand.value = data.data
     } finally {
       bandIsLoading.value = false
+    }
+  }
+
+  const searchBand = async (query: string, onlyLocal: boolean = false) => {
+    try {
+      fileManagerBandsIsLoading.value = true
+      const { data } = await axios.get(`/api/band/search?query=${query}&only_local=${onlyLocal}`)
+      return data
+    } finally {
+      fileManagerBandsIsLoading.value = false
     }
   }
 
@@ -134,15 +149,16 @@ export const useStore = defineStore('store', () => {
       albumIsLoading.value = true
       const { data } = await axios.get(`/api/album/${albumId}`)
       currentAlbum.value = data.data
+      return data.data
     } finally {
       albumIsLoading.value = false
     }
   }
 
-  const updateAlbum = async (albumId: string | number) => {
+  const updateAlbum = async (albumId: string | number, album: Album = currentAlbum.value) => {
     try {
       albumIsLoading.value = true
-      const { data } = await axios.patch(`/api/album/${albumId}`, currentAlbum.value)
+      const { data } = await axios.patch(`/api/album/${albumId}`, album)
       currentAlbum.value = data.data
     } finally {
       albumIsLoading.value = false
@@ -322,6 +338,7 @@ export const useStore = defineStore('store', () => {
     currentAlbum,
     currentMember,
     user,
+    fileManagerSearchObject,
     stats,
     bandIsLoading,
     randomBandIsLoading,
@@ -332,12 +349,14 @@ export const useStore = defineStore('store', () => {
     ripMembersIsLoading,
     userIsLoading,
     similarBandsIsLoading,
+    fileManagerBandsIsLoading,
     albumsExceptCurrent,
     sseEvents,
     fromRandom,
     isMobile,
     userIsAuth,
     userIsAdmin,
+    searchBand,
     getRandomBand,
     getBandById,
     getBandByGenre,

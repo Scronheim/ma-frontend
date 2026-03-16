@@ -14,14 +14,14 @@ export interface Band {
   links: SocialLink[]
   logo_url: string | null
   photo_url: string | null
-  discography: Album[]
+  discography: Album[] | ShortAlbumWithTracklist[]
   current_lineup: MemberLineUp[]
   past_lineup: MemberLineUp[]
   updated_at: string
 }
 
 export interface Album {
-  id: number | null
+  id: number
   title: string
   title_slug: string
   band_ids: number[]
@@ -234,4 +234,13 @@ export interface Genre {
 export interface SelectItem {
   title: string
   value: string | number
+}
+
+export interface NginxItem {
+  name: string
+  type: 'file' | 'directory'
+  mtime: string
+  path: string
+  url: string
+  size?: number
 }

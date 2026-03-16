@@ -89,7 +89,7 @@ onMounted(() => {
       </div>
     </header>
 
-    <el-container class="min-h-[calc(100vh-68px)]">
+    <el-container class="min-h-[calc(100vh-60px)]">
       <!-- Десктопное меню (el-aside) -->
       <el-aside width="260px" class="hidden md:block bg-gray-800 border-r border-gray-700">
         <SideMenu @close-menu="mobileMenuOpen = false" />
@@ -129,7 +129,7 @@ onMounted(() => {
 
       <!-- Основной контент (el-main) -->
       <el-main class="p-0 bg-gray-900">
-        <div class="container mx-auto px-1 py-3">
+        <div class="container mx-auto px-1 pt-3">
           <router-view />
         </div>
       </el-main>

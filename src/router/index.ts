@@ -12,6 +12,7 @@ import CountrySearchView from '../views/CountrySearchView.vue'
 import GenreSearchView from '../views/GenreSearchView.vue'
 import ArtistRip from '../views/ArtistRip.vue'
 import AdvancedSearch from '../views/AdvancedSearch.vue'
+import MusicManagerView from '../views/MusicManagerView.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -86,6 +87,11 @@ const router = createRouter({
       path: '/search/advanced',
       name: 'advanced search',
       component: AdvancedSearch
+    },
+    {
+      path: '/file-manager',
+      name: 'file-manager',
+      component: MusicManagerView
     }
   ],
   scrollBehavior() {

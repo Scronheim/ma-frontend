@@ -74,6 +74,12 @@ const getRandomBand = async () => {
               </span>
             </div>
           </router-link>
+          <router-link v-if="store.userIsAdmin" :to="{ path: '/file-manager' }" @click="emit('closeMenu')">
+            <div class="flex items-center space-x-2 py-3 rounded-lg transition-colors duration-200 text-gray-300 hover:bg-gray-700">
+              <Icon icon="mdi:plus" width="24" height="24" />
+              <span>Добавление музыки</span>
+            </div>
+          </router-link>
         </nav>
         <div class="flex items-center space-x-2 py-3 rounded-lg transition-colors duration-200 text-gray-300 hover:bg-gray-700 cursor-pointer" @click="store.logout">
           <Icon icon="mdi:exit-run" width="24" height="24" />
