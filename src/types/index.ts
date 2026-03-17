@@ -244,3 +244,16 @@ export interface NginxItem {
   url: string
   size?: number
 }
+
+export interface ContextMenuItem {
+  label?: string
+  icon?: string
+  iconClass?: string
+  disabled?: boolean
+  danger?: boolean
+  divider?: boolean
+  shortcut?: string
+  checked?: boolean
+  children?: ContextMenuItem[]
+  action?: () => void
+}

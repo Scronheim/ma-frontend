@@ -1,20 +1,16 @@
 import type { NginxItem } from '@/types'
 
 class NginxService {
-  private baseUrl: string = '/music' // URL вашего nginx сервера
+  private baseUrl: string = '/api/files'
 
   setBaseUrl(url: string) {
     this.baseUrl = url
   }
 
-  /**
-   * Получить список файлов из директории через nginx autoindex
-   * Формат ответа nginx autoindex должен быть JSON
-   * Настройка nginx: autoindex on; autoindex_format json;
-   */
   async listDirectory(path: string = ''): Promise<NginxItem[]> {
     try {
-      const url = `${this.baseUrl}${path}/?json`
+      let url = `${this.baseUrl}/list`
+      if (path) url += `?path=${path}`
       const response = await fetch(url)
 
       if (!response.ok) {
@@ -22,15 +18,13 @@ class NginxService {
       }
 
       const data = await response.json()
-
-      // Преобразуем ответ nginx autoindex в наш формат
-      return data.map((item: NginxItem) => ({
+      return data.items.map((item: NginxItem) => ({
         name: item.name,
         type: item.type === 'directory' ? 'directory' : 'file',
         size: item.size,
         mtime: item.mtime,
-        path: `${path}/${item.name}`.replace(/\/\//g, '/'),
-        url: `${this.baseUrl}${path}/${item.name}`.replace(/\/\//g, '/')
+        path: path ? `${path}/${item.name}` : item.name,
+        url: `/music/${path}/${item.name}`
       }))
     } catch (error) {
       console.error('Error listing directory:', error)
@@ -51,7 +45,7 @@ class NginxService {
   getParentPath(path: string): string {
     const parts = path.split('/').filter(p => p)
     parts.pop()
-    return '/' + parts.join('/')
+    return parts.join('/')
   }
 
   /**

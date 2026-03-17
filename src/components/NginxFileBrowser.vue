@@ -11,7 +11,7 @@
     <!-- Навигационная строка -->
     <div class="px-4 py-2 bg-gray-750 border-b border-gray-700">
       <div class="flex items-center space-x-2 text-sm">
-        <button @click="navigateTo('/')" class="text-gray-400 hover:text-white" :disabled="currentPath === '/'">
+        <button @click="navigateTo('')" class="text-gray-400 hover:text-white" :disabled="currentPath === ''">
           <Icon icon="mdi:home" width="18" />
         </button>
 
@@ -52,20 +52,26 @@
       <!-- Список файлов -->
       <div v-else class="space-y-1">
         <!-- Кнопка "Наверх" (если не в корне) -->
-        <div v-if="currentPath !== '/'" class="flex items-center p-2 rounded-lg cursor-pointer hover:bg-gray-750 text-gray-400 select-none" @click="navigateTo(parentPath)">
+        <div v-if="currentPath !== ''" class="flex items-center p-2 rounded-lg cursor-pointer hover:bg-gray-750 text-gray-400 select-none" @click="navigateTo(parentPath)">
           <Icon class="w-6 h-6" icon="mdi:chevron-left" />
           <span>назад</span>
         </div>
 
         <!-- Папки -->
-        <div v-for="item in directories" :key="item.path" class="flex items-center p-2 rounded-lg cursor-pointer hover:bg-gray-900 select-none" @click="navigateTo(item.path)">
+        <div
+          v-for="item in directories"
+          :key="item.path"
+          class="flex items-center p-2 rounded-lg cursor-pointer hover:bg-gray-900 select-none"
+          @click="navigateTo(item.path)"
+          @click.right="emit('context-menu', $event, item)"
+        >
           <Icon icon="mdi:folder-outline" class="w-6 h-6 mr-2 text-yellow-500" />
           <span class="flex-1">{{ item.name }}</span>
           <span class="text-xs text-gray-500">{{ formatDate(item.mtime) }}</span>
         </div>
 
         <!-- Файлы -->
-        <div v-for="item in files" :key="item.path" class="flex items-center p-2 rounded-lg hover:bg-gray-900 select-none">
+        <div v-for="item in files" :key="item.path" class="flex items-center p-2 rounded-lg hover:bg-gray-900 select-none" @click.right="emit('context-menu', $event, item)">
           <Icon icon="mdi:file-document" class="w-5 h-5 mr-2" />
           <span class="flex-1">{{ item.name }}</span>
           <span class="text-xs text-gray-500 mr-3">{{ formatFileSize(item.size) }}</span>
@@ -97,12 +103,13 @@ const emit = defineEmits<{
   (e: 'select-files', files: NginxItem[]): void
   (e: 'match-selected'): void
   (e: 'clear-results'): void
+  (e: 'context-menu', event: MouseEvent, file: NginxItem): void
 }>()
 
 const store = useStore()
 
 // Состояние
-const currentPath = ref('/')
+const currentPath = ref('')
 const filter = ref('')
 const items = ref<NginxItem[]>([])
 const isLoading = ref(false)
@@ -113,17 +120,17 @@ const breadcrumbs = computed(() => {
   let path = ''
   return [
     ...parts.map(part => {
-      path += '/' + part
+      path += part
       return { name: part, path }
     })
   ]
 })
 
 const parentPath = computed(() => {
-  if (currentPath.value === '/') return '/'
+  if (currentPath.value === '') return ''
   const parts = currentPath.value.split('/').filter(p => p)
   parts.pop()
-  return '/' + parts.join('/')
+  return parts.join('/')
 })
 
 // Фильтрация папок и файлов
@@ -193,7 +200,7 @@ watch(breadcrumbs, value => {
 })
 
 // Инициализация
-loadDirectory('/')
+loadDirectory('')
 </script>
 
 <style scoped></style>

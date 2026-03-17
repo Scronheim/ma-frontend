@@ -5,10 +5,10 @@ import { Icon } from '@iconify/vue'
 
 import { useStore } from '@/store/store'
 
+import LoadingSpinner from './LoadingSpinner.vue'
 import CustomButton from './inputs/CustomButton.vue'
 
-import type { Band, ShortAlbum, Album, Track } from '@/types'
-import LoadingSpinner from './LoadingSpinner.vue'
+import type { Band, Album } from '@/types'
 
 const props = defineProps<{
   searchResults: Band[]
@@ -86,7 +86,7 @@ watch(store.fileManagerSearchObject, async newValue => {
                 <img v-if="band.photo_url" class="w-20" :src="band.photo_url" />
                 <img v-else-if="band.logo_url" class="w-20" :src="band.logo_url" />
                 <div class="flex flex-col">
-                  <h3 class="text-lg font-bold text-white">{{ band.name }}</h3>
+                  <router-link :to="`/bands/${band.name_slug}/${band.id}`" class="text-lg font-bold text-white" target="_blank" @click.stop>{{ band.name }}</router-link>
                   <p class="text-sm text-gray-400">{{ band.country }} • {{ band.genres }}</p>
                 </div>
               </div>
@@ -96,7 +96,7 @@ watch(store.fileManagerSearchObject, async newValue => {
           </div>
 
           <!-- Альбомы -->
-          <div v-if="expandedBands.includes(band.id)" class="grid grid-cols-3 gap-2 border-t border-gray-700">
+          <div v-if="expandedBands.includes(band.id)" class="grid grid-cols-1 md:grid-cols-3 gap-2 border-t border-gray-700">
             <div v-for="(album, albumIndex) in band.discography" :key="album.id" class="border-b border-gray-700 last:border-0">
               <!-- Заголовок альбома с кнопкой матчинга всего альбома -->
               <div class="p-1 bg-gray-900">
@@ -105,7 +105,9 @@ watch(store.fileManagerSearchObject, async newValue => {
                     <div v-if="album.cover_loading" class="w-20 h-20 border-4 border-red-600 border-t-transparent rounded-full animate-spin mx-auto" />
                     <img v-else class="w-20 h-20" :src="album.cover_url" />
                     <div class="flex flex-col ml-2">
-                      <span class="font-medium">{{ album.title }}</span>
+                      <router-link :to="`/albums/${band.name_slug}/${album.title_slug}/${album.id}`" class="font-medium text-white" target="_blank" @click.stop>
+                        {{ album.title }}
+                      </router-link>
                       <span class="text-xs text-gray-500">{{ album.release_date }}</span>
                       <span class="text-xs text-gray-500">{{ album.type }}</span>
                     </div>
@@ -121,6 +123,7 @@ watch(store.fileManagerSearchObject, async newValue => {
                 <!-- Кнопка матчинга всего альбома -->
                 <CustomButton text="Запомнить пути" thin @click="matchWholeAlbum(band, album)" />
                 <div v-for="track in album.tracklist" :key="track.id" class="track-item flex items-center p-2 rounded-lg">
+                  <span v-if="track.url" class="w-8 text-gray-500"><Icon icon="mdi:play" /></span>
                   <span class="w-8 text-xs text-gray-500">{{ track.number }}.</span>
                   <span class="flex items-center gap-2 flex-1 text-sm">
                     {{ track.title }}
