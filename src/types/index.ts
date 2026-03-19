@@ -30,7 +30,7 @@ export interface Album {
   type: 'Full-length' | 'EP' | 'Single' | 'Demo' | 'Split'
   release_date: string
   label: string
-  cover_url: string
+  cover_url: string | null
   cover_loading: boolean
   tracklist: Track[]
   current_lineup: MemberLineUp[]

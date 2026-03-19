@@ -8,7 +8,7 @@ export const DEFAULT_USER: User = {
   avatar_color: 'red',
   bands_ratings: [],
   albums_ratings: [],
-  favorite_genre: null,
+  favorite_genre: '',
   favorite_bands: [],
   favorite_albums: [],
   role: 'user'

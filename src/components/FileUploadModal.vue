@@ -6,14 +6,17 @@
     :show-footer="true"
     :confirm-text="confirmText"
     :cancel-text="cancelText"
-    :confirm-disabled="!canConfirm"
     @confirm="handleConfirm"
     @cancel="handleCancel"
     @close="handleClose"
   >
+    <div v-if="props.progress !== 0" class="progress-container" id="progressContainer">
+      <div class="progress-bar" id="progressBar" :style="{ width: `${props.progress}%` }">{{ Math.round(props.progress) }}%</div>
+    </div>
     <div
+      v-else
       ref="dropZoneRef"
-      class="drop-zone relative border-2 border-dashed rounded-lg p-8 transition-all duration-200 cursor-pointer"
+      class="drop-zone relative border-2 border-dashed rounded-lg p-8 cursor-pointer"
       :class="[hasFiles ? 'bg-gray-750' : '']"
       @click="triggerFileSelect"
       @dragenter="handleDragEnter"
@@ -29,25 +32,22 @@
           {{ isDragging ? 'А теперь брось их сюда' : 'Перетяни файлы сюда' }}
         </p>
         <p class="text-sm text-gray-500 mb-4">или</p>
-        <button type="button" class="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg transition-colors duration-200 text-sm font-medium" @click.stop="triggerFileSelect">
-          Выбери файлы
-        </button>
-        <p v-if="maxSize" class="text-xs text-gray-500 mt-4">Максимальный размер файла: {{ formatFileSize(maxSize) }}</p>
+        <button type="button" class="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg text-sm font-medium" @click.stop="triggerFileSelect">Выбери файлы</button>
         <p v-if="accept" class="text-xs text-gray-500">Разрешённые форматы: {{ accept.split(',').join(', ') }}</p>
       </div>
 
       <!-- Список выбранных файлов -->
-      <div v-else class="space-y-3">
-        <div class="flex items-center justify-between mb-4">
+      <div v-else>
+        <div class="flex items-center justify-between">
           <h3 class="text-sm font-medium text-gray-300">Выбранные файлы ({{ files.length }})</h3>
-          <button @click.stop="clearFiles" class="text-xs text-gray-400 hover:text-white transition-colors duration-200">Очистить всё</button>
+          <button @click.stop="clearFiles" class="text-xs text-gray-400 hover:text-white">Очистить всё</button>
         </div>
 
-        <div class="max-h-60 overflow-y-auto pr-2">
+        <div class="max-h-60 overflow-y-auto">
           <div
             v-for="(file, index) in files"
-            :key="file.id"
-            class="file-item flex items-center p-3 bg-gray-750 rounded-lg group"
+            :key="file.name"
+            class="flex items-center p-1 bg-gray-750 rounded-lg group"
             :class="{
               'border border-red-500': file.error,
               'border border-green-500': file.status === 'uploaded'
@@ -62,7 +62,7 @@
             <div class="flex-1 min-w-0">
               <div class="flex items-start justify-between">
                 <div>
-                  <p class="text-sm font-medium text-white truncate" :title="file.name">
+                  <p class="text-sm font-medium text-white wrap-break-word" :title="file.name">
                     {{ file.name }}
                   </p>
                   <p class="text-xs text-gray-500">
@@ -90,10 +90,7 @@
             </div>
 
             <!-- Кнопка удаления -->
-            <button
-              @click.stop="removeFile(index)"
-              class="ml-2 p-1 text-gray-400 hover:text-white hover:bg-gray-700 rounded transition-colors duration-200 opacity-0 group-hover:opacity-100"
-            >
+            <button @click.stop="removeFile(index)" class="ml-2 p-1 text-gray-400 hover:text-white hover:bg-gray-700 rounded opacity-0 group-hover:opacity-100">
               <Icon class="w-4 h-4" icon="mdi:close" />
             </button>
           </div>
@@ -102,7 +99,7 @@
         <!-- Кнопка добавления ещё файлов -->
         <button
           @click.stop="triggerFileSelect"
-          class="w-full mt-2 py-2 border border-gray-700 border-dashed rounded-lg text-sm text-gray-400 hover:text-white hover:border-gray-600 transition-colors duration-200"
+          class="w-full mt-2 py-2 border border-gray-700 border-dashed rounded-lg text-sm text-gray-400 hover:text-white hover:border-gray-600"
         >
           + Добавить ещё файлов
         </button>
@@ -110,8 +107,8 @@
     </div>
 
     <!-- Предпросмотр для изображений -->
-    <div v-if="previewImage" class="border-t border-gray-700 pt-4">
-      <h4 class="text-sm font-medium text-gray-300 mb-3">Preview</h4>
+    <div v-if="previewImage && props.progress === 0" class="border-t border-gray-700 pt-4">
+      <h4 class="text-sm font-medium text-gray-300 mb-3">Предпросмотр картинок</h4>
       <div class="bg-gray-750 rounded-lg p-2 flex items-center justify-center">
         <img :src="previewImage" alt="Preview" class="max-h-48 max-w-full object-contain rounded" />
       </div>
@@ -142,28 +139,22 @@ const props = withDefaults(
     title?: string
     size?: 'sm' | 'md' | 'lg' | 'xl' | 'full'
     multiple?: boolean
+    progress?: number
     accept?: string
-    maxSize?: number // в байтах
-    maxFiles?: number
-    minFiles?: number
     showOptions?: boolean
     albumMode?: boolean
     folders?: { name: string; path: string }[]
     confirmText?: string
     cancelText?: string
     autoUpload?: boolean
-    validateFile?: (file: File) => string | null // возвращает ошибку или null
-    onUpload?: (files: UploadFile[], options: UploadOptions) => Promise<void>
   }>(),
   {
     modelValue: false,
-    title: 'Upload Files',
+    title: 'Загрузка файлов',
     size: 'lg',
     multiple: true,
-    accept: '.jpg,.jpeg,.png,.mp3,.flac,.wav,.ogg,.m4a,audio/*',
-    maxSize: 100 * 1024 * 1024, // 100MB
-    maxFiles: 10,
-    minFiles: 0,
+    progress: 0,
+    accept: '.jpg,.jpeg,.png,.mp3,.flac,.wav,.ogg,.m4a,.zip,.7z,.rar,audio/*',
     showOptions: true,
     albumMode: false,
     folders: () => [],
@@ -175,41 +166,25 @@ const props = withDefaults(
 
 const emit = defineEmits<{
   (e: 'update:modelValue', value: boolean): void
-  (e: 'upload', files: UploadFile[], options: UploadOptions): void
+  (e: 'upload', files: File[]): void
   (e: 'cancel'): void
   (e: 'close'): void
   (e: 'file-add', file: UploadFile): void
   (e: 'file-remove', file: UploadFile): void
 }>()
 
-export interface UploadOptions {
-  destinationFolder: string
-  overwriteExisting: boolean
-  createAlbumFolder: boolean
-}
-
 // Состояние
 const visible = computed({
   get: () => props.modelValue,
   set: value => emit('update:modelValue', value)
 })
-
 const fileInputRef = ref<HTMLInputElement | null>(null)
 const dropZoneRef = ref<HTMLElement | null>(null)
 const isDragging = ref(false)
 const files = ref<UploadFile[]>([])
-const destinationFolder = ref('')
-const overwriteExisting = ref(false)
-const createAlbumFolder = ref(false)
 
 // Вычисляемые свойства
 const hasFiles = computed(() => files.value.length > 0)
-
-const canConfirm = computed(() => {
-  if (files.value.length < props.minFiles) return false
-  if (files.value.length > props.maxFiles) return false
-  return files.value.every(f => !f.error)
-})
 
 const totalSize = computed(() => {
   return files.value.reduce((sum, file) => sum + file.size, 0)
@@ -266,20 +241,7 @@ const handleDrop = (event: DragEvent) => {
 }
 
 const addFiles = (newFiles: File[]) => {
-  // Проверка на максимальное количество файлов
-  if (files.value.length + newFiles.length > props.maxFiles) {
-    ElMessage.warning(`Maximum ${props.maxFiles} files allowed`)
-    return
-  }
-
   newFiles.forEach(file => {
-    // Проверка размера
-    if (file.size > props.maxSize) {
-      const error = `File too large. Maximum size is ${formatFileSize(props.maxSize)}`
-      addFileWithError(file, error)
-      return
-    }
-
     // Проверка типа (если указан accept)
     if (props.accept !== '*/*') {
       const acceptedTypes = props.accept.split(',').map(t => t.trim())
@@ -288,15 +250,6 @@ const addFiles = (newFiles: File[]) => {
 
       if (!isAccepted) {
         addFileWithError(file, `File type not allowed. Accepted: ${props.accept}`)
-        return
-      }
-    }
-
-    // Пользовательская валидация
-    if (props.validateFile) {
-      const error = props.validateFile(file)
-      if (error) {
-        addFileWithError(file, error)
         return
       }
     }
@@ -369,35 +322,11 @@ const formatFileSize = (bytes: number): string => {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
 }
 
-// Симуляция загрузки
-const simulateUpload = async (file: UploadFile) => {
-  file.status = 'uploading'
-
-  for (let i = 0; i <= 100; i += 10) {
-    await new Promise(resolve => setTimeout(resolve, 200))
-    file.progress = i
-  }
-
-  file.status = 'uploaded'
-  file.progress = 100
-}
-
 const handleConfirm = async () => {
-  const options: UploadOptions = {
-    destinationFolder: destinationFolder.value,
-    overwriteExisting: overwriteExisting.value,
-    createAlbumFolder: createAlbumFolder.value
-  }
-
-  for (const file of files.value) {
-    console.log(file)
-
-    if (file.status === 'pending') {
-      await simulateUpload(file)
-    }
-  }
-
-  emit('upload', files.value, options)
+  emit(
+    'upload',
+    files.value.flatMap(f => f.file)
+  )
 }
 
 const handleCancel = () => {
@@ -417,6 +346,10 @@ watch(visible, newVal => {
     clearFiles()
   }
 })
+
+defineExpose({
+  clearFiles
+})
 </script>
 
 <style scoped>
@@ -426,32 +359,6 @@ watch(visible, newVal => {
 
 .drop-zone.dragging {
   transform: scale(1.02);
-}
-
-.file-item {
-  transition: all 0.2s ease;
-}
-
-.file-item:hover {
-  transform: translateX(4px);
-}
-
-/* Стили для скроллбара */
-.overflow-y-auto::-webkit-scrollbar {
-  width: 6px;
-}
-
-.overflow-y-auto::-webkit-scrollbar-track {
-  background: #1f2937;
-}
-
-.overflow-y-auto::-webkit-scrollbar-thumb {
-  background: #4b5563;
-  border-radius: 3px;
-}
-
-.overflow-y-auto::-webkit-scrollbar-thumb:hover {
-  background: #6b7280;
 }
 
 /* Анимация для появления файлов */
@@ -468,5 +375,21 @@ watch(visible, newVal => {
 .file-item-leave-to {
   opacity: 0;
   transform: translateX(30px);
+}
+.progress-container {
+  height: 17px;
+  background-color: #f0f0f0;
+  border-radius: 10px;
+  overflow: hidden;
+  display: block;
+}
+
+.progress-bar {
+  height: 100%;
+  width: 0%;
+  background-color: #4caf50;
+  font-size: small;
+  text-align: center;
+  transition: width 0.3s;
 }
 </style>

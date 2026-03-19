@@ -34,6 +34,10 @@ export const useStore = defineStore('store', () => {
   const advancedSearchIsLoading = ref<boolean>(false)
   const similarBandsIsLoading = ref<boolean>(false)
   const fileManagerBandsIsLoading = ref<boolean>(false)
+  const renameIsLoading = ref<boolean>(false)
+  const addFolderIsLoading = ref<boolean>(false)
+  const deleteFileOrFolderIsLoading = ref<boolean>(false)
+  const filesIsUploading = ref<boolean>(false)
   const fromRandom = ref<boolean>(false)
   const sseEvents = ref<EventSource>()
 
@@ -206,6 +210,47 @@ export const useStore = defineStore('store', () => {
     }
   }
 
+  const rename = async (old_name: string, new_name: string, path: string = '') => {
+    try {
+      renameIsLoading.value = true
+      await axios.put('/api/files/rename', { path, old_name, new_name })
+    } finally {
+      renameIsLoading.value = false
+    }
+  }
+
+  const addFolder = async (folder_name: string, path: string = '') => {
+    try {
+      addFolderIsLoading.value = true
+      await axios.post(`/api/files/folder?path=${path}`, { folder_name })
+    } finally {
+      addFolderIsLoading.value = false
+    }
+  }
+
+  const deleteFileOrFolder = async (path: string = '') => {
+    try {
+      deleteFileOrFolderIsLoading.value = true
+      await axios.delete(`/api/files/delete?path=${path}`)
+    } finally {
+      deleteFileOrFolderIsLoading.value = false
+    }
+  }
+
+  const uploadFiles = async (files: File[], path: string = '') => {
+    try {
+      const payload = new FormData()
+      payload.append('path', `${path}/`)
+      files.forEach(file => {
+        payload.append('files', file)
+      })
+      filesIsUploading.value = true
+      await axios.post(`/api/files/upload`, payload)
+    } finally {
+      filesIsUploading.value = false
+    }
+  }
+
   const onEventsMessage = (event: MessageEvent) => {
     if (!currentBand.value.discography.length) return
     const data: SSEResponse = JSON.parse(event.data)
@@ -350,6 +395,7 @@ export const useStore = defineStore('store', () => {
     userIsLoading,
     similarBandsIsLoading,
     fileManagerBandsIsLoading,
+    renameIsLoading,
     albumsExceptCurrent,
     sseEvents,
     fromRandom,
@@ -380,6 +426,10 @@ export const useStore = defineStore('store', () => {
     me,
     updateMe,
     getProfileByUsername,
-    checkToken
+    checkToken,
+    rename,
+    addFolder,
+    deleteFileOrFolder,
+    uploadFiles
   }
 })

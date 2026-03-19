@@ -7,6 +7,48 @@ export const sortByDate = (a: Album, b: Album): number => {
   return 1
 }
 
+export const uploadMultipleFiles = async (files: File[], path: string = '', onProgress: Function | null = null) => {
+  const formData = new FormData()
+  formData.append('path', path)
+
+  files.forEach(file => {
+    formData.append('files', file)
+  })
+
+  try {
+    const xhr = new XMLHttpRequest()
+
+    // Создаем промис для обработки XHR запроса
+    const promise = new Promise((resolve, reject) => {
+      xhr.upload.addEventListener('progress', event => {
+        if (event.lengthComputable && onProgress) {
+          const percentComplete = (event.loaded / event.total) * 100
+          onProgress(percentComplete)
+        }
+      })
+
+      xhr.addEventListener('load', () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          resolve(JSON.parse(xhr.responseText))
+        } else {
+          reject(new Error(`Upload failed with status ${xhr.status}`))
+        }
+      })
+
+      xhr.addEventListener('error', () => reject(new Error('Upload failed')))
+      xhr.addEventListener('abort', () => reject(new Error('Upload aborted')))
+    })
+
+    xhr.open('POST', '/api/files/upload')
+    xhr.send(formData)
+
+    return await promise
+  } catch (error) {
+    console.error('Upload failed:', error)
+    throw error
+  }
+}
+
 export const bandStatusesMap = {
   Active: 'Активна',
   Unknown: 'Неизвестно',
