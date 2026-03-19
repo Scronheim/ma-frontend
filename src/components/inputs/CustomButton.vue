@@ -38,12 +38,20 @@ const buttonIconEnd = computed((): string => {
 const buttonYPadding = computed((): string => {
   return props.thin ? 'py-1' : 'py-2'
 })
+
+const buttonColor = computed((): string => {
+  return `bg-${props.color}-600`
+})
+
+const buttonHoverColor = computed((): string => {
+  return `hover:bg-${props.color}-700`
+})
 </script>
 
 <template>
   <button
-    class="px-2 bg-gray-700 hover:bg-gray-600 rounded-lg flex items-center justify-center cursor-pointer"
-    :class="[buttonYPadding]"
+    class="px-2 rounded-lg flex items-center justify-center cursor-pointer"
+    :class="[buttonYPadding, buttonColor, buttonHoverColor]"
     :disabled="props.disabled"
     @click="emits('click')"
   >

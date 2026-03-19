@@ -62,7 +62,7 @@
               <!-- Длительность -->
               <div class="flex items-center space-x-2">
                 <span class="text-xs text-gray-400">{{ formatTime(track.duration) }}</span>
-                <button class="cursor-pointer" @click="removeFromPlaylist(track)">
+                <button class="cursor-pointer" @click.stop="removeFromPlaylist(track)">
                   <Icon class="w-5 h-5 text-red-500" icon="mdi:close" />
                 </button>
               </div>
@@ -210,11 +210,7 @@
 
               <!-- Кнопка перемешивания -->
               <button @click="toggleShuffle" class="text-gray-400 hover:text-white" :class="{ 'text-red-400': isShuffled }">
-                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                  <path
-                    d="M10.59 9.17L5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm0 9.41l-1.41 1.41 2.55 2.55L14.5 20H20v-5.5l-2.04 2.04-3.46-3.45z"
-                  />
-                </svg>
+                <Icon icon="mdi:shuffle" class="w-5 h-5" />
               </button>
 
               <!-- Кнопка показа плейлиста -->
@@ -225,9 +221,7 @@
                 :class="{ 'text-red-400': isPlaylistVisible }"
                 title="Показать плейлист"
               >
-                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M15 6H3v2h12V6zm0 4H3v2h12v-2zM3 16h8v-2H3v2zM17 6v8.18c-.31-.11-.65-.18-1-.18-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3V8h3V6h-5z" />
-                </svg>
+                <Icon icon="mdi:playlist-music" class="w-5 h-5" />
                 <!-- Бейдж с количеством треков -->
                 <span
                   v-if="playlistTracks.length > 0"
@@ -239,9 +233,7 @@
 
               <!-- Кнопка закрытия плеера -->
               <button @click="closePlayer" title="Закрыть плеер" class="text-gray-400 hover:text-white ml-2">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
+                <Icon icon="mdi:close" class="w-5 h-5" />
               </button>
             </div>
           </div>

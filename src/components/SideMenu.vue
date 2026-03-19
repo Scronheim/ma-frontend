@@ -6,6 +6,7 @@ import { useStore } from '@/store/store'
 
 import type { FormInstance, FormRules } from 'element-plus'
 import type { AuthData } from '@/types'
+import CustomButton from './inputs/CustomButton.vue'
 
 const emit = defineEmits<{
   (e: 'closeMenu'): void
@@ -106,8 +107,8 @@ const getRandomBand = async () => {
           </el-form-item>
         </el-form>
         <div class="flex justify-between">
-          <button @click="register" class="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-lg cursor-pointer">Регистрация</button>
-          <button @click="login" class="px-3 py-1 bg-green-600 hover:bg-green-700 text-white rounded-lg cursor-pointer">Войти</button>
+          <CustomButton text="Регистрация" thin color="blue" @click="register" />
+          <CustomButton text="Войти" thin color="green" @click="login" />
         </div>
       </template>
     </div>
