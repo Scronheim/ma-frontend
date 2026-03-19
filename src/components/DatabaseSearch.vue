@@ -56,9 +56,9 @@ const matchWholeAlbum = (band: Band, album: Album) => {
   emit('match-album', band, album)
 }
 
-// watch(store.fileManagerSearchObject, async newValue => {
-//   if (newValue.query) await performSearch(newValue.query)
-// })
+watch(store.fileManagerSearchObject, async newValue => {
+  if (newValue.query) await performSearch(newValue.query)
+})
 </script>
 
 <template>
