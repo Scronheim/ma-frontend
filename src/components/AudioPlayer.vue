@@ -1,5 +1,92 @@
 <template>
   <Teleport to="body">
+    <!-- Панель плейлиста (справа) -->
+    <Transition
+      enter-active-class="transition transform duration-300 ease-out"
+      enter-from-class="translate-x-full"
+      enter-to-class="translate-x-0"
+      leave-active-class="transition transform duration-300 ease-in"
+      leave-from-class="translate-x-0"
+      leave-to-class="translate-x-full"
+    >
+      <div
+        v-if="isPlaylistVisible"
+        class="fixed top-0 right-0 bottom-0 z-50 w-full sm:w-[500px] bg-gray-800 border-l border-gray-600 shadow-2xl overflow-hidden"
+        :class="{ 'with-player': isVisible && currentTrack }"
+        :style="{
+          top: '59px', // Высота верхнего меню
+          bottom: isVisible && currentTrack ? '73px' : '0' // 80px - высота плеера
+        }"
+      >
+        <div class="h-full flex flex-col">
+          <!-- Заголовок плейлиста -->
+          <div class="flex items-center justify-between px-4 py-2 border-b border-gray-700">
+            <div class="flex items-center gap-2">
+              <h3 class="text-lg font-semibold text-white">Плейлист</h3>
+              <span class="text-xs text-gray-400 cursor-pointer" @click="playerStore.clearPlaylist">Очистить</span>
+            </div>
+            <button @click="togglePlaylist" class="text-gray-400 hover:text-white hover:bg-gray-800 cursor-pointer">
+              <Icon icon="mdi:close" class="w-5 h-5" />
+            </button>
+          </div>
+
+          <!-- Поиск по плейлисту -->
+          <div class="p-4 border-b border-gray-700">
+            <TextInput placeholder="Введите название трека" :model-value="searchQuery" @update:model-value="searchQuery = $event" />
+          </div>
+
+          <!-- Список треков -->
+          <div class="flex-1 overflow-y-auto">
+            <div
+              v-for="(track, index) in filteredPlaylist"
+              :key="track.id"
+              @click="selectTrackFromPlaylist(index)"
+              class="flex items-center space-x-3 px-3 py-2 border-b border-gray-800 cursor-pointer"
+              :class="[trackIndex === getOriginalIndex(index) && currentTrack?.id === track.id ? 'bg-gray-900' : 'bg-gray-800']"
+            >
+              <div class="w-2 text-xs text-gray-400">{{ index + 1 }}</div>
+              <!-- Обложка -->
+              <div class="w-12 h-12 bg-gray-800 rounded flex-shrink-0 overflow-hidden">
+                <img v-if="track.coverUrl" :src="track.coverUrl" :alt="track.title" class="w-full h-full object-cover" />
+                <div v-else class="w-full h-full flex items-center justify-center text-2xl">🎵</div>
+              </div>
+
+              <!-- Информация о треке -->
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center space-x-2">
+                  <h4 class="text-sm font-medium text-white truncate">{{ track.title }}</h4>
+                </div>
+                <p class="text-xs text-gray-400 truncate">{{ track.artist }} • {{ track.album }}</p>
+              </div>
+
+              <!-- Длительность -->
+              <div class="flex items-center space-x-2">
+                <span class="text-xs text-gray-400">{{ formatTime(track.duration) }}</span>
+                <button class="cursor-pointer" @click="removeFromPlaylist(track)">
+                  <Icon class="w-5 h-5 text-red-500" icon="mdi:close" />
+                </button>
+              </div>
+            </div>
+
+            <!-- Пустой плейлист -->
+            <div v-if="filteredPlaylist.length === 0" class="flex flex-col items-center justify-center py-12 text-gray-400">
+              <svg class="w-20 h-20 mb-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="1"
+                  d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"
+                />
+              </svg>
+              <p class="text-lg">Плейлист пуст</p>
+              <p class="text-sm text-gray-500 mt-2">Добавьте треки для воспроизведения</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Transition>
+
+    <!-- Основной плеер -->
     <Transition
       enter-active-class="transition transform duration-300 ease-out"
       enter-from-class="translate-y-full"
@@ -8,26 +95,14 @@
       leave-from-class="translate-y-0"
       leave-to-class="translate-y-full"
     >
-      <div
-        v-if="isVisible && currentTrack"
-        class="fixed bottom-0 left-0 right-0 z-50 bg-gray-900 border-t border-gray-600 shadow-2xl"
-        :class="{ 'pb-safe': true }"
-      >
+      <div v-if="isVisible && currentTrack" class="fixed bottom-0 left-0 right-0 z-40 bg-gray-800 border-t border-gray-600 shadow-2xl" :class="{ 'pb-safe': true }">
         <div class="container mx-auto px-4 py-3">
           <div class="flex flex-col md:flex-row items-center gap-4">
             <!-- Информация о треке -->
             <div class="flex items-center space-x-4 w-full md:w-auto">
               <!-- Обложка -->
-              <div
-                class="w-12 h-12 bg-gray-800 rounded-lg flex-shrink-0 overflow-hidden cursor-pointer"
-                @click="goToCurrentAlbum"
-              >
-                <img
-                  v-if="currentTrack.coverUrl"
-                  :src="currentTrack.coverUrl"
-                  :alt="currentTrack.title"
-                  class="w-full h-full"
-                />
+              <div class="w-12 h-12 bg-gray-800 rounded-lg flex-shrink-0 overflow-hidden cursor-pointer" @click="goToCurrentAlbum">
+                <img v-if="currentTrack.coverUrl" :src="currentTrack.coverUrl" :alt="currentTrack.title" class="w-full h-full object-cover" />
                 <div v-else class="w-full h-full flex items-center justify-center text-2xl">🎵</div>
               </div>
 
@@ -35,11 +110,11 @@
               <div class="min-w-0 flex-1">
                 <h4 class="font-medium text-white truncate">{{ currentTrack.title }}</h4>
                 <p class="text-sm text-gray-400 truncate">
-                  <RouterLink :to="`/bands/${currentTrack.artist}/${currentTrack.artistId}`">
+                  <RouterLink :to="`/bands/${currentTrack.artist_slug}/${currentTrack.artistId}`" class="hover:text-white">
                     {{ currentTrack.artist }}
                   </RouterLink>
                   •
-                  <RouterLink :to="`/albums/${currentTrack.artist}/${currentTrack.album_slug}/${currentTrack.albumId}`">
+                  <RouterLink :to="`/albums/${currentTrack.artist_slug}/${currentTrack.album_slug}/${currentTrack.albumId}`" class="hover:text-white">
                     {{ currentTrack.album }}
                   </RouterLink>
                 </p>
@@ -49,22 +124,14 @@
             <!-- Элементы управления -->
             <div class="flex items-center space-x-4 w-full md:w-auto justify-center">
               <!-- Кнопка предыдущего трека -->
-              <button
-                @click="playPrevious"
-                class="text-gray-400 hover:text-white transition-colors duration-200"
-                :disabled="!hasPrevious"
-                :class="{ 'opacity-50 cursor-not-allowed': !hasPrevious }"
-              >
+              <button @click="playPrevious" class="text-gray-400 hover:text-white" :disabled="!hasPrevious" :class="{ 'opacity-50 cursor-not-allowed': !hasPrevious }">
                 <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M6 6h2v12H6V6zm3.5 6l8.5 6V6l-8.5 6z" />
                 </svg>
               </button>
 
               <!-- Кнопка play/pause -->
-              <button
-                @click="togglePlay"
-                class="w-10 h-10 bg-red-600 hover:bg-red-700 rounded-full flex items-center justify-center transition-colors duration-200"
-              >
+              <button @click="togglePlay" class="w-10 h-10 bg-red-600 hover:bg-red-700 rounded-full flex items-center justify-center">
                 <svg v-if="isPlaying" class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
                 </svg>
@@ -74,12 +141,7 @@
               </button>
 
               <!-- Кнопка следующего трека -->
-              <button
-                @click="playNext"
-                class="text-gray-400 hover:text-white transition-colors duration-200"
-                :disabled="!hasNext"
-                :class="{ 'opacity-50 cursor-not-allowed': !hasNext }"
-              >
+              <button @click="playNext" class="text-gray-400 hover:text-white" :disabled="!hasNext" :class="{ 'opacity-50 cursor-not-allowed': !hasNext }">
                 <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M18 6L18 18 16 18 16 6 18 6z" />
                   <path d="M6 18L6 6 16 12 6 18z" />
@@ -93,11 +155,7 @@
 
               <div class="flex-1 relative group">
                 <!-- Прогресс-бар -->
-                <div
-                  class="w-full h-1 bg-gray-700 rounded-full cursor-pointer"
-                  @click="seekToPosition"
-                  ref="progressBar"
-                >
+                <div class="w-full h-1 bg-gray-700 rounded-full cursor-pointer" @click="seekToPosition" ref="progressBar">
                   <div class="h-full bg-red-600 rounded-full relative" :style="{ width: `${progressPercentage}%` }">
                     <!-- Ползунок -->
                     <div
@@ -110,9 +168,23 @@
 
               <span class="text-xs text-gray-400 w-10">{{ formatTime(duration) }}</span>
             </div>
-            <div class="flex">
-              <!-- Прогресс-бар -->
-              <div class="mb-2">
+
+            <!-- Дополнительные элементы управления -->
+            <div class="flex items-center space-x-3">
+              <!-- Кнопка громкости -->
+              <div class="flex items-center space-x-2">
+                <button @click="toggleMute" class="text-gray-400 hover:text-white">
+                  <svg v-if="isMuted || volume === 0" class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                    <path
+                      d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"
+                    />
+                  </svg>
+                  <svg v-else class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                    <path
+                      d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"
+                    />
+                  </svg>
+                </button>
                 <input
                   type="range"
                   min="0"
@@ -120,18 +192,13 @@
                   step="0.01"
                   :value="volume"
                   @input="changeVolume"
-                  class="w-24 h-1 bg-gray-700 bg-gradient-to-r from-red-600 to-red-600 bg-no-repeat rounded-lg appearance-none cursor-pointer"
+                  class="w-20 h-1 bg-gray-700 rounded-lg appearance-none cursor-pointer"
+                  :style="{ background: `linear-gradient(to right, #dc2626 ${volume * 100}%, #374151 ${volume * 100}%)` }"
                 />
               </div>
-            </div>
-            <!-- Дополнительные элементы управления -->
-            <div class="flex items-center space-x-3">
+
               <!-- Кнопка повтора -->
-              <button
-                @click="toggleRepeat"
-                class="text-gray-400 hover:text-white transition-colors duration-200"
-                :class="{ 'text-red-400': repeatMode !== 'none' }"
-              >
+              <button @click="toggleRepeat" class="text-gray-400 hover:text-white" :class="{ 'text-red-400': repeatMode !== 'none' }">
                 <svg v-if="repeatMode === 'one'" class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z" />
                   <circle cx="12" cy="12" r="2" fill="currentColor" />
@@ -142,11 +209,7 @@
               </button>
 
               <!-- Кнопка перемешивания -->
-              <button
-                @click="toggleShuffle"
-                class="text-gray-400 hover:text-white transition-colors duration-200"
-                :class="{ 'text-red-400': isShuffled }"
-              >
+              <button @click="toggleShuffle" class="text-gray-400 hover:text-white" :class="{ 'text-red-400': isShuffled }">
                 <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                   <path
                     d="M10.59 9.17L5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm0 9.41l-1.41 1.41 2.55 2.55L14.5 20H20v-5.5l-2.04 2.04-3.46-3.45z"
@@ -154,12 +217,28 @@
                 </svg>
               </button>
 
-              <!-- Кнопка закрытия плеера -->
+              <!-- Кнопка показа плейлиста -->
               <button
-                @click="closePlayer"
-                title="Закрыть плеер"
-                class="text-gray-400 hover:text-white transition-colors duration-200 ml-2"
+                id="playlistButton"
+                @click.stop="togglePlaylist"
+                class="text-gray-400 hover:text-white relative"
+                :class="{ 'text-red-400': isPlaylistVisible }"
+                title="Показать плейлист"
               >
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M15 6H3v2h12V6zm0 4H3v2h12v-2zM3 16h8v-2H3v2zM17 6v8.18c-.31-.11-.65-.18-1-.18-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3V8h3V6h-5z" />
+                </svg>
+                <!-- Бейдж с количеством треков -->
+                <span
+                  v-if="playlistTracks.length > 0"
+                  class="absolute -top-2 -right-2 bg-red-600 text-white text-xs rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1"
+                >
+                  {{ playlistTracks.length }}
+                </span>
+              </button>
+
+              <!-- Кнопка закрытия плеера -->
+              <button @click="closePlayer" title="Закрыть плеер" class="text-gray-400 hover:text-white ml-2">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
@@ -177,16 +256,19 @@ import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 
 import { usePlayerStore } from '@/store/player'
+import { Icon } from '@iconify/vue'
+import TextInput from './inputs/TextInput.vue'
 
 export interface PlayerTrack {
   id: string
   title: string
-  title_slug: string
+  number: number
   artist: string
+  artist_slug: string
   artistId: number
   album: string
   album_slug: string
-  albumId: string
+  albumId: number
   coverUrl?: string
   duration: number
   audioUrl: string
@@ -205,11 +287,11 @@ const emit = defineEmits<{
 }>()
 
 const router = useRouter()
-
 const playerStore = usePlayerStore()
 
 // Состояние плеера
 const isVisible = ref(false)
+const isPlaylistVisible = ref(false)
 const audioElement = ref<HTMLAudioElement | null>(null)
 const progressBar = ref<HTMLDivElement | null>(null)
 const currentTime = ref(0)
@@ -219,6 +301,7 @@ const isMuted = ref(false)
 const isDragging = ref(false)
 const repeatMode = ref<'none' | 'all' | 'one'>('none')
 const isShuffled = ref(false)
+const searchQuery = ref('')
 
 // Текущий трек
 const currentTrack = ref<PlayerTrack | null>(null)
@@ -235,6 +318,14 @@ const progressPercentage = computed(() => {
   return (currentTime.value / duration.value) * 100
 })
 
+// Фильтрованный плейлист по поиску
+const filteredPlaylist = computed(() => {
+  if (!searchQuery.value) return playlistTracks.value
+
+  const query = searchQuery.value.toLowerCase()
+  return playlistTracks.value.filter(track => track.title.toLowerCase().includes(query) || track.artist.toLowerCase().includes(query) || track.album.toLowerCase().includes(query))
+})
+
 // Проверка наличия предыдущего/следующего трека
 const hasPrevious = computed(() => {
   if (isShuffled.value) return true
@@ -246,6 +337,10 @@ const hasNext = computed(() => {
   return trackIndex.value < playlistTracks.value.length - 1
 })
 
+const removeFromPlaylist = (track: PlayerTrack) => {
+  playerStore.removeFromPlaylist(`${track.albumId}-${track.number}`)
+}
+
 // Форматирование времени
 const formatTime = (seconds: number) => {
   if (isNaN(seconds)) return '0:00'
@@ -254,40 +349,38 @@ const formatTime = (seconds: number) => {
   return `${mins}:${secs.toString().padStart(2, '0')}`
 }
 
-// Обновление фона ползунка громкости
-const updateVolumeBackground = (event: Event) => {
-  const input = event.target as HTMLInputElement
-  const value =
-    ((parseFloat(input.value) - parseFloat(input.min)) / (parseFloat(input.max) - parseFloat(input.min))) * 100
-  input.style.backgroundSize = `${value}% 100%`
+// Получение оригинального индекса из отфильтрованного
+const getOriginalIndex = (filteredIndex: number): number => {
+  const track = filteredPlaylist.value[filteredIndex]
+  return playlistTracks.value.findIndex(t => t.id === track.id)
 }
 
-// Инициализация аудио элемента
-onMounted(() => {
-  audioElement.value = new Audio()
-
-  audioElement.value.addEventListener('timeupdate', updateTime)
-  audioElement.value.addEventListener('loadedmetadata', updateDuration)
-  audioElement.value.addEventListener('ended', handleTrackEnd)
-  audioElement.value.addEventListener('play', () => {
-    playerStore.isPlaying = true
-  })
-  audioElement.value.addEventListener('pause', () => {
-    playerStore.isPlaying = false
-  })
-  audioElement.value.addEventListener('volumechange', () => {
-    isMuted.value = audioElement.value?.muted || false
-  })
-})
-
-onUnmounted(() => {
-  if (audioElement.value) {
-    audioElement.value.pause()
-    audioElement.value.removeEventListener('timeupdate', updateTime)
-    audioElement.value.removeEventListener('loadedmetadata', updateDuration)
-    audioElement.value.removeEventListener('ended', handleTrackEnd)
+// Выбор трека из плейлиста
+const selectTrackFromPlaylist = (filteredIndex: number) => {
+  const originalIndex = getOriginalIndex(filteredIndex)
+  if (currentTrack.value?.id && trackIndex.value === originalIndex) {
+    togglePlay()
+  } else {
+    playTrack(playlistTracks.value[originalIndex], originalIndex)
   }
-})
+}
+
+// Переключение видимости плейлиста
+const togglePlaylist = () => {
+  isPlaylistVisible.value = !isPlaylistVisible.value
+  if (!isPlaylistVisible.value) {
+    searchQuery.value = ''
+  }
+}
+
+// Закрытие плейлиста при клике вне его области
+const handleClickOutside = (event: MouseEvent) => {
+  const playlist = document.querySelector('.fixed.top-0.right-0.bottom-0')
+  if (playlist && !playlist.contains(event.target as Node) && isPlaylistVisible.value) {
+    isPlaylistVisible.value = false
+    searchQuery.value = ''
+  }
+}
 
 // Обновление времени
 const updateTime = () => {
@@ -313,7 +406,10 @@ const togglePlay = () => {
   }
 }
 
+// Просто проигрывает трек, без добавления в плейлист
 const playTrack = (track: PlayerTrack, index: number) => {
+  console.log(track)
+
   currentTrack.value = track
   trackIndex.value = index
   isVisible.value = true
@@ -401,8 +497,6 @@ const changeVolume = (event: Event) => {
     audioElement.value.volume = newVolume
     audioElement.value.muted = false
   }
-
-  updateVolumeBackground(event)
 }
 
 const toggleMute = () => {
@@ -429,6 +523,7 @@ const closePlayer = () => {
     audioElement.value.pause()
   }
   isVisible.value = false
+  isPlaylistVisible.value = false
   currentTrack.value = null
   emit('close')
 }
@@ -436,7 +531,7 @@ const closePlayer = () => {
 // Переход к альбому
 const goToCurrentAlbum = () => {
   if (currentTrack.value) {
-    router.push(`/albums/${currentTrack.value.artist}/${currentTrack.value.album_slug}/${currentTrack.value.albumId}`)
+    router.push(`/albums/${currentTrack.value.artist_slug}/${currentTrack.value.album_slug}/${currentTrack.value.albumId}`)
   }
 }
 
@@ -477,14 +572,29 @@ const startDrag = () => {
 
 const stopDrag = () => {
   isDragging.value = false
-}
-
-// Добавляем обработчики для перетаскивания
+} // Инициализация аудио элемента
 onMounted(() => {
+  audioElement.value = new Audio()
+
+  audioElement.value.addEventListener('timeupdate', updateTime)
+  audioElement.value.addEventListener('loadedmetadata', updateDuration)
+  audioElement.value.addEventListener('ended', handleTrackEnd)
+  audioElement.value.addEventListener('play', () => (playerStore.isPlaying = true))
+  audioElement.value.addEventListener('pause', () => (playerStore.isPlaying = false))
+  audioElement.value.addEventListener('volumechange', () => (isMuted.value = audioElement.value?.muted || false))
   document.addEventListener('mouseup', stopDrag)
+
+  // document.addEventListener('click', handleClickOutside)
 })
 
 onUnmounted(() => {
+  if (audioElement.value) {
+    audioElement.value.pause()
+    audioElement.value.removeEventListener('timeupdate', updateTime)
+    audioElement.value.removeEventListener('loadedmetadata', updateDuration)
+    audioElement.value.removeEventListener('ended', handleTrackEnd)
+  }
+  document.removeEventListener('click', handleClickOutside)
   document.removeEventListener('mouseup', stopDrag)
 })
 
@@ -496,15 +606,13 @@ defineExpose({
   pause,
   togglePlay,
   isVisible,
-  currentTrack
+  currentTrack,
+  trackIndex,
+  togglePlaylist
 })
 </script>
 
 <style scoped>
-.pb-safe {
-  padding-bottom: env(safe-area-inset-bottom, 0);
-}
-
 input[type='range'] {
   -webkit-appearance: none;
   appearance: none;
@@ -545,20 +653,5 @@ input[type='range']::-moz-range-track {
   height: 4px;
   background: #374151;
   border-radius: 2px;
-}
-
-.animate-fade-in {
-  animation: fadeIn 0.2s ease-in-out;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translate(-50%, 10px);
-  }
-  to {
-    opacity: 1;
-    transform: translate(-50%, 0);
-  }
 }
 </style>

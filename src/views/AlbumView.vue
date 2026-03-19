@@ -12,7 +12,6 @@ import { usePlayerStore } from '@/store/player'
 import { albumTypes } from '@/utils'
 import DateNormalizer from '@/utils/dateNormalizer'
 
-import { PlayerTrack } from '@/components/AudioPlayer.vue'
 import LoadingSpinner from '@/components/LoadingSpinner.vue'
 import Modal from '@/components/Modal.vue'
 import TextInput from '@/components/inputs/TextInput.vue'
@@ -22,6 +21,8 @@ import CustomTextarea from '@/components/inputs/CustomTextarea.vue'
 import SelectInput from '@/components/inputs/SelectInput.vue'
 
 import type { Rating, Track } from '@/types'
+import type { PlayerTrack } from '@/components/AudioPlayer.vue'
+import { Icon } from '@iconify/vue'
 
 dayjs.extend(durationPlugin)
 
@@ -51,18 +52,22 @@ const albumUserFavoriteIndex = computed((): number => store.user.favorite_albums
 const albumTracks = computed<PlayerTrack[]>(() => {
   if (!album.value) return []
 
-  return album.value.tracklist.map((track: Track) => ({
-    id: `${album.value.id}-${track.number}`,
-    title: track.title,
-    artist: album.value.band_names_slug.join(', '),
-    artistId: album.value.band_ids.join(),
-    album: album.value.title,
-    album_slug: album.value.title_slug,
-    albumId: album.value.id,
-    coverUrl: album.value.cover_url,
-    duration: parseDuration(track.duration),
-    audioUrl: track.url
-  }))
+  return album.value.tracklist.map(
+    (track: Track): PlayerTrack => ({
+      id: `${album.value.id}-${track.number}`,
+      title: track.title,
+      number: track.number,
+      artist: album.value.band_names.join(', '),
+      artist_slug: album.value.band_names_slug.join(', '),
+      artistId: parseInt(album.value.band_ids.join()),
+      album: album.value.title,
+      album_slug: album.value.title_slug,
+      albumId: album.value.id,
+      coverUrl: album.value.cover_url,
+      duration: parseDuration(track.duration),
+      audioUrl: track.url
+    })
+  )
 })
 const albumUserRating = computed((): Rating => {
   const rating = store.user.albums_ratings.find(b => b.id === parseInt(albumId.value))
@@ -70,6 +75,7 @@ const albumUserRating = computed((): Rating => {
   return { id: parseInt(albumId.value), rating: 0 }
 })
 const isPlaying = computed(() => playerStore.isPlaying)
+const albumTrackWithUrls = computed(() => albumTracks.value.filter(t => t.audioUrl))
 
 const toggleFavoriteAlbum = async () => {
   if (albumUserFavoriteIndex.value > -1) store.user.favorite_albums.splice(albumUserFavoriteIndex.value, 1)
@@ -113,8 +119,11 @@ const saveTrack = async () => {
   })
 }
 
-const isCurrentTrack = (track: any) => {
+const isCurrentTrack = (track: Track): boolean => {
   return playerStore.currentTrack?.id === `${album.value?.id}-${track.number}`
+}
+const trackInPlaylist = (track: Track): boolean => {
+  return !!playerStore.playlist.find(t => t.id === `${album.value?.id}-${track.number}`)
 }
 
 const parseDuration = (duration: string): number => {
@@ -122,18 +131,23 @@ const parseDuration = (duration: string): number => {
   return minutes * 60 + seconds
 }
 
-const playTrack = (track: Track) => {
-  const trackIndex = album.value.tracklist.findIndex((t: any) => t.number === track.number)
-  const playerTrack = albumTracks.value[trackIndex]
+const toggleTrack = (index: number) => {
+  const playerTrack = albumTracks.value[index]
 
-  if (audioPlayer?.value) audioPlayer.value.playTrack(playerTrack, trackIndex)
+  if (audioPlayer?.value) {
+    if (audioPlayer.value.currentTrack?.id && audioPlayer.value.trackIndex === index) {
+      audioPlayer.value.togglePlay()
+    } else {
+      audioPlayer.value.playTrack(playerTrack, index)
+    }
+  }
 }
 
 const playAllTracks = () => {
-  playerStore.setPlaylist(albumTracks.value, 0)
+  playerStore.setPlaylist(albumTrackWithUrls.value, 0)
 
   if (audioPlayer?.value) {
-    audioPlayer.value.playTrack(albumTracks.value[0], 0)
+    audioPlayer.value.playTrack(albumTrackWithUrls.value[0], 0)
   }
 }
 
@@ -141,14 +155,17 @@ const shuffleAllTracks = () => {
   const shuffled = [...albumTracks.value].sort(() => Math.random() - 0.5)
   playerStore.setPlaylist(shuffled, 0)
 
-  if (audioPlayer?.value) {
-    audioPlayer.value.playTrack(shuffled[0], 0)
-  }
+  if (audioPlayer?.value) audioPlayer.value.playTrack(shuffled[0], 0)
 }
 
-const addToPlaylist = (track: any) => {
-  const trackIndex = album.value.tracklist.findIndex((t: any) => t.number === track.number)
-  playerStore.addToPlaylist(albumTracks.value[trackIndex])
+const addToPlaylist = (index: number) => {
+  const track = albumTracks.value[index]
+  if (!playerStore.playlist.length) audioPlayer?.value.playTrack(track, 0)
+  playerStore.addToPlaylist(track)
+}
+
+const removeFromPlaylist = (track: Track) => {
+  playerStore.removeFromPlaylist(`${album.value?.id}-${track.number}`)
 }
 
 watch(
@@ -216,6 +233,7 @@ onMounted(async () => {
           </div>
         </div>
         <h3 class="text-gray-400 text-sm">Данные на {{ DateNormalizer.normalizeDate(album.updated_at) }}</h3>
+        <CustomButton v-if="albumTrackWithUrls.length" start-icon="play" text="Воспроизвести альбом" thin @click="playAllTracks" />
       </div>
       <CustomButton v-if="store.userIsAdmin" text="Редактировать" start-icon="edit" :loading="store.bandIsLoading" @click="showCommonEditDialog = true" />
     </div>
@@ -225,22 +243,26 @@ onMounted(async () => {
         <!-- Треклист -->
         <div class="bg-gray-800 rounded-lg border border-gray-700 py-3 px-3">
           <div class="flex justify-between">
-            <h2 class="text-2xl font-bold mb-4 text-red-400">Треклист</h2>
+            <h2 class="text-2xl font-bold text-red-400">Треклист</h2>
             <div v-if="store.userIsAuth" class="flex items-start">
               <el-rate clearable allow-half v-model.number="albumUserRating.rating" @change="changeAlbumRating" />
             </div>
           </div>
-          <div v-for="track in album.tracklist" :key="track.id">
+          <div v-for="(track, index) in album.tracklist" :key="track.id">
             <div class="flex items-center justify-between p-1 hover:bg-gray-750 rounded transition-colors duration-150">
               <div class="flex items-center space-x-2">
-                <button v-if="track.url" @click="playTrack(track)" class="text-gray-400 hover:text-red-400 cursor-pointer">
-                  <svg v-if="isCurrentTrack(track) && isPlaying" class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
-                  </svg>
-                  <svg v-else class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M8 5v14l11-7L8 5z" />
-                  </svg>
-                </button>
+                <template v-if="track.url">
+                  <button @click="toggleTrack(index)" class="text-gray-400 hover:text-red-400 cursor-pointer">
+                    <Icon v-if="isCurrentTrack(track) && isPlaying" class="w-5 h-5 text-white" icon="mdi:pause" />
+                    <Icon v-else class="w-5 h-5 text-white" icon="mdi:play" />
+                  </button>
+                  <button v-if="!isCurrentTrack(track) && !trackInPlaylist(track)" @click="addToPlaylist(index)">
+                    <Icon class="w-5 h-5" icon="mdi:playlist-plus" />
+                  </button>
+                  <button v-if="trackInPlaylist(track)" @click="removeFromPlaylist(track)">
+                    <Icon class="w-5 h-5 text-red-500" icon="mdi:playlist-remove" />
+                  </button>
+                </template>
                 <span class="text-gray-400 w-6 text-center">{{ track.number }}</span>
 
                 <span>{{ track.title }}</span>
