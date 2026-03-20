@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, reactive, computed, watch } from 'vue'
+import { ref, reactive, computed, watch, onMounted } from 'vue'
 import { Icon } from '@iconify/vue'
 import { useClipboard } from '@vueuse/core'
 import { ElNotification } from 'element-plus'
@@ -50,6 +50,7 @@ const newFolderName = ref<string>('')
 const uploadProgress = ref<number>(0)
 const downloadProgress = ref<number>(0)
 const fileUploadRef = ref()
+const fileListRef = ref()
 
 const breadcrumbs = computed(() => {
   const parts = currentPath.value.split('/').filter(p => p)
@@ -78,6 +79,11 @@ const files = computed(() =>
       return (parseInt(a.name) || Infinity) - (parseInt(b.name) || Infinity)
     })
 )
+
+const saveScrollPosition = (event: Event) => {
+  const scrollTop = event.target.scrollTop
+  if (scrollTop) localStorage.setItem('scrollTop', event.target.scrollTop.toString())
+}
 
 const openFileContextMenu = (event: MouseEvent, file: NginxItem) => {
   let items: ContextMenuItem[] = []
@@ -237,6 +243,7 @@ const loadDirectory = async (path: string) => {
     error.value = err instanceof Error ? err.message : 'Failed to load directory'
     items.value = []
   } finally {
+    setTimeout(() => restoreScrollPosition(), 100)
     isLoading.value = false
   }
 }
@@ -273,13 +280,22 @@ const formatDate = (dateString?: string): string => {
   return date.toLocaleDateString()
 }
 
+const restoreScrollPosition = () => {
+  const savedPosition = localStorage.getItem('scrollTop')
+  if (savedPosition) {
+    document.getElementById('fileList').scroll(0, parseInt(savedPosition))
+    fileListRef.value.scroll(0, parseInt(savedPosition))
+  }
+}
+
 watch(breadcrumbs, value => {
   if (value.length === 1) store.fileManagerSearchObject.query = value[0].name
   else if (value.length === 0) emit('clear-results')
 })
 
-// Инициализация
-loadDirectory('')
+onMounted(() => {
+  loadDirectory('')
+})
 
 defineExpose({
   refreshCurrentDirectory,
@@ -323,7 +339,7 @@ defineExpose({
     </div>
 
     <!-- Список файлов -->
-    <div class="flex-1 overflow-y-auto p-2">
+    <div ref="fileListRef" id="fileList" class="flex-1 overflow-y-auto p-2" @scroll="saveScrollPosition">
       <!-- Индикатор загрузки -->
       <div v-if="isLoading" class="flex items-center justify-center py-8">
         <div class="w-8 h-8 border-4 border-red-600 border-t-transparent rounded-full animate-spin"></div>
