@@ -252,13 +252,18 @@ onMounted(async () => {
             <div class="flex items-center justify-between p-1 hover:bg-gray-750 rounded transition-colors duration-150">
               <div class="flex items-center space-x-2">
                 <template v-if="track.url">
-                  <button @click="toggleTrack(index)" class="text-gray-400 hover:text-red-400 cursor-pointer">
-                    <Icon v-if="isCurrentTrack(track) && isPlaying" class="w-5 h-5 text-white" icon="mdi:pause" />
-                    <Icon v-else class="w-5 h-5 text-white" icon="mdi:play" />
-                  </button>
-                  <button v-if="!isCurrentTrack(track) && !trackInPlaylist(track)" @click="addToPlaylist(index)">
-                    <Icon class="w-5 h-5" icon="mdi:playlist-plus" />
-                  </button>
+                  <el-tooltip :content="isPlaying ? 'Пауза' : 'Воспроизвести'" placement="top">
+                    <button @click="toggleTrack(index)" class="text-gray-400 hover:text-red-400 cursor-pointer">
+                      <Icon v-if="isCurrentTrack(track) && isPlaying" class="w-5 h-5 text-white" icon="mdi:pause" />
+                      <Icon v-else class="w-5 h-5 text-white" icon="mdi:play" />
+                    </button>
+                  </el-tooltip>
+                  <el-tooltip content="Добавить в плейлист" placement="top">
+                    <button v-if="!isCurrentTrack(track) && !trackInPlaylist(track)" @click="addToPlaylist(index)">
+                      <Icon class="w-5 h-5" icon="mdi:playlist-plus" />
+                    </button>
+                  </el-tooltip>
+
                   <button v-if="trackInPlaylist(track)" @click="removeFromPlaylist(track)">
                     <Icon class="w-5 h-5 text-red-500" icon="mdi:playlist-remove" />
                   </button>

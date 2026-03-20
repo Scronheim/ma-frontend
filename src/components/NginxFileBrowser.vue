@@ -1,19 +1,21 @@
 <script setup lang="ts">
 import { ref, reactive, computed, watch } from 'vue'
 import { Icon } from '@iconify/vue'
+import { useClipboard } from '@vueuse/core'
+import { ElNotification } from 'element-plus'
 
 import { useStore } from '@/store/store'
 
 import { nginxService } from '../services/nginx.service'
 
-import { uploadMultipleFiles } from '@/utils'
+import { uploadMultipleFiles, downloadFile } from '@/utils'
 
 import FileUploadModal from '../components/FileUploadModal.vue'
 import ContextMenu from '../components/ContextMenu.vue'
 import TextInput from './inputs/TextInput.vue'
+import CustomButton from './inputs/CustomButton.vue'
 
 import type { ContextMenuItem, NginxItem } from '@/types'
-import CustomButton from './inputs/CustomButton.vue'
 
 const emit = defineEmits<{
   (e: 'navigate', path: string): void
@@ -24,6 +26,7 @@ const emit = defineEmits<{
 
 const store = useStore()
 
+const { copy } = useClipboard()
 // Состояние
 const contextMenu = reactive({
   visible: false,
@@ -45,6 +48,7 @@ const newFolderParentPath = ref<string>('')
 const uploadPath = ref<string>('')
 const newFolderName = ref<string>('')
 const uploadProgress = ref<number>(0)
+const downloadProgress = ref<number>(0)
 const fileUploadRef = ref()
 
 const breadcrumbs = computed(() => {
@@ -80,14 +84,9 @@ const openFileContextMenu = (event: MouseEvent, file: NginxItem) => {
   if (file.type === 'file') {
     items = [
       {
-        label: 'Воспроизвести',
-        icon: 'play',
-        action: () => playFile(file)
-      },
-      {
         label: 'Скачать',
         icon: 'download',
-        action: () => downloadFile(file)
+        action: () => downloadFileLocal(file)
       },
       {
         label: 'Переименовать',
@@ -98,7 +97,6 @@ const openFileContextMenu = (event: MouseEvent, file: NginxItem) => {
       {
         label: 'Скопировать URL',
         icon: 'content-copy',
-        shortcut: 'Ctrl+C',
         action: () => copyFileUrl(file)
       },
       {
@@ -172,6 +170,24 @@ const openFileContextMenu = (event: MouseEvent, file: NginxItem) => {
   contextMenu.visible = true
 }
 
+const downloadFileLocal = (file: NginxItem) => {
+  downloadFile(`/music/${file.path}`, file.name, (progress: number) => (downloadProgress.value = progress))
+  downloadProgress.value = 0
+}
+const copyFileUrl = (file: NginxItem) => {
+  copy(`${location.origin}/music/${file.path}`)
+  ElNotification({
+    type: 'success',
+    message: 'URL скопирован'
+  })
+}
+const copyFilePath = (file: NginxItem) => {
+  copy(`/mnt/data/music/${file.path}`)
+  ElNotification({
+    type: 'success',
+    message: 'URL скопирован'
+  })
+}
 const showUploadModal = (file: NginxItem, parentPath: string = '') => {
   uploadPath.value = parentPath ? parentPath : file.path.split(file.name)[0]
   uploadModal.value = true

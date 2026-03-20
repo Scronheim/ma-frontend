@@ -7,6 +7,52 @@ export const sortByDate = (a: Album, b: Album): number => {
   return 1
 }
 
+export const downloadFile = async (url: string, filename: string, onProgress: Function | null = null) => {
+  try {
+    const response = await fetch(url)
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
+    }
+
+    const contentLength = response.headers.get('content-length')
+    const total = contentLength ? parseInt(contentLength, 10) : 0
+
+    let loaded = 0
+
+    // Создаем reader для отслеживания прогресса
+    const reader = response.body.getReader()
+    const chunks = []
+
+    while (true) {
+      const { done, value } = await reader.read()
+
+      if (done) break
+
+      chunks.push(value)
+      loaded += value.length
+
+      if (onProgress && total) {
+        const percentCompleted = Math.round((loaded * 100) / total)
+        onProgress(percentCompleted)
+      }
+    }
+
+    // Собираем все чанки в один blob
+    const blob = new Blob(chunks)
+    const link = document.createElement('a')
+    const objectUrl = URL.createObjectURL(blob)
+
+    link.href = objectUrl
+    link.download = filename
+    link.click()
+
+    URL.revokeObjectURL(objectUrl)
+  } catch (error) {
+    console.error('Ошибка:', error)
+  }
+}
+
 export const uploadMultipleFiles = async (files: File[], path: string = '', onProgress: Function | null = null) => {
   const formData = new FormData()
   formData.append('path', path)
