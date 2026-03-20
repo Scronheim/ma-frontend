@@ -74,7 +74,7 @@ const directories = computed(() => items.value.filter(item => item.type === 'dir
 
 const files = computed(() =>
   items.value
-    .filter(item => item.type === 'file')
+    .filter(item => item.type === 'file' && (item.name.endsWith('.mp3') || item.name.endsWith('.flac')))
     .sort((a, b) => {
       return (parseInt(a.name) || Infinity) - (parseInt(b.name) || Infinity)
     })
@@ -82,7 +82,7 @@ const files = computed(() =>
 
 const saveScrollPosition = (event: Event) => {
   const scrollTop = event.target.scrollTop
-  if (scrollTop) localStorage.setItem('scrollTop', event.target.scrollTop.toString())
+  if (scrollTop && !breadcrumbs.value.length) localStorage.setItem('scrollTop', event.target.scrollTop.toString())
 }
 
 const openFileContextMenu = (event: MouseEvent, file: NginxItem) => {
