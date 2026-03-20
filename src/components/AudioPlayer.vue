@@ -25,7 +25,7 @@
               <h3 class="text-lg font-semibold text-white">Плейлист</h3>
               <span class="text-xs text-gray-400 cursor-pointer" @click="playerStore.clearPlaylist">Очистить</span>
             </div>
-            <button @click="togglePlaylist" class="text-gray-400 hover:text-white hover:bg-gray-800 cursor-pointer">
+            <button @click="togglePlaylistVisible" class="text-gray-400 hover:text-white hover:bg-gray-800 cursor-pointer">
               <Icon icon="mdi:close" class="w-5 h-5" />
             </button>
           </div>
@@ -216,7 +216,7 @@
               <!-- Кнопка показа плейлиста -->
               <button
                 id="playlistButton"
-                @click.stop="togglePlaylist"
+                @click.stop="togglePlaylistVisible"
                 class="text-gray-400 hover:text-white relative"
                 :class="{ 'text-red-400': isPlaylistVisible }"
                 title="Показать плейлист"
@@ -251,20 +251,7 @@ import { usePlayerStore } from '@/store/player'
 import { Icon } from '@iconify/vue'
 import TextInput from './inputs/TextInput.vue'
 
-export interface PlayerTrack {
-  id: string
-  title: string
-  number: number
-  artist: string
-  artist_slug: string
-  artistId: number
-  album: string
-  album_slug: string
-  albumId: number
-  coverUrl?: string
-  duration: number
-  audioUrl: string
-}
+import type { PlayerTrack } from '@/types'
 
 const props = defineProps<{
   playlist?: PlayerTrack[]
@@ -358,7 +345,7 @@ const selectTrackFromPlaylist = (filteredIndex: number) => {
 }
 
 // Переключение видимости плейлиста
-const togglePlaylist = () => {
+const togglePlaylistVisible = () => {
   isPlaylistVisible.value = !isPlaylistVisible.value
   if (!isPlaylistVisible.value) {
     searchQuery.value = ''
@@ -400,8 +387,6 @@ const togglePlay = () => {
 
 // Просто проигрывает трек, без добавления в плейлист
 const playTrack = (track: PlayerTrack, index: number) => {
-  console.log(track)
-
   currentTrack.value = track
   trackIndex.value = index
   isVisible.value = true
@@ -597,10 +582,11 @@ defineExpose({
   playNext,
   pause,
   togglePlay,
+  isPlaying,
   isVisible,
   currentTrack,
   trackIndex,
-  togglePlaylist
+  togglePlaylistVisible
 })
 </script>
 

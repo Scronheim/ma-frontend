@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { inject, ref, watch } from 'vue'
 import { debounce } from 'lodash-es'
 import { Icon } from '@iconify/vue'
 
@@ -8,7 +8,7 @@ import { useStore } from '@/store/store'
 import LoadingSpinner from './LoadingSpinner.vue'
 import CustomButton from './inputs/CustomButton.vue'
 
-import type { Band, Album } from '@/types'
+import type { Band, Album, Track, AudioPlayer } from '@/types'
 
 const props = defineProps<{
   searchResults: Band[]
@@ -27,6 +27,11 @@ const store = useStore()
 const isLoading = ref(false)
 const expandedBands = ref<number[]>([])
 const expandedAlbums = ref<number[]>([])
+const audioPlayer = inject<AudioPlayer>('audioPlayer')
+
+const isCurrentTrack = (album: Album, track: Track): boolean => {
+  return audioPlayer.value.currentTrack?.id === `${album.id}-${track.number}`
+}
 
 const performSearch = debounce(async (query: string) => {
   emit('search', query)
@@ -54,6 +59,23 @@ const toggleAlbum = async (albumId: number, bandIndex: number, albumIndex: numbe
 
 const matchWholeAlbum = (band: Band, album: Album) => {
   emit('match-album', band, album)
+}
+
+const playTrack = (band: Band, album: Album, track: Track) => {
+  audioPlayer.value.playTrack({
+    id: `${album.id}-${track.number}`,
+    title: track.title,
+    number: track.number,
+    album: album.title,
+    album_slug: album.title_slug,
+    albumId: album.id,
+    artist: band.name,
+    artist_slug: band.name_slug,
+    artistId: band.id,
+    audioUrl: track.url,
+    duration: track.duration,
+    coverUrl: album.cover_url
+  })
 }
 
 watch(store.fileManagerSearchObject, async newValue => {
@@ -123,13 +145,13 @@ watch(store.fileManagerSearchObject, async newValue => {
                 <!-- Кнопка матчинга всего альбома -->
                 <CustomButton text="Запомнить пути" thin @click="matchWholeAlbum(band, album)" />
                 <div v-for="track in album.tracklist" :key="track.id" class="track-item flex items-center p-2 rounded-lg">
-                  <span v-if="track.url" class="w-8 text-gray-500"><Icon icon="mdi:play" /></span>
+                  <template v-if="track.url">
+                    <Icon v-if="isCurrentTrack(album, track) && audioPlayer.isPlaying" class="w-5 mr-2 cursor-pointer" icon="mdi:pause" @click="audioPlayer?.pause" />
+                    <Icon v-else class="w-5 mr-2 cursor-pointer" icon="mdi:play" @click="playTrack(band, album, track)" />
+                  </template>
                   <span class="w-8 text-xs text-gray-500">{{ track.number }}.</span>
                   <span class="flex items-center gap-2 flex-1 text-sm">
                     {{ track.title }}
-                    <el-tooltip content="URL указан" placement="top">
-                      <Icon v-if="track.url" icon="mdi:link" color="green" />
-                    </el-tooltip>
                   </span>
                   <span class="text-xs text-gray-500 mr-3">{{ track.duration }}</span>
                 </div>

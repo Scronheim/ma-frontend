@@ -257,3 +257,30 @@ export interface ContextMenuItem {
   children?: ContextMenuItem[]
   action?: () => void
 }
+
+export interface PlayerTrack {
+  id: string
+  title: string
+  number: number
+  artist: string
+  artist_slug: string
+  artistId: number
+  album: string
+  album_slug: string
+  albumId: number
+  coverUrl?: string | null
+  duration: number
+  audioUrl: string
+}
+
+export interface AudioPlayer {
+  currentTrack: PlayerTrack | null
+  currentIndex: number
+  isVisible: boolean
+  pause: () => Promise<void>
+  playNext: () => Promise<void>
+  playPrevious: () => Promise<void>
+  togglePlay: () => Promise<void>
+  togglePlaylistVisible: () => Promise<void>
+  playTrack: (track: PlayerTrack, index: number) => Promise<void>
+}
