@@ -622,7 +622,7 @@ input[type='range']::-moz-range-thumb {
 input[type='range']::-webkit-slider-runnable-track {
   width: 100%;
   height: 4px;
-  background: #374151;
+  background: transparent;
   border-radius: 2px;
 }
 
