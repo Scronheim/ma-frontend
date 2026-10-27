@@ -159,7 +159,7 @@ onMounted(async () => {
             <td class="py-2 px-4">
               <div class="flex items-center">
                 <div class="font-medium">
-                  <RouterLink :to="`/albums/${result.album_name_slug}/${result.album_id}`" class="text-blue-400 font-bold">
+                  <RouterLink :to="`/albums/${result.band_name_slug}/${result.album_name_slug}/${result.album_id}`" class="text-blue-400 font-bold">
                     {{ result.album_name }}
                   </RouterLink>
                 </div>
