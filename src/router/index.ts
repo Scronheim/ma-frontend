@@ -13,6 +13,9 @@ import GenreSearchView from '../views/GenreSearchView.vue'
 import ArtistRip from '../views/ArtistRip.vue'
 import AdvancedSearch from '../views/AdvancedSearch.vue'
 import MusicManagerView from '../views/MusicManagerView.vue'
+import QuizzesMainView from '../views/quizzes/MainView.vue'
+import QuizView from '../views/quizzes/QuizView.vue'
+import UpcomingReleasesView from '../views/UpcomingReleasesView.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -92,6 +95,21 @@ const router = createRouter({
       path: '/file-manager',
       name: 'file-manager',
       component: MusicManagerView
+    },
+    {
+      path: '/quizzes',
+      name: 'quizzes page',
+      component: QuizzesMainView
+    },
+    {
+      path: '/quizzes/:id',
+      name: 'quiz page',
+      component: QuizView
+    },
+    {
+      path: '/release/upcoming',
+      name: 'upcoming releases page',
+      component: UpcomingReleasesView
     }
   ],
   scrollBehavior() {

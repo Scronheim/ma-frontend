@@ -58,6 +58,7 @@ const toggleAlbum = async (albumId: number, bandIndex: number, albumIndex: numbe
 }
 
 const matchWholeAlbum = (band: Band, album: Album) => {
+  expandedAlbums.value = expandedAlbums.value.filter(n => n !== album.id)
   emit('match-album', band, album)
 }
 

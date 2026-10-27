@@ -5,9 +5,9 @@ import axios from 'axios'
 import { breakpointsTailwind, useBreakpoints } from '@vueuse/core'
 import { ElNotification } from 'element-plus'
 
-import { DEFAULT_BAND, DEFAULT_ALBUM, DEFAULT_BAND_MEMBER, DEFAULT_USER } from '@/utils/consts'
+import { DEFAULT_BAND, DEFAULT_ALBUM, DEFAULT_BAND_MEMBER, DEFAULT_USER, DEFAULT_QUIZ } from '@/utils/consts'
 
-import type { Band, Album, Track, SSEResponse, AllStatInfo, Member, User, SimilarBand, ShortAlbum } from '@/types'
+import type { Band, Album, Track, SSEResponse, AllStatInfo, Member, User, SimilarBand, ShortAlbum, Quiz } from '@/types'
 
 export const useStore = defineStore('store', () => {
   const router = useRouter()
@@ -17,19 +17,24 @@ export const useStore = defineStore('store', () => {
   const currentBandSimilar = ref<SimilarBand[]>([])
   const currentAlbum = ref<Album>(DEFAULT_ALBUM)
   const currentMember = ref<Member>(DEFAULT_BAND_MEMBER)
+  const currentQuiz = ref<Quiz>(DEFAULT_QUIZ)
   const user = ref<User>(DEFAULT_USER)
   const token = ref('')
   const fileManagerSearchObject = ref({
     query: ''
   })
   const stats = ref<AllStatInfo>()
+  const quizzes = ref<Quiz[]>([])
+
   const randomBandIsLoading = ref<boolean>(false)
   const bandIsLoading = ref<boolean>(false)
   const albumIsLoading = ref<boolean>(false)
   const lyricsIsLoading = ref<boolean>(false)
   const statsIsLoading = ref<boolean>(false)
+  const quizzesIsLoading = ref<boolean>(false)
   const memberIsLoading = ref<boolean>(false)
   const ripMembersIsLoading = ref<boolean>(false)
+  const upcomingReleasesIsLoading = ref<boolean>(false)
   const userIsLoading = ref<boolean>(false)
   const advancedSearchIsLoading = ref<boolean>(false)
   const similarBandsIsLoading = ref<boolean>(false)
@@ -37,6 +42,7 @@ export const useStore = defineStore('store', () => {
   const renameIsLoading = ref<boolean>(false)
   const addFolderIsLoading = ref<boolean>(false)
   const deleteFileOrFolderIsLoading = ref<boolean>(false)
+
   const filesIsUploading = ref<boolean>(false)
   const fromRandom = ref<boolean>(false)
   const sseEvents = ref<EventSource>()
@@ -200,6 +206,16 @@ export const useStore = defineStore('store', () => {
     }
   }
 
+  const getUpcomingReleases = async (page: number = 1) => {
+    try {
+      upcomingReleasesIsLoading.value = true
+      const { data } = await axios.get(`/api/release/upcoming?page=${page}`)
+      return data
+    } finally {
+      upcomingReleasesIsLoading.value = false
+    }
+  }
+
   const getStats = async () => {
     try {
       statsIsLoading.value = true
@@ -207,6 +223,26 @@ export const useStore = defineStore('store', () => {
       stats.value = data.data
     } finally {
       statsIsLoading.value = false
+    }
+  }
+
+  const getQuizzes = async () => {
+    try {
+      quizzesIsLoading.value = true
+      const { data } = await axios.get('/api/quizzes/')
+      quizzes.value = data.data
+    } finally {
+      quizzesIsLoading.value = false
+    }
+  }
+
+  const getQuizById = async (quizId: string | number) => {
+    try {
+      quizzesIsLoading.value = true
+      const { data } = await axios.get(`/api/quizzes/${quizId}`)
+      currentQuiz.value = data.data
+    } finally {
+      quizzesIsLoading.value = false
     }
   }
 
@@ -331,6 +367,11 @@ export const useStore = defineStore('store', () => {
   const me = async (): Promise<void> => {
     try {
       const { data } = await axios.get('/api/auth/me')
+      const someFavBandsAreNull = (data as User).favorite_bands.some(b => b.id === null)
+      const someFavAlbumsAreNull = (data as User).favorite_albums.some(a => a.id === null)
+
+      if (someFavBandsAreNull) data.favorite_bands = []
+      if (someFavAlbumsAreNull) data.favorite_albums = []
       user.value = data
     } catch (e) {
       if (e.response.status === 404) {
@@ -344,8 +385,8 @@ export const useStore = defineStore('store', () => {
     try {
       const localUser = {
         ...user.value,
-        favorite_bands: user.value.favorite_bands.flatMap(b => b.id),
-        favorite_albums: user.value.favorite_albums.flatMap(a => a.id)
+        favorite_bands: user.value.favorite_bands.flatMap(b => b.id).filter(Boolean),
+        favorite_albums: user.value.favorite_albums.flatMap(a => a.id).filter(Boolean)
       }
       const { data } = await axios.patch('/api/auth/me/update', localUser)
       user.value = data
@@ -382,9 +423,11 @@ export const useStore = defineStore('store', () => {
     currentBandSimilar,
     currentAlbum,
     currentMember,
+    currentQuiz,
     user,
     fileManagerSearchObject,
     stats,
+    quizzes,
     bandIsLoading,
     randomBandIsLoading,
     albumIsLoading,
@@ -392,6 +435,7 @@ export const useStore = defineStore('store', () => {
     statsIsLoading,
     memberIsLoading,
     ripMembersIsLoading,
+    upcomingReleasesIsLoading,
     userIsLoading,
     similarBandsIsLoading,
     fileManagerBandsIsLoading,
@@ -415,7 +459,10 @@ export const useStore = defineStore('store', () => {
     getLyricsById,
     getMemberById,
     getRipMembers,
+    getUpcomingReleases,
     getStats,
+    getQuizzes,
+    getQuizById,
     advancedBandSearch,
     advancedAlbumSearch,
     advancedSongSearch,

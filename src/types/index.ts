@@ -60,6 +60,18 @@ export interface RipMember {
   cause_of_death: string
 }
 
+export interface UpcomingRelease {
+  band_id: number
+  album_id: number
+  band_name: string
+  album_name: string
+  band_name_slug: string
+  album_name_slug: string
+  album_type: string
+  genres: string
+  release_date: string
+}
+
 export interface Member {
   id: number | null
   fullname: string | null
@@ -217,6 +229,7 @@ export interface User {
   favorite_albums: ShortAlbum[]
   role: 'admin' | 'moderator' | 'user'
   avatar_color: string
+  telegram: TelegramUser | null
   created_at?: string
 }
 
@@ -283,4 +296,31 @@ export interface AudioPlayer {
   togglePlay: () => Promise<void>
   togglePlaylistVisible: () => Promise<void>
   playTrack: (track: PlayerTrack, index: number) => Promise<void>
+}
+
+export interface QuizQuestion {
+  question?: string
+  photo_url: string
+  answers: string[]
+  correct_answer: number
+}
+
+export interface Quiz {
+  id: number
+  title: string
+  category: string
+  questions: QuizQuestion[]
+  created_at?: string
+}
+
+export type QuizCategory = 'history' | 'bands' | 'albums' | 'lyrics' | 'genres' | 'trivia' | 'mixed'
+
+export interface TelegramUser {
+  id: number
+  auth_date: number
+  username: string
+  first_name: string
+  last_name: string
+  photo_url: string
+  hash: string
 }

@@ -81,6 +81,12 @@ const getRandomBand = async () => {
               <span>Добавление музыки</span>
             </div>
           </router-link>
+          <!-- <router-link v-if="store.userIsAdmin" :to="{ path: '/quizzes' }" @click="emit('closeMenu')">
+            <div class="flex items-center space-x-2 py-3 rounded-lg transition-colors duration-200 text-gray-300 hover:bg-gray-700">
+              <Icon icon="mdi:quiz" width="24" height="24" />
+              <span>Викторины</span>
+            </div>
+          </router-link> -->
         </nav>
         <div class="flex items-center space-x-2 py-3 rounded-lg transition-colors duration-200 text-gray-300 hover:bg-gray-700 cursor-pointer" @click="store.logout">
           <Icon icon="mdi:exit-run" width="24" height="24" />
@@ -150,6 +156,13 @@ const getRandomBand = async () => {
           <Icon v-else icon="mdi:help-circle" width="24" height="24" />
           <span>Случайная группа</span>
         </div>
+        <router-link to="/release/upcoming" v-slot="{ isActive }" @click="emit('closeMenu')">
+          <div class="flex items-center space-x-2 py-3 rounded-lg transition-colors duration-200" :class="isActive ? 'bg-red-600 text-white' : 'text-gray-300 hover:bg-gray-700'">
+            <Icon v-if="store.upcomingReleasesIsLoading" icon="mdi:loading" width="24" height="24" class="animate-spin" />
+            <Icon v-else icon="mdi:album" width="24" height="24" />
+            <span>Предстоящие релизы</span>
+          </div>
+        </router-link>
         <router-link to="/artist/rip" v-slot="{ isActive }" @click="emit('closeMenu')">
           <div class="flex items-center space-x-2 py-3 rounded-lg transition-colors duration-200" :class="isActive ? 'bg-red-600 text-white' : 'text-gray-300 hover:bg-gray-700'">
             <Icon v-if="store.ripMembersIsLoading" icon="mdi:loading" width="24" height="24" class="animate-spin" />
@@ -162,10 +175,11 @@ const getRandomBand = async () => {
 
     <!-- Нижняя часть с доп. ссылками -->
     <div class="flex flex-col items-center justify-end px-4 border-t border-gray-700 text-xs text-gray-500">
-      © 2025-2026 Encyclopaedia Metallum
-      <br />
+      <p>© 2025-2026 Encyclopaedia Metallum</p>
       <p>Вся информация взята с сайта</p>
       <el-link href="https://www.metal-archives.com" target="_blank">www.metal-archives.com</el-link>
+      <p class="mt-3">Связь с разработчиком</p>
+      <el-link href="https://t.me/scronheim" target="_blank">@scronheim</el-link>
     </div>
   </div>
 </template>

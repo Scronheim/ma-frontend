@@ -204,8 +204,15 @@ onMounted(async () => {
         <div>
           <h1 class="text-3xl md:text-4xl font-bold">
             {{ album.title }}
+
             <el-tooltip v-if="store.userIsAuth" :content="albumUserFavoriteIndex > -1 ? 'Убрать из любимых' : 'Добавить в любимые'" placement="top">
-              <el-button :icon="albumUserFavoriteIndex > -1 ? StarFilled : Star" circle text @click="toggleFavoriteAlbum" />
+              <el-button
+                :icon="albumUserFavoriteIndex > -1 ? StarFilled : Star"
+                circle
+                plain
+                :type="albumUserFavoriteIndex > -1 ? 'warning' : 'info'"
+                @click="toggleFavoriteAlbum"
+              />
             </el-tooltip>
           </h1>
           <div class="mt-2 break-all">

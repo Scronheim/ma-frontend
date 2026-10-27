@@ -150,7 +150,7 @@ onMounted(async () => {
         </div>
       </div>
       <div class="flex gap-2">
-        <CustomButton v-if="store.userIsAuth" text="Обновить" :loading="store.bandIsLoading" @click="refreshBand" />
+        <CustomButton v-if="store.userIsAuth" text="Обновить" start-icon="refresh" :loading="store.bandIsLoading" @click="refreshBand" />
         <CustomButton v-if="store.userIsAdmin" text="Редактировать" start-icon="edit" :loading="store.bandIsLoading" @click="showCommonEditDialog = true" />
       </div>
     </div>

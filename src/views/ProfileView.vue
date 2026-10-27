@@ -3,6 +3,7 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { EditPen } from '@element-plus/icons-vue'
 import { ElNotification } from 'element-plus'
+import { telegramLoginTemp } from 'vue3-telegram-login'
 
 import { useStore } from '@/store/store'
 
@@ -14,7 +15,7 @@ import SelectInput from '../components/inputs/SelectInput.vue'
 
 import { countries } from '@/utils'
 
-import type { ShortBand, ShortAlbum, User } from '../types'
+import type { ShortBand, ShortAlbum, User, TelegramUser } from '../types'
 
 import { DEFAULT_USER } from '@/utils/consts'
 
@@ -69,6 +70,15 @@ const removeAlbumFromFavorite = async (index: number): Promise<void> => {
   store.user.favorite_albums.splice(index, 1)
   await store.updateMe()
 }
+const handleTelegramCallback = async (tgUser: TelegramUser) => {
+  store.user.telegram = tgUser
+  await store.updateMe()
+}
+
+const handleTelegramLogout = async () => {
+  store.user.telegram = null
+  await store.updateMe()
+}
 
 watch(route, () => {
   activeTab.value = route.hash
@@ -103,6 +113,17 @@ onMounted(async () => {
                 <span v-if="user.gender">Пол: {{ user.gender }}</span>
                 <span v-if="user.country">Страна: {{ user.country }}</span>
                 <span v-if="user.favorite_genre">Любимый жанр: {{ user.favorite_genre }}</span>
+                <telegram-login-temp v-if="!user.telegram" mode="callback" telegram-login="metal_archives_ru_bot" @callback="handleTelegramCallback" />
+                <span v-else>
+                  Telegram:
+                  <div class="flex items-center gap-1">
+                    <div class="w-15 h-15 md:w-15 md:h-15 rounded-full border-4 border-gray-700 overflow-hidden">
+                      <img :src="user.telegram.photo_url" />
+                    </div>
+                    {{ user.telegram.first_name }} {{ user.telegram.last_name }}
+                    <button @click="handleTelegramLogout" class="px-2 py-1 bg-gray-600 hover:bg-red-700 text-white rounded-lg cursor-pointer">Выйти</button>
+                  </div>
+                </span>
               </div>
             </div>
 
@@ -138,14 +159,14 @@ onMounted(async () => {
       <div class="p-6">
         <div v-if="activeTab === '#bands'" class="space-y-4">
           <div v-if="user.favorite_bands.length === 0" class="text-center py-8 text-gray-400">Нет добавленых избранных групп</div>
-          <div class="grid grid-cols-1 md:grid-cols-4 gap-4 h-82 overflow-y-auto">
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-4 overflow-y-auto">
             <BandCardMini v-for="(band, index) in user.favorite_bands" :key="band.id" :band="band" @click="goToBand(band)" @remove="removeBandFromFavorite(index)" />
           </div>
         </div>
 
         <div v-if="activeTab === '#albums'" class="space-y-4">
           <div v-if="user.favorite_albums.length === 0" class="text-center py-8 text-gray-400">Нет добавленых избранных альбомов</div>
-          <div class="grid grid-cols-1 md:grid-cols-4 gap-4 h-82 overflow-y-auto">
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-4 overflow-y-auto">
             <AlbumCardMini v-for="(album, index) in user.favorite_albums" :key="album.id" :album="album" @click="goToAlbum(album)" @remove="removeAlbumFromFavorite(index)" />
           </div>
         </div>

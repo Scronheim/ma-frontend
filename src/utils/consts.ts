@@ -1,4 +1,4 @@
-import type { Album, Band, Member, User } from '@/types'
+import type { Album, Band, Member, Quiz, User } from '@/types'
 
 export const DEFAULT_USER: User = {
   username: '',
@@ -68,4 +68,11 @@ export const DEFAULT_BAND: Band = {
   photo_url: null,
   logo_url: null,
   updated_at: ''
+}
+
+export const DEFAULT_QUIZ: Quiz = {
+  id: 0,
+  title: '',
+  category: '',
+  questions: []
 }
